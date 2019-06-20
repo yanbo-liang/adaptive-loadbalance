@@ -30,8 +30,9 @@ public class TestClientFilter implements Filter {
             Double value = map.get(invoker.getUrl().toString());
             if (value != null && rtt > value * 1.8) {
                 Test.block.put(invoker.getUrl().toString(), 3);
+//                Test.block.merge(invoker.getUrl().toString(),3,(a,b)->a+1);
             }
-            map.merge(invoker.getUrl().toString(), rtt, (a, b) -> 0.8 * a + 0.2 * b);
+            map.merge(invoker.getUrl().toString(), rtt, (a, b) -> 0.7 * a + 0.3 * b);
             return result;
 
         } catch (Exception e) {
