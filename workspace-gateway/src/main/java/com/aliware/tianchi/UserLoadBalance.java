@@ -35,7 +35,7 @@ public class UserLoadBalance implements LoadBalance {
         String key = invoker.getUrl().toString();
 
         if (Test.block.getOrDefault(key, 0) == 0) {
-            //return invoker;
+            return invoker;
         } else {
             Test.block.compute(key, (k, v) -> {
                 if (v != null) {
@@ -50,11 +50,11 @@ public class UserLoadBalance implements LoadBalance {
             String newKey = inv.getUrl().toString();
             if (!newKey.equals(key)) {
                 if (Test.block.getOrDefault(newKey, 0) == 0) {
-                    //return inv;
+                    return inv;
                 }
             }
         }
-        //return null;
-        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+        return null;
+//        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 }
