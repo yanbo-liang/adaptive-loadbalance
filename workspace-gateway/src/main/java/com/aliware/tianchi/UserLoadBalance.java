@@ -47,8 +47,11 @@ public class UserLoadBalance implements LoadBalance {
         }
 
         for (Invoker<T> inv : invokers) {
-            if (!inv.getUrl().toString().equals(key)) {
-                return inv;
+            String newKey = inv.getUrl().toString();
+            if (!newKey.equals(key)) {
+                if (Test.block.getOrDefault(newKey, 0) == 0) {
+                    return inv;
+                }
             }
         }
         return null;
