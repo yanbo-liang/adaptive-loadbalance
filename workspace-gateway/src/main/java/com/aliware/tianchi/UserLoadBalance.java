@@ -34,7 +34,9 @@ public class UserLoadBalance implements LoadBalance {
 
         String key = invoker.getUrl().toString();
 
-        if (Test.block.getOrDefault(key, 0) != 0) {
+        if (Test.block.getOrDefault(key, 0) == 0) {
+            return invoker;
+        } else {
             Test.block.compute(key, (k, v) -> {
                 if (v != null) {
                     return v - 1;
