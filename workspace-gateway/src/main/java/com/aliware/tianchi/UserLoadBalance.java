@@ -40,13 +40,14 @@ public class UserLoadBalance implements LoadBalance {
         int index = ThreadLocalRandom.current().nextInt(invokers.size());
         Invoker<T> invoker = invokers.get(index);
         if (blockString.contains(invoker.getUrl().toString())) {
-            LOGGER.warn("shit");
+
             Test.block.compute(invoker.getUrl().toString(), (k, v) -> v = v - 1);
             for (Invoker<T> invoker1 : invokers) {
                 if (!invoker1.getUrl().toString().equals(invoker.getUrl().toString())) {
                     return invoker1;
                 }
             }
+
             return null;
         } else {
             return invoker;

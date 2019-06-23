@@ -23,16 +23,17 @@ public class TestClientFilter implements Filter {
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
 
         try {
+            String key = invoker.getUrl().toString();
             long start = System.currentTimeMillis();
             Result result = invoker.invoke(invocation);
             long end = System.currentTimeMillis();
             double rtt = end - start;
-            Double value = map.get(invoker.getUrl().toString());
+            Double value = map.get(key);
             if (value != null && rtt > value * 1.8) {
-                Test.block.put(invoker.getUrl().toString(), 3);
+                Test.block.put(key, 3);
 //                Test.block.merge(invoker.getUrl().toString(),3,(a,b)->a+1);
             }
-            map.merge(invoker.getUrl().toString(), rtt, (a, b) -> 0.7 * a + 0.3 * b);
+            map.merge(key, rtt, (a, b) -> 0.7 * a + 0.3 * b);
             return result;
 
         } catch (Exception e) {
