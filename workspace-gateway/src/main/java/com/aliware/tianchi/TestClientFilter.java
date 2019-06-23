@@ -30,8 +30,8 @@ public class TestClientFilter implements Filter {
 
             double rtt = end - start;
 
-            Double value = Test.rttMap.getOrDefault(key, 0.0);
-            if (rtt > value * 9999) {
+            Double value = Test.rttMap.getOrDefault(key, 1000000D);
+            if (rtt > value * 1.8) {
 //                Test.block.put(key, 3);
                 Test.block.compute(key, (k, v) -> {
                     if (v == null) {
