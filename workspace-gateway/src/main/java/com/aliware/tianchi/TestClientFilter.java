@@ -17,24 +17,32 @@ import java.util.concurrent.ConcurrentHashMap;
 @Activate(group = Constants.CONSUMER)
 public class TestClientFilter implements Filter {
 
-    private ConcurrentHashMap<String, Double> map = new ConcurrentHashMap<>();
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
 
         try {
             String key = invoker.getUrl().toString();
+
             long start = System.currentTimeMillis();
             Result result = invoker.invoke(invocation);
             long end = System.currentTimeMillis();
+
             double rtt = end - start;
-            Double value = map.get(key);
-            if (value != null && rtt > value * 1.8) {
-                return null;
+
+            Double value = Test.rttMap.getOrDefault(key, 0.0);
+            if (rtt > value * 1.8) {
 //                Test.block.put(key, 3);
-//                Test.block.merge(invoker.getUrl().toString(),3,(a,b)->a+1);
+                Test.block.compute(key, (k, v) -> {
+                    if (v == null) {
+                        v = 1;
+                    } else {
+                        v += 1;
+                    }
+                    return v;
+                });
             }
-            map.merge(key, rtt, (a, b) -> 0.7 * a + 0.3 * b);
+            Test.rttMap.merge(key, rtt, (a, b) -> 0.7 * a + 0.3 * b);
             return result;
 
         } catch (Exception e) {
