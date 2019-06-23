@@ -37,7 +37,7 @@ public class TestClientFilter implements Filter {
                     if (v == null) {
                         v = 1;
                     } else {
-                        v += 3;
+                        v += 1;
                     }
                     return v;
                 });
