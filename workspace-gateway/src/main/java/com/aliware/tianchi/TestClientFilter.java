@@ -30,7 +30,8 @@ public class TestClientFilter implements Filter {
             double rtt = end - start;
             Double value = map.get(key);
             if (value != null && rtt > value * 1.8) {
-                Test.block.put(key, 3);
+                return null;
+//                Test.block.put(key, 3);
 //                Test.block.merge(invoker.getUrl().toString(),3,(a,b)->a+1);
             }
             map.merge(key, rtt, (a, b) -> 0.7 * a + 0.3 * b);

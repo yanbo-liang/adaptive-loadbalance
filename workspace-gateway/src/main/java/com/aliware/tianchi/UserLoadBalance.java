@@ -28,31 +28,31 @@ public class UserLoadBalance implements LoadBalance {
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-        Set<String> blockString = new HashSet<>();
-        Test.block.forEachEntry(10, stringIntegerEntry -> {
-            Integer a = stringIntegerEntry.getValue();
-            if (a != null && a > 0) {
-                blockString.add(stringIntegerEntry.getKey());
-            }
-        });
+//        Set<String> blockString = new HashSet<>();
+//        Test.block.forEachEntry(10, stringIntegerEntry -> {
+//            Integer a = stringIntegerEntry.getValue();
+//            if (a != null && a > 0) {
+//                blockString.add(stringIntegerEntry.getKey());
+//            }
+//        });
+//
+//
+//        int index = ThreadLocalRandom.current().nextInt(invokers.size());
+//        Invoker<T> invoker = invokers.get(index);
+//        if (blockString.contains(invoker.getUrl().toString())) {
+//
+//            Test.block.compute(invoker.getUrl().toString(), (k, v) -> v = v - 1);
+//            for (Invoker<T> invoker1 : invokers) {
+//                if (!invoker1.getUrl().toString().equals(invoker.getUrl().toString())) {
+//                    return invoker1;
+//                }
+//            }
+//
+//            return null;
+//        } else {
+//            return invoker;
+//        }
 
-
-        int index = ThreadLocalRandom.current().nextInt(invokers.size());
-        Invoker<T> invoker = invokers.get(index);
-        if (blockString.contains(invoker.getUrl().toString())) {
-
-            Test.block.compute(invoker.getUrl().toString(), (k, v) -> v = v - 1);
-            for (Invoker<T> invoker1 : invokers) {
-                if (!invoker1.getUrl().toString().equals(invoker.getUrl().toString())) {
-                    return invoker1;
-                }
-            }
-
-            return null;
-        } else {
-            return invoker;
-        }
-
-//        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 }
