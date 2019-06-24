@@ -29,22 +29,21 @@ public class TestClientFilter implements Filter {
             long end = System.nanoTime();
             long rtt = end - start;
 
-//            Double value = UserLoadBalance.rttMap.get(key);
-//            if (value != null) {
-//                if (rtt > value * 2) {
-////                Test.block.put(key, 3);
-//                    Test.block.compute(key, (k, v) -> {
-//                        int tmp;
-//                        if (v == null) {
-//                            tmp = 1;
-//                        } else {
-//                            tmp = v + 3;
-//                        }
-//                        return tmp;
-//                    });
-//                }
-//            }
-            UserLoadBalance.rttMap.merge(key, rtt, (oldRtt, newRtt) -> (long)(0.5 * oldRtt + 0.5 * newRtt));
+            Long value = UserLoadBalance.rttMap.get(key);
+            if (value != null && rtt > value * 2) {
+//                Test.block.put(key, 3);
+                UserLoadBalance.blockMap.compute(key, (k, v) -> {
+                    int tmp;
+                    if (v == null) {
+                        tmp = 1;
+                    } else {
+                        tmp = v + 3;
+                    }
+                    return tmp;
+                });
+
+            }
+            UserLoadBalance.rttMap.merge(key, rtt, (oldRtt, newRtt) -> (long) (0.8 * oldRtt + 0.2 * newRtt));
             return result;
 
         } catch (Exception e) {

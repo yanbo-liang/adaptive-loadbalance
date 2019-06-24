@@ -23,7 +23,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class UserLoadBalance implements LoadBalance {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserLoadBalance.class);
 
-    public static Map<String, Long> rttMap =new ConcurrentHashMap<>();
+    public static Map<String, Long> rttMap = new ConcurrentHashMap<>();
+    public static Map<String, Integer> blockMap = new ConcurrentHashMap<>();
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
@@ -41,25 +42,20 @@ public class UserLoadBalance implements LoadBalance {
                 pickedInvoker = invoker;
             }
         }
+        Invoker defaultInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+        String defaultInvokerKey = defaultInvoker.getUrl().toString();
+        if (blockMap.getOrDefault(defaultInvokerKey, 0) == 0) {
+            return defaultInvoker;
+        } else {
+            blockMap.compute(defaultInvokerKey, (k, v) -> {
+                if (v != null) {
+                    return v - 1;
+                } else {
+                    return null;
+                }
+            });
 
-        return pickedInvoker;
-//        int index = ThreadLocalRandom.current().nextInt(invokers.size());
-//        Invoker<T> invoker = invokers.get(index);
-
-//        String key = invoker.getUrl().toString();
-//
-//        if (Test.block.getOrDefault(key, 0) == 0) {
-//            return invoker;
-//        } else {
-//            Test.block.compute(key, (k, v) -> {
-//                if (v != null) {
-//                    return v - 1;
-//                } else {
-//                    return null;
-//                }
-//            });
-//
-//
+            return pickedInvoker;
 //            for (Invoker<T> inv : invokers) {
 //                String newKey = inv.getUrl().toString();
 //                if (!newKey.equals(key)) {
@@ -68,7 +64,7 @@ public class UserLoadBalance implements LoadBalance {
 //                    }
 //                }
 //            }
-//        }
+        }
 //        return null;
 //        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
