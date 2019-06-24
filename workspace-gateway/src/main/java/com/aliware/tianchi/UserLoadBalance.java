@@ -28,7 +28,7 @@ public class UserLoadBalance implements LoadBalance {
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-        try {
+//        try {
 //            for (Invoker<T> invoker : invokers) {
 //                if (rttMap.get(invoker.getUrl().toString()) == null) {
 //                    return invoker;
@@ -46,32 +46,32 @@ public class UserLoadBalance implements LoadBalance {
 
 
 
-            Invoker defaultInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-            String defaultInvokerKey = defaultInvoker.getUrl().toString();
-            if (blockMap.getOrDefault(defaultInvokerKey, 0) == 0) {
-                return defaultInvoker;
-            } else {
-                blockMap.compute(defaultInvokerKey, (k, v) -> {
-                    if (v != null) {
-                        return v - 1;
-                    } else {
-                        return null;
-                    }
-                });
-
-                for (Invoker<T> inv : invokers) {
-                    String newKey = inv.getUrl().toString();
-                    if (!newKey.equals(defaultInvokerKey)) {
-                        if (blockMap.getOrDefault(newKey, 0) == 0) {
-                            return inv;
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-//return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+//            Invoker defaultInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+//            String defaultInvokerKey = defaultInvoker.getUrl().toString();
+//            if (blockMap.getOrDefault(defaultInvokerKey, 0) == 0) {
+//                return defaultInvoker;
+//            } else {
+//                blockMap.compute(defaultInvokerKey, (k, v) -> {
+//                    if (v != null) {
+//                        return v - 1;
+//                    } else {
+//                        return null;
+//                    }
+//                });
+//
+//                for (Invoker<T> inv : invokers) {
+//                    String newKey = inv.getUrl().toString();
+//                    if (!newKey.equals(defaultInvokerKey)) {
+//                        if (blockMap.getOrDefault(newKey, 0) == 0) {
+//                            return inv;
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 }
