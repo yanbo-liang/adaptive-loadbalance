@@ -8,10 +8,7 @@ import org.apache.dubbo.rpc.cluster.LoadBalance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -26,7 +23,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class UserLoadBalance implements LoadBalance {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserLoadBalance.class);
 
-    public static ConcurrentHashMap<String, Double> rttMap;
+    public static Map<String, Double> rttMap =new ConcurrentHashMap<>();
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
