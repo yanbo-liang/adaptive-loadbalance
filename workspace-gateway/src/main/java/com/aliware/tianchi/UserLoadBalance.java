@@ -23,19 +23,19 @@ import java.util.concurrent.ThreadLocalRandom;
 public class UserLoadBalance implements LoadBalance {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserLoadBalance.class);
 
-    public static Map<String, Double> rttMap =new ConcurrentHashMap<>();
+    public static Map<String, Long> rttMap =new ConcurrentHashMap<>();
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-        for (Invoker invoker : invokers) {
+        for (Invoker<T> invoker : invokers) {
             if (rttMap.get(invoker.getUrl().toString()) == null) {
                 return invoker;
             }
         }
-        double rttMax = Double.MAX_VALUE;
+        long rttMax = Long.MAX_VALUE;
         Invoker pickedInvoker = invokers.get(0);
         for (Invoker<T> invoker : invokers) {
-            double rtt = rttMap.get(invoker.getUrl().toString());
+            long rtt = rttMap.get(invoker.getUrl().toString());
             if (rtt < rttMax) {
                 rttMax = rtt;
                 pickedInvoker = invoker;

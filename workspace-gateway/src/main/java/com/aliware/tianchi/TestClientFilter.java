@@ -27,7 +27,7 @@ public class TestClientFilter implements Filter {
             long start = System.nanoTime();
             Result result = invoker.invoke(invocation);
             long end = System.nanoTime();
-            double rtt = end - start;
+            long rtt = end - start;
 
 //            Double value = UserLoadBalance.rttMap.get(key);
 //            if (value != null) {
@@ -44,7 +44,7 @@ public class TestClientFilter implements Filter {
 //                    });
 //                }
 //            }
-            UserLoadBalance.rttMap.merge(key, rtt, (oldRtt, newRtt) -> 0.5 * oldRtt + 0.5 * newRtt);
+            UserLoadBalance.rttMap.merge(key, rtt, (oldRtt, newRtt) -> (long)(0.5 * oldRtt + 0.5 * newRtt));
             return result;
 
         } catch (Exception e) {
