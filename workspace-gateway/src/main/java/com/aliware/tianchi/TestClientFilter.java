@@ -4,8 +4,10 @@ import org.apache.dubbo.common.Constants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author daofeng.xjf
@@ -17,21 +19,29 @@ import java.util.concurrent.ConcurrentHashMap;
 @Activate(group = Constants.CONSUMER)
 public class TestClientFilter implements Filter {
 
+    public volatile static Map<String, AtomicLong> rttMap = new ConcurrentHashMap<>();
+
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-
         try {
             String key = invoker.getUrl().toString();
+
+            if (rttMap.get(key) == null) {
+                synchronized (TestClientFilter.class) {
+                    if (rttMap.get(key) == null) {
+                        rttMap.put(key, new AtomicLong(-1));
+                    }
+                }
+            }
 
             long start = System.nanoTime();
             Result result = invoker.invoke(invocation);
             long end = System.nanoTime();
             long rtt = end - start;
 
-            Long value = UserLoadBalance.rttMap.get(key);
-            if (value != null && rtt > value * 1.8) {
-//                Test.block.put(key, 3);
+            long value = rttMap.get(key).get();
+            if (value > 0 && rtt > value * 1.8) {
                 UserLoadBalance.blockMap.compute(key, (k, v) -> {
                     int tmp;
                     if (v == null) {
@@ -41,12 +51,23 @@ public class TestClientFilter implements Filter {
                     }
                     return tmp;
                 });
-
             }
-            UserLoadBalance.rttMap.merge(key, rtt, (oldRtt, newRtt) -> (long) (0.8 * oldRtt + 0.2 * newRtt));
+
+            rttMap.compute(key, (k, v) -> {
+                v.accumulateAndGet(rtt, (old, param) -> {
+                    if (old > 0) {
+                        return (long) (0.8 * old + 0.2 * param);
+                    } else {
+                        return param;
+                    }
+                });
+                return v;
+
+            });
             return result;
 
         } catch (Exception e) {
+            e.printStackTrace();
             throw e;
         }
     }
