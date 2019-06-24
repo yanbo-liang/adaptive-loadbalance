@@ -24,29 +24,27 @@ public class TestClientFilter implements Filter {
         try {
             String key = invoker.getUrl().toString();
 
-            long start = System.currentTimeMillis();
+            long start = System.nanoTime();
             Result result = invoker.invoke(invocation);
-            long end = System.currentTimeMillis();
-
+            long end = System.nanoTime();
             double rtt = end - start;
-            Double value = Test.rttMap.get(key);
-            if (value != null) {
-                if (rtt > value * 2) {
-//                Test.block.put(key, 3);
-                    Test.block.compute(key, (k, v) -> {
-                        int tmp;
-                        if (v == null) {
-                            tmp = 1;
-                        } else {
-                            tmp = v+3;
-                        }
-                        return tmp;
-                    });
-                }
-            }
-            if (rtt != 0) {
-                Test.rttMap.merge(key, rtt, (a, b) -> 0.7 * a + 0.3 * b);
-            }
+
+//            Double value = UserLoadBalance.rttMap.get(key);
+//            if (value != null) {
+//                if (rtt > value * 2) {
+////                Test.block.put(key, 3);
+//                    Test.block.compute(key, (k, v) -> {
+//                        int tmp;
+//                        if (v == null) {
+//                            tmp = 1;
+//                        } else {
+//                            tmp = v + 3;
+//                        }
+//                        return tmp;
+//                    });
+//                }
+//            }
+            UserLoadBalance.rttMap.merge(key, rtt, (oldRtt, newRtt) -> 0.7 * oldRtt + 0.3 * newRtt);
             return result;
 
         } catch (Exception e) {

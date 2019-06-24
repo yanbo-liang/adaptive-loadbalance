@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -25,52 +26,53 @@ import java.util.concurrent.ThreadLocalRandom;
 public class UserLoadBalance implements LoadBalance {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserLoadBalance.class);
 
+    public static ConcurrentHashMap<String, Double> rttMap;
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-
+        for (Invoker invoker : invokers) {
+            if (rttMap.get(invoker.getUrl().toString()) == null) {
+                return invoker;
+            }
+        }
         double rttMax = Double.MAX_VALUE;
-        Invoker invoker = invokers.get(0);
-        for (Invoker<T> tmpInvoker : invokers) {
-            String key = tmpInvoker.getUrl().toString();
-            Double rtt = Test.rttMap.get(key);
-            if (rtt==null){
-                return tmpInvoker;
-            }else {
-                if (rtt<rttMax){
-                    invoker=tmpInvoker;
-                    rttMax=rtt;
-                }
+        Invoker pickedInvoker = invokers.get(0);
+        for (Invoker<T> invoker : invokers) {
+            double rtt = rttMap.get(invoker.getUrl().toString());
+            if (rtt < rttMax) {
+                rttMax = rtt;
+                pickedInvoker = invoker;
             }
         }
 
+        return pickedInvoker;
 //        int index = ThreadLocalRandom.current().nextInt(invokers.size());
 //        Invoker<T> invoker = invokers.get(index);
 
-        String key = invoker.getUrl().toString();
-
-        if (Test.block.getOrDefault(key, 0) == 0) {
-            return invoker;
-        } else {
-            Test.block.compute(key, (k, v) -> {
-                if (v != null) {
-                    return v - 1;
-                } else {
-                    return null;
-                }
-            });
-
-
-            for (Invoker<T> inv : invokers) {
-                String newKey = inv.getUrl().toString();
-                if (!newKey.equals(key)) {
-                    if (Test.block.getOrDefault(newKey, 0) == 0) {
-                        return inv;
-                    }
-                }
-            }
-        }
-        return null;
+//        String key = invoker.getUrl().toString();
+//
+//        if (Test.block.getOrDefault(key, 0) == 0) {
+//            return invoker;
+//        } else {
+//            Test.block.compute(key, (k, v) -> {
+//                if (v != null) {
+//                    return v - 1;
+//                } else {
+//                    return null;
+//                }
+//            });
+//
+//
+//            for (Invoker<T> inv : invokers) {
+//                String newKey = inv.getUrl().toString();
+//                if (!newKey.equals(key)) {
+//                    if (Test.block.getOrDefault(newKey, 0) == 0) {
+//                        return inv;
+//                    }
+//                }
+//            }
+//        }
+//        return null;
 //        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 }
