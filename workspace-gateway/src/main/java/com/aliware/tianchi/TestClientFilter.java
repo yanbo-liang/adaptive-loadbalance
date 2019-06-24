@@ -56,7 +56,7 @@ public class TestClientFilter implements Filter {
             rttMap.compute(key, (k, v) -> {
                 v.accumulateAndGet(rtt, (old, param) -> {
                     if (old > 0) {
-                        return (long) (0.7 * old + 0.3 * param);
+                        return (long) (0.8 * old + 0.2 * param);
                     } else {
                         return param;
                     }
