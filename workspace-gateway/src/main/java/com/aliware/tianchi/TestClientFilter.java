@@ -43,6 +43,7 @@ public class TestClientFilter implements Filter {
 
             long value = rttMap.get(key).get();
             if (value > 0 && rtt > value * 2) {
+                System.out.println("!!!!!!!!!!!!!!!!!!!!!!!");
                 UserLoadBalance.blockMap.compute(key, (k, v) -> {
                     if (v == null) {
                         return new AtomicInteger(1);
@@ -56,7 +57,7 @@ public class TestClientFilter implements Filter {
             rttMap.compute(key, (k, v) -> {
                 v.accumulateAndGet(rtt, (old, param) -> {
                     if (old > 0) {
-                        return (long) (0.7 * old + 0.3 * param);
+                        return (long) (0.95 * old + 0.05 * param);
                     } else {
                         return param;
                     }
