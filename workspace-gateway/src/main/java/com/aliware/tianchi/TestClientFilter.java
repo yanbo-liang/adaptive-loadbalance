@@ -44,7 +44,7 @@ public class TestClientFilter implements Filter {
 //                    });
 //                }
 //            }
-            UserLoadBalance.rttMap.merge(key, rtt, (oldRtt, newRtt) -> 0.7 * oldRtt + 0.3 * newRtt);
+            UserLoadBalance.rttMap.merge(key, rtt, (oldRtt, newRtt) -> 0.9 * oldRtt + 0.1 * newRtt);
             return result;
 
         } catch (Exception e) {
