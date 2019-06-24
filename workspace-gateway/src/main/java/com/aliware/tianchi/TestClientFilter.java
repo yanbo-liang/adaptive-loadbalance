@@ -7,6 +7,7 @@ import org.apache.dubbo.rpc.*;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -43,13 +44,12 @@ public class TestClientFilter implements Filter {
             long value = rttMap.get(key).get();
             if (value > 0 && rtt > value * 1.8) {
                 UserLoadBalance.blockMap.compute(key, (k, v) -> {
-                    int tmp;
                     if (v == null) {
-                        tmp = 1;
+                        return new AtomicInteger(1);
                     } else {
-                        tmp = v + 1;
+                        v.incrementAndGet();
+                        return v;
                     }
-                    return tmp;
                 });
             }
 

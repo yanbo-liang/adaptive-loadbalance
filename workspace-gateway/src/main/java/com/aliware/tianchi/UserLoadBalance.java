@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author daofeng.xjf
@@ -24,11 +26,12 @@ import java.util.concurrent.atomic.AtomicLong;
 public class UserLoadBalance implements LoadBalance {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserLoadBalance.class);
 
-    public static Map<String, Integer> blockMap = new ConcurrentHashMap<>();
+    public static Map<String, AtomicInteger> blockMap = new ConcurrentHashMap<>();
+
+    private static ReentrantLock lock = new ReentrantLock();
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-//        try {
 //            for (Invoker<T> invoker : invokers) {
 //                if (rttMap.get(invoker.getUrl().toString()) == null) {
 //                    return invoker;
@@ -45,33 +48,24 @@ public class UserLoadBalance implements LoadBalance {
 //            }
 
 
+        Invoker defaultInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+        String defaultInvokerKey = defaultInvoker.getUrl().toString();
+        synchronized (defaultInvoker) {
+            AtomicInteger atomicInteger = blockMap.get(defaultInvokerKey);
+            if (atomicInteger != null && atomicInteger.get() > 0) {
+                atomicInteger.decrementAndGet();
+                for (Invoker<T> invoker : invokers) {
+                    String newKey = invoker.getUrl().toString();
+                    if (!newKey.equals(defaultInvokerKey)) {
+                        return invoker;
 
-//            Invoker defaultInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-//            String defaultInvokerKey = defaultInvoker.getUrl().toString();
-//            if (blockMap.getOrDefault(defaultInvokerKey, 0) == 0) {
-//                return defaultInvoker;
-//            } else {
-//                blockMap.compute(defaultInvokerKey, (k, v) -> {
-//                    if (v != null) {
-//                        return v - 1;
-//                    } else {
-//                        return null;
-//                    }
-//                });
-//
-//                for (Invoker<T> inv : invokers) {
-//                    String newKey = inv.getUrl().toString();
-//                    if (!newKey.equals(defaultInvokerKey)) {
-//                        if (blockMap.getOrDefault(newKey, 0) == 0) {
-//                            return inv;
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+                    }
+                }
+            }
+        }
+
+
+        return null;
+//return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 }
