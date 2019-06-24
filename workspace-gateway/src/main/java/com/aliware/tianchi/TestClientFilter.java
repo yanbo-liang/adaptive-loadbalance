@@ -31,19 +31,19 @@ public class TestClientFilter implements Filter {
             double rtt = end - start;
 
             Double value = Test.rttMap.getOrDefault(key, 1000000D);
-            if (rtt > value * 1.8) {
+            if (rtt > value * 2) {
 //                Test.block.put(key, 3);
                 Test.block.compute(key, (k, v) -> {
                     if (v == null) {
                         v = 1;
                     } else {
-                        v += 1;
+                        v += 2;
                     }
                     return v;
                 });
             }
             if (rtt!=0) {
-                Test.rttMap.merge(key, rtt, (a, b) -> 0.8 * a + 0.2 * b);
+                Test.rttMap.merge(key, rtt, (a, b) -> 0.9 * a + 0.1 * b);
             }
             return result;
 
