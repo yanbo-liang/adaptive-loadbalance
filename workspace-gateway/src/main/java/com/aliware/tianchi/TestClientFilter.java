@@ -44,7 +44,7 @@ public class TestClientFilter implements Filter {
                     });
                 }
                 if (rtt != 0) {
-                    Test.rttMap.merge(key, rtt, (a, b) -> 0.8 * a + 0.2 * b);
+                    Test.rttMap.merge(key, rtt, (a, b) -> 0.7 * a + 0.3 * b);
                 }
             }
             return result;
