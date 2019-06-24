@@ -30,14 +30,14 @@ public class TestClientFilter implements Filter {
             long rtt = end - start;
 
             Long value = UserLoadBalance.rttMap.get(key);
-            if (value != null && rtt > value * 2) {
+            if (value != null && rtt > value * 1.8) {
 //                Test.block.put(key, 3);
                 UserLoadBalance.blockMap.compute(key, (k, v) -> {
                     int tmp;
                     if (v == null) {
                         tmp = 1;
                     } else {
-                        tmp = v + 3;
+                        tmp = v + 1;
                     }
                     return tmp;
                 });
