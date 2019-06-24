@@ -42,7 +42,9 @@ public class TestClientFilter implements Filter {
                     return v;
                 });
             }
-            Test.rttMap.merge(key, rtt, (a, b) -> 0.8 * a + 0.2 * b);
+            if (rtt!=0) {
+                Test.rttMap.merge(key, rtt, (a, b) -> 0.8 * a + 0.2 * b);
+            }
             return result;
 
         } catch (Exception e) {
