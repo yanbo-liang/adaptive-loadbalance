@@ -55,17 +55,16 @@ public class UserLoadBalance implements LoadBalance {
                 }
             });
 
-            return pickedInvoker;
-//            for (Invoker<T> inv : invokers) {
-//                String newKey = inv.getUrl().toString();
-//                if (!newKey.equals(key)) {
-//                    if (Test.block.getOrDefault(newKey, 0) == 0) {
-//                        return inv;
-//                    }
-//                }
-//            }
+            for (Invoker<T> inv : invokers) {
+                String newKey = inv.getUrl().toString();
+                if (!newKey.equals(defaultInvokerKey)) {
+                    if (blockMap.getOrDefault(newKey, 0) == 0) {
+                        return inv;
+                    }
+                }
+            }
         }
-//        return null;
+        return null;
 //        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 }
