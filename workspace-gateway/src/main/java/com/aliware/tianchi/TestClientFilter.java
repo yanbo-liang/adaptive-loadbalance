@@ -31,14 +31,14 @@ public class TestClientFilter implements Filter {
             double rtt = end - start;
             Double value = Test.rttMap.get(key);
             if (value != null) {
-                if (rtt > value * 2) {
+                if (rtt > value * 1.8) {
 //                Test.block.put(key, 3);
                     Test.block.compute(key, (k, v) -> {
                         int tmp;
                         if (v == null) {
                             tmp = 1;
                         } else {
-                            tmp = v+3;
+                            tmp = v+1;
                         }
                         return tmp;
                     });
