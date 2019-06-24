@@ -54,18 +54,26 @@ public class UserLoadBalance implements LoadBalance {
             AtomicInteger atomicInteger = blockMap.get(defaultInvokerKey);
             if (atomicInteger != null && atomicInteger.get() > 0) {
                 atomicInteger.decrementAndGet();
-                for (Invoker<T> invoker : invokers) {
-                    String newKey = invoker.getUrl().toString();
-                    if (!newKey.equals(defaultInvokerKey)) {
-                        return invoker;
-
-                    }
-                }
+                defaultInvoker = null;
             }
         }
 
+        for (Invoker<T> invoker : invokers) {
+            String newKey = invoker.getUrl().toString();
+            if (!newKey.equals(defaultInvokerKey)) {
+                AtomicInteger atomicInteger = blockMap.get(newKey);
+                if (atomicInteger != null && atomicInteger.get() == 0) {
+                    defaultInvoker = invoker;
+                }
 
-        return null;
+            }
+        }
+
+        if (defaultInvoker == null) {
+            throw new RpcException("too busy");
+        } else {
+            return defaultInvoker;
+        }
 //return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 }
