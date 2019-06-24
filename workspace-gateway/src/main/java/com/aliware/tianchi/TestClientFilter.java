@@ -42,12 +42,12 @@ public class TestClientFilter implements Filter {
             long rtt = end - start;
 
             long value = rttMap.get(key).get();
-            if (value > 0 && rtt > value * 1.8) {
+            if (value > 0 && rtt > value * 2) {
                 UserLoadBalance.blockMap.compute(key, (k, v) -> {
                     if (v == null) {
-                        return new AtomicInteger(1);
+                        return new AtomicInteger(3);
                     } else {
-                        v.updateAndGet(x -> x + 1);
+                        v.updateAndGet(x -> x + 3);
                         return v;
                     }
                 });
