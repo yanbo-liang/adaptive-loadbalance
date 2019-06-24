@@ -39,6 +39,7 @@ public class UserLoadBalance implements LoadBalance {
             }else {
                 if (rtt<rttMax){
                     invoker=tmpInvoker;
+                    rttMax=rtt;
                 }
             }
         }
