@@ -31,7 +31,7 @@ public class TestClientFilter implements Filter {
             double rtt = end - start;
             Double value = Test.rttMap.get(key);
             if (value != null) {
-                if (rtt > value * 3) {
+                if (rtt > value * 2) {
 //                Test.block.put(key, 3);
                     Test.block.compute(key, (k, v) -> {
                         int tmp;
