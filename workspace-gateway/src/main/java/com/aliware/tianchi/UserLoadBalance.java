@@ -29,8 +29,22 @@ public class UserLoadBalance implements LoadBalance {
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
 
-        int index = ThreadLocalRandom.current().nextInt(invokers.size());
-        Invoker<T> invoker = invokers.get(index);
+        double rttMax = Double.MAX_VALUE;
+        Invoker invoker = invokers.get(0);
+        for (Invoker<T> tmpInvoker : invokers) {
+            String key = tmpInvoker.getUrl().toString();
+            Double rtt = Test.rttMap.get(key);
+            if (rtt==null){
+                return tmpInvoker;
+            }else {
+                if (rtt<rttMax){
+                    invoker=tmpInvoker;
+                }
+            }
+        }
+
+//        int index = ThreadLocalRandom.current().nextInt(invokers.size());
+//        Invoker<T> invoker = invokers.get(index);
 
         String key = invoker.getUrl().toString();
 
