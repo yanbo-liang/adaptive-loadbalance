@@ -35,14 +35,18 @@ public class UserLoadBalance implements LoadBalance {
         String defaultInvokerKey = defaultInvoker.getUrl().toString();
 
         threadLocal.set(false);
-        TestClientFilter.blockMap.get(defaultInvokerKey).updateAndGet(x -> {
-            if (x > 0) {
-                threadLocal.set(true);
-                return x - 1;
-            } else {
-                return x;
-            }
-        });
+        AtomicInteger blockcount = TestClientFilter.blockMap.get(defaultInvokerKey);
+        if (blockcount != null) {
+            blockcount.updateAndGet(x -> {
+                if (x > 0) {
+                    threadLocal.set(true);
+                    return x - 1;
+                } else {
+                    return x;
+                }
+            });
+        }
+
         if (threadLocal.get()) {
             defaultInvoker = null;
             for (Invoker<T> invoker : invokers) {
