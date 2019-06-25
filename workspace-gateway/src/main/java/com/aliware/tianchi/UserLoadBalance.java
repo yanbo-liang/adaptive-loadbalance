@@ -30,43 +30,43 @@ public class UserLoadBalance implements LoadBalance {
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-
-        Invoker defaultInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-        String defaultInvokerKey = defaultInvoker.getUrl().toString();
-
-        threadLocal.set(false);
-        AtomicInteger blockcount = TestClientFilter.blockMap.get(defaultInvokerKey);
-        if (blockcount != null) {
-            blockcount.updateAndGet(x -> {
-                if (x > 0) {
-                    threadLocal.set(true);
-                    return x - 1;
-                } else {
-                    return x;
-                }
-            });
-        }
-
-        if (threadLocal.get()) {
-            defaultInvoker = null;
-            for (Invoker<T> invoker : invokers) {
-                String newKey = invoker.getUrl().toString();
-                if (!newKey.equals(defaultInvokerKey)) {
-                    AtomicInteger atomicInteger = TestClientFilter.blockMap.get(newKey);
-                    if (atomicInteger != null && atomicInteger.get() == 0) {
-                        defaultInvoker = invoker;
-                    }
-
-                }
-            }
-        }
-
-
-        if (defaultInvoker == null) {
-            throw new RpcException("too busy");
-        } else {
-            return defaultInvoker;
-        }
-//return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+//
+//        Invoker defaultInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+//        String defaultInvokerKey = defaultInvoker.getUrl().toString();
+//
+//        threadLocal.set(false);
+//        AtomicInteger blockcount = TestClientFilter.blockMap.get(defaultInvokerKey);
+//        if (blockcount != null) {
+//            blockcount.updateAndGet(x -> {
+//                if (x > 0) {
+//                    threadLocal.set(true);
+//                    return x - 1;
+//                } else {
+//                    return x;
+//                }
+//            });
+//        }
+//
+//        if (threadLocal.get()) {
+//            defaultInvoker = null;
+//            for (Invoker<T> invoker : invokers) {
+//                String newKey = invoker.getUrl().toString();
+//                if (!newKey.equals(defaultInvokerKey)) {
+//                    AtomicInteger atomicInteger = TestClientFilter.blockMap.get(newKey);
+//                    if (atomicInteger != null && atomicInteger.get() == 0) {
+//                        defaultInvoker = invoker;
+//                    }
+//
+//                }
+//            }
+//        }
+//
+//
+//        if (defaultInvoker == null) {
+//            throw new RpcException("too busy");
+//        } else {
+//            return defaultInvoker;
+//        }
+return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 }
