@@ -98,7 +98,7 @@ public class TestClientFilter implements Filter {
                 }else{
 
                 }
-                invokerRtt.accumulateAndGet(tmp, (old, param) -> (long) (0.8 * old + 0.2 * param));
+                invokerRtt.accumulateAndGet(tmp, (old, param) -> (long) (0.7 * old + 0.3 * param));
             }
 
         }
