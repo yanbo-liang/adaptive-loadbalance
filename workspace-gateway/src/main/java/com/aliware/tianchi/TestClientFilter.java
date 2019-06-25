@@ -3,10 +3,14 @@ package com.aliware.tianchi;
 import org.apache.dubbo.common.Constants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -19,62 +23,86 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @Activate(group = Constants.CONSUMER)
 public class TestClientFilter implements Filter {
+    private static final Logger logger = LoggerFactory.getLogger(TestClientFilter.class);
 
-    public volatile static Map<String, AtomicLong> rttMap = new ConcurrentHashMap<>();
+    public static final ConcurrentMap<Invocation, AtomicLong> rttMap = new ConcurrentReferenceHashMap<>(1024, ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
+    public static final ConcurrentMap<String, AtomicLong> invokerRttMap = new ConcurrentHashMap<>();
+
+    public static final ConcurrentMap<String, AtomicInteger> blockMap = new ConcurrentHashMap<>();
+
+    public static final ConcurrentMap<String, AtomicInteger> pendingMap = new ConcurrentHashMap<>();
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         try {
             String key = invoker.getUrl().toString();
 
-            if (rttMap.get(key) == null) {
+            AtomicInteger blockCount = blockMap.get(key);
+            if (blockCount == null) {
                 synchronized (TestClientFilter.class) {
-                    if (rttMap.get(key) == null) {
-                        rttMap.put(key, new AtomicLong(-1));
+                    if (blockMap.get(key) == null) {
+                        blockMap.put(key, new AtomicInteger(0));
                     }
                 }
             }
-
-            long start = System.nanoTime();
-            Result result = invoker.invoke(invocation);
-            long end = System.nanoTime();
-            long rtt = end - start;
-
-            long value = rttMap.get(key).get();
-            if (value > 0 && rtt > value * 2) {
-                System.out.println("!!!!!!!!!!!!!!!!!!!!!!!");
-                UserLoadBalance.blockMap.compute(key, (k, v) -> {
-                    if (v == null) {
-                        return new AtomicInteger(1);
-                    } else {
-                        v.updateAndGet(x -> x + 1);
-                        return v;
+            AtomicInteger pendingCount = pendingMap.get(key);
+            if (pendingCount == null) {
+                synchronized (TestClientFilter.class) {
+                    if (pendingMap.get(key) == null) {
+                        pendingMap.put(key, new AtomicInteger(1));
                     }
-                });
+                }
+            } else {
+                pendingCount.incrementAndGet();
             }
 
-            rttMap.compute(key, (k, v) -> {
-                v.accumulateAndGet(rtt, (old, param) -> {
-                    if (old > 0) {
-                        return (long) (0.95 * old + 0.05 * param);
-                    } else {
-                        return param;
-                    }
-                });
-                return v;
+            AtomicLong rtt = rttMap.get(invocation);
+            if (rtt == null) {
+                rttMap.put(invocation, new AtomicLong(System.currentTimeMillis()));
+            } else {
+                System.exit(1);
+            }
 
-            });
+            Result result = invoker.invoke(invocation);
             return result;
-
         } catch (Exception e) {
-            e.printStackTrace();
             throw e;
         }
     }
 
     @Override
     public Result onResponse(Result result, Invoker<?> invoker, Invocation invocation) {
+        String key = invoker.getUrl().toString();
+
+        AtomicInteger pendingCount = pendingMap.get(key);
+        if (pendingCount != null) {
+            pendingCount.decrementAndGet();
+        }
+
+        AtomicLong rtt = rttMap.get(invocation);
+        if (rtt != null) {
+            long tmp = System.currentTimeMillis() - rtt.get();
+
+            AtomicLong invokerRtt = invokerRttMap.get(key);
+            if (invokerRtt == null) {
+                synchronized (TestClientFilter.class) {
+                    if (invokerRttMap.get(key) == null) {
+                        invokerRttMap.put(key, new AtomicLong(tmp));
+                    }
+                }
+            } else {
+                long a = invokerRtt.get();
+                if (tmp > a * 2) {
+                    blockMap.get(key).incrementAndGet();
+                }else{
+
+                }
+                invokerRtt.accumulateAndGet(tmp, (old, param) -> (long) (0.8 * old + 0.2 * param));
+            }
+
+        }
+
         return result;
     }
 }

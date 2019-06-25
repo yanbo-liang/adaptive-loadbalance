@@ -26,48 +26,37 @@ import java.util.concurrent.locks.ReentrantLock;
 public class UserLoadBalance implements LoadBalance {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserLoadBalance.class);
 
-    public static Map<String, AtomicInteger> blockMap = new ConcurrentHashMap<>();
-
-    private static ReentrantLock lock = new ReentrantLock();
+    private static final ThreadLocal<Boolean> threadLocal = new ThreadLocal<>();
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-//            for (Invoker<T> invoker : invokers) {
-//                if (rttMap.get(invoker.getUrl().toString()) == null) {
-//                    return invoker;
-//                }
-//            }
-//            long rttMax = Long.MAX_VALUE;
-//            Invoker pickedInvoker = invokers.get(0);
-//            for (Invoker<T> invoker : invokers) {
-//                long rtt = rttMap.get(invoker.getUrl().toString()).get();
-//                if (rtt < rttMax) {
-//                    rttMax = rtt;
-//                    pickedInvoker = invoker;
-//                }
-//            }
-
 
         Invoker defaultInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
         String defaultInvokerKey = defaultInvoker.getUrl().toString();
-        synchronized (defaultInvoker) {
-            AtomicInteger atomicInteger = blockMap.get(defaultInvokerKey);
-            if (atomicInteger != null && atomicInteger.get() > 0) {
-                atomicInteger.decrementAndGet();
-                defaultInvoker = null;
-            }
-        }
 
-        for (Invoker<T> invoker : invokers) {
-            String newKey = invoker.getUrl().toString();
-            if (!newKey.equals(defaultInvokerKey)) {
-                AtomicInteger atomicInteger = blockMap.get(newKey);
-                if (atomicInteger != null && atomicInteger.get() == 0) {
-                    defaultInvoker = invoker;
+        threadLocal.set(false);
+        TestClientFilter.blockMap.get(defaultInvokerKey).updateAndGet(x -> {
+            if (x > 0) {
+                threadLocal.set(true);
+                return x - 1;
+            } else {
+                return x;
+            }
+        });
+        if (threadLocal.get()) {
+            defaultInvoker = null;
+            for (Invoker<T> invoker : invokers) {
+                String newKey = invoker.getUrl().toString();
+                if (!newKey.equals(defaultInvokerKey)) {
+                    AtomicInteger atomicInteger = TestClientFilter.blockMap.get(newKey);
+                    if (atomicInteger != null && atomicInteger.get() == 0) {
+                        defaultInvoker = invoker;
+                    }
+
                 }
-
             }
         }
+
 
         if (defaultInvoker == null) {
             throw new RpcException("too busy");
