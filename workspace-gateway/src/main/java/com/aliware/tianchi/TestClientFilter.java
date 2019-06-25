@@ -93,7 +93,7 @@ public class TestClientFilter implements Filter {
                 }
             } else {
                 long a = invokerRtt.get();
-                if (tmp > a * 2) {
+                if (tmp > a * 2.5) {
                     blockMap.get(key).incrementAndGet();
                 }else{
 
