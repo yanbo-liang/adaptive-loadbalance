@@ -31,8 +31,8 @@ public class Task implements Runnable {
                     for (Map.Entry<String, Boolean> entry : entries) {
                         if (entry.getValue()) {
                             int weight = weightMap.get(entry.getKey());
-                            weightMap.put(entry.getKey(), weight - 5);
-                            total += 5;
+                            weightMap.put(entry.getKey(), weight - 2);
+                            total += 2;
                         }
                     }
                     while (total > 0) {
@@ -70,7 +70,7 @@ public class Task implements Runnable {
 
             System.out.println(weightMap);
             try {
-                Thread.sleep(200);
+                Thread.sleep(100);
             } catch (Exception e) {
                 e.printStackTrace();
             }
