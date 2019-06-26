@@ -83,7 +83,7 @@ public class Task implements Runnable {
             System.out.println(weightMap.values());
 
             try {
-                Thread.sleep(200);
+                Thread.sleep(500);
             } catch (Exception e) {
                 e.printStackTrace();
             }
