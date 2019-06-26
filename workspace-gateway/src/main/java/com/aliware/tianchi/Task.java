@@ -51,12 +51,8 @@ public class Task implements Runnable {
                 TestClientFilter.startCheck = true;
                 TestClientFilter.exhaustedMap = new ConcurrentHashMap<>();
             }
-
-            System.out.println("!!!!!!!!!!!");
-
-            System.out.println(weightMap);
             try {
-                Thread.sleep(100);
+                Thread.sleep(200);
             } catch (Exception e) {
                 e.printStackTrace();
             }
