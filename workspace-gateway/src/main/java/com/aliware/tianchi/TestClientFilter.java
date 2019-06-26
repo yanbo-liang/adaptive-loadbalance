@@ -100,7 +100,7 @@ public class TestClientFilter implements Filter {
         String key = invoker.getUrl().toString();
         if (startCheck) {
             if (result.hasException()) {
-                if (result.getException() instanceof RuntimeException) {
+                if (result.getException().getMessage().contains("EXHAUSTED")) {
                     boolean exhausted = exhaustedMap.getOrDefault(key, false);
                     if (!exhausted) {
                         exhaustedMap.put(key, true);

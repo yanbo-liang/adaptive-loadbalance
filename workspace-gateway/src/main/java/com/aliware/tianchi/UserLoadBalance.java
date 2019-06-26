@@ -23,8 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class UserLoadBalance implements LoadBalance {
     private static final Logger logger = LoggerFactory.getLogger(UserLoadBalance.class);
 
-    private static final ThreadLocal<Boolean> threadLocal = new ThreadLocal<>();
-
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private static final AtomicBoolean inited = new AtomicBoolean(false);
 
@@ -75,7 +73,6 @@ public class UserLoadBalance implements LoadBalance {
 
         return null;
 
-//        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 //    @Override
 //    public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {

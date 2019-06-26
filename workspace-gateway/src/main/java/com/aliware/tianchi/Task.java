@@ -1,6 +1,5 @@
 package com.aliware.tianchi;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -8,16 +7,12 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Task implements Runnable {
-    Map<String, Integer> map = new HashMap<>();
-    private static boolean mess = true;
 
     @Override
     public void run() {
         while (true) {
             ConcurrentMap<String, Integer> weightMap = UserLoadBalance.weightMap;
             ConcurrentMap<String, Boolean> exhaustedMap = TestClientFilter.exhaustedMap;
-//            if (TestClientFilter.startCheck) {
-//                TestClientFilter.startCheck = false;
             if (exhaustedMap.size() > 0 && exhaustedMap.size() < weightMap.size()) {
                 Set<String> changeKeys = new HashSet<>();
                 Set<String> exhaustedKeys = exhaustedMap.keySet();
@@ -81,28 +76,11 @@ public class Task implements Runnable {
                         }
                     }
                 }
-
-
-//                    int size = weightMap.size();
-//                    List<String> keyList = new ArrayList<>(weightMap.keySet());
-//                        int random = ThreadLocalRandom.current().nextInt(size);
-//                        weightMap.compute(keyList.get(random), (k, v) -> v +2);
-//
-//                        int random1 = ThreadLocalRandom.current().nextInt(size);
-//                        weightMap.compute(keyList.get(random1), (k, v) -> v - 2);
-//
-
             }
             TestClientFilter.exhaustedMap.clear();
             TestClientFilter.totalRequestMap.clear();
             TestClientFilter.totalTimeMap.clear();
             System.out.println(weightMap.values());
-//            } else {
-//                TestClientFilter.startCheck = true;
-//                TestClientFilter.exhaustedMap = new ConcurrentHashMap<>();
-//            }
-
-
 
             try {
                 Thread.sleep(200);
