@@ -14,8 +14,8 @@ public class Task implements Runnable {
         while (true) {
             ConcurrentMap<String, Integer> weightMap = UserLoadBalance.weightMap;
             ConcurrentMap<String, Boolean> exhaustedMap = TestClientFilter.exhaustedMap;
-            if (TestClientFilter.startCheck) {
-                TestClientFilter.startCheck = false;
+//            if (TestClientFilter.startCheck) {
+//                TestClientFilter.startCheck = false;
                 if (exhaustedMap.size() > 0 && exhaustedMap.size() < weightMap.size()) {
                     Set<String> changeKeys = new HashSet<>();
                     Set<String> exhaustedKeys = exhaustedMap.keySet();
@@ -46,26 +46,27 @@ public class Task implements Runnable {
                     }
                 } else if (exhaustedMap.size() == 0) {
 
-                    int size = weightMap.size();
-                    List<String> keyList = new ArrayList<>(weightMap.keySet());
-                        int random = ThreadLocalRandom.current().nextInt(size);
-                        weightMap.compute(keyList.get(random), (k, v) -> v +2);
-
-                        int random1 = ThreadLocalRandom.current().nextInt(size);
-                        weightMap.compute(keyList.get(random1), (k, v) -> v - 2);
-
+//                    int size = weightMap.size();
+//                    List<String> keyList = new ArrayList<>(weightMap.keySet());
+//                        int random = ThreadLocalRandom.current().nextInt(size);
+//                        weightMap.compute(keyList.get(random), (k, v) -> v +2);
+//
+//                        int random1 = ThreadLocalRandom.current().nextInt(size);
+//                        weightMap.compute(keyList.get(random1), (k, v) -> v - 2);
+//
 
                 }
-
-
-            } else {
-                TestClientFilter.startCheck = true;
                 TestClientFilter.exhaustedMap = new ConcurrentHashMap<>();
-            }
+
+
+//            } else {
+//                TestClientFilter.startCheck = true;
+//                TestClientFilter.exhaustedMap = new ConcurrentHashMap<>();
+//            }
 
             System.out.println(weightMap.values());
             try {
-                Thread.sleep(200);
+                Thread.sleep(100);
             } catch (Exception e) {
                 e.printStackTrace();
             }
