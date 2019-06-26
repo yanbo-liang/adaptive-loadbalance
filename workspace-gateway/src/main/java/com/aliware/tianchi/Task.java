@@ -33,8 +33,8 @@ public class Task implements Runnable {
                     if (entry.getValue()) {
                         int weight = weightMap.get(entry.getKey());
                         if (weight - 5 > 20) {
-                            weightMap.put(entry.getKey(), weight - 5);
-                            total += 5;
+                            weightMap.put(entry.getKey(), weight - 10);
+                            total += 10;
                         }
                     }
                 }
