@@ -1,13 +1,18 @@
 package com.aliware.tianchi;
 
+import org.apache.dubbo.common.Constants;
+import org.apache.dubbo.common.extension.ExtensionLoader;
+import org.apache.dubbo.common.store.DataStore;
+import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.listener.CallbackListener;
 import org.apache.dubbo.rpc.service.CallbackService;
+import org.apache.dubbo.rpc.support.RpcUtils;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 /**
  * @author daofeng.xjf
@@ -25,8 +30,13 @@ public class CallbackServiceImpl implements CallbackService {
                 if (!listeners.isEmpty()) {
                     for (Map.Entry<String, CallbackListener> entry : listeners.entrySet()) {
                         try {
-                            entry.getValue().receiveServerMsg(System.getProperty("quota") + " " + new Date().toString());
+                            DataStore defaultExtension = ExtensionLoader.getExtensionLoader(DataStore.class).getDefaultExtension();
+                            Map<String,Object> map = defaultExtension.get(Constants.EXECUTOR_SERVICE_COMPONENT_KEY);
+                            Object port = new ArrayList<>(map.keySet()).get(0);
+                            ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) map.get(port);
+                            entry.getValue().receiveServerMsg(System.getProperty("quota") + threadPoolExecutor.getMaximumPoolSize());
                         } catch (Throwable t1) {
+                            t1.printStackTrace();
                             listeners.remove(entry.getKey());
                         }
                     }

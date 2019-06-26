@@ -5,10 +5,12 @@ import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author daofeng.xjf
@@ -21,8 +23,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TestClientFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(TestClientFilter.class);
 
-    //    public static final ConcurrentMap<Invocation, AtomicLong> rttMap = new ConcurrentReferenceHashMap<>(1024, ConcurrentReferenceHashMap.ReferenceType.WEAK);
-//
+    public static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(1024, ConcurrentReferenceHashMap.ReferenceType.WEAK);
+    public static ConcurrentMap<String, AtomicLong> totalRequestMap = new ConcurrentHashMap<>();
+    public static ConcurrentMap<String, AtomicLong> totalTimeMap = new ConcurrentHashMap<>();
+
+
 //    public static final ConcurrentMap<String, AtomicLong> invokerRttMap = new ConcurrentHashMap<>();
 ////
 //    public static final ConcurrentMap<String, AtomicInteger> pendingMap = new ConcurrentHashMap<>();
@@ -68,6 +73,7 @@ public class TestClientFilter implements Filter {
         try {
             String key = invoker.getUrl().toString();
 
+
 //            AtomicInteger pendingCount = pendingMap.get(key);
 //            if (pendingCount == null) {
 //                synchronized (TestClientFilter.class) {
@@ -79,12 +85,8 @@ public class TestClientFilter implements Filter {
 //                pendingCount.incrementAndGet();
 //            }
 
-//            AtomicLong rtt = rttMap.get(invocation);
-//            if (rtt == null) {
-//                rttMap.put(invocation, new AtomicLong(System.currentTimeMillis()));
-//            } else {
-//                System.exit(1);
-//            }
+
+            rttMap.put(invocation, System.currentTimeMillis());
 
             Result result = invoker.invoke(invocation);
             return result;
@@ -107,6 +109,37 @@ public class TestClientFilter implements Filter {
                 }
             }
         }
+        long rtt = System.currentTimeMillis() - rttMap.get(invocation);
+
+        AtomicLong totalRequest = totalRequestMap.get(key);
+        if (totalRequest == null) {
+            synchronized (totalRequestMap) {
+                AtomicLong atomicLong = totalRequestMap.get(key);
+                if (atomicLong == null) {
+                    totalRequestMap.put(key, new AtomicLong(1));
+                } else {
+                    atomicLong.incrementAndGet();
+                }
+            }
+        } else {
+            totalRequest.incrementAndGet();
+        }
+
+        AtomicLong totalTime = totalTimeMap.get(key);
+        if (totalTime == null) {
+            synchronized (totalTimeMap) {
+                AtomicLong atomicLong = totalTimeMap.get(key);
+                if (atomicLong == null) {
+                    totalTimeMap.put(key, new AtomicLong(rtt));
+                } else {
+                    atomicLong.updateAndGet(x -> x + rtt);
+                }
+            }
+        } else {
+            totalTime.updateAndGet(x -> x + rtt);
+        }
+
+
 //        AtomicInteger pendingCount = pendingMap.get(key);
 //        if (pendingCount != null) {
 //            pendingCount.decrementAndGet();
@@ -116,9 +149,6 @@ public class TestClientFilter implements Filter {
 //        }
 
 
-//        AtomicLong rtt = rttMap.get(invocation);
-//        if (rtt != null) {
-//            long tmp = System.currentTimeMillis() - rtt.get();
 //
 //            AtomicLong invokerRtt = invokerRttMap.get(key);
 //            if (invokerRtt == null) {
@@ -137,7 +167,7 @@ public class TestClientFilter implements Filter {
 //                invokerRtt.accumulateAndGet(tmp, (old, param) -> (long) (0.8 * old + 0.2 * param));
 //            }
 //
-//        }
+
 
         return result;
     }
