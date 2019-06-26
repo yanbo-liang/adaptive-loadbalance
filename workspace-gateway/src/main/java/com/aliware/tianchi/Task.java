@@ -3,9 +3,11 @@ package com.aliware.tianchi;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Task implements Runnable {
     Map<String, Integer> map = new HashMap<>();
+    private static boolean mess = true;
 
     @Override
     public void run() {
@@ -42,7 +44,21 @@ public class Task implements Runnable {
                             }
                         }
                     }
-                }else if(exhaustedMap.size()==0){
+                } else if (exhaustedMap.size() == 0) {
+                    if (mess) {
+                        mess = false;
+                        int size = weightMap.size();
+                        List<String> keyList = new ArrayList<>(weightMap.keySet());
+                        int random = ThreadLocalRandom.current().nextInt(size);
+                        weightMap.compute(keyList.get(random), (k, v) -> v + 5);
+                    } else {
+                        mess = true;
+                        int size = weightMap.size();
+                        List<String> keyList = new ArrayList<>(weightMap.keySet());
+                        int random = ThreadLocalRandom.current().nextInt(size);
+                        weightMap.compute(keyList.get(random), (k, v) -> v - 5);
+
+                    }
 
                 }
 
@@ -51,6 +67,8 @@ public class Task implements Runnable {
                 TestClientFilter.startCheck = true;
                 TestClientFilter.exhaustedMap = new ConcurrentHashMap<>();
             }
+
+            System.out.println(weightMap);
             try {
                 Thread.sleep(200);
             } catch (Exception e) {
