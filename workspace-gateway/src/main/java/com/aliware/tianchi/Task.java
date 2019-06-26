@@ -65,7 +65,7 @@ public class Task implements Runnable {
                             changeKeys.add(tmp);
                         }
                     }
-                    int total = 7;
+                    int total = 3;
                     while (total > 0) {
                         for (String tmp : changeKeys) {
                             if (total > 0) {
