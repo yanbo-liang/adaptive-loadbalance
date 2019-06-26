@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -24,12 +24,87 @@ import java.util.concurrent.locks.ReentrantLock;
  * 选手需要基于此类实现自己的负载均衡算法
  */
 public class UserLoadBalance implements LoadBalance {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserLoadBalance.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserLoadBalance.class);
 
     private static final ThreadLocal<Boolean> threadLocal = new ThreadLocal<>();
 
+    private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private static final AtomicBoolean inited = new AtomicBoolean(false);
+
+    public static final ConcurrentMap<String, Integer> weightMap = new ConcurrentHashMap<>();
+
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
+
+
+        int totalWeight = 0;
+        for (Invoker<T> invoker : invokers) {
+            String key = invoker.getUrl().toString();
+            Integer weight = weightMap.get(key);
+            if (weight == null) {
+                synchronized (weightMap) {
+                    if (weightMap.get(key) == null) {
+                        weightMap.put(key, 100);
+                    }
+                }
+                weight = weightMap.get(key);
+            }
+            totalWeight += weight;
+        }
+
+        if (!inited.get()) {
+            if (inited.compareAndSet(false, true)) {
+                Task task = new Task();
+                executorService.execute(task);
+            }
+        }
+
+        int[] section = new int[invokers.size()];
+        int subTotal = 0;
+        for (int i = 0; i < invokers.size(); i++) {
+            String key = invokers.get(i).getUrl().toString();
+            subTotal += weightMap.get(key);
+            section[i] = subTotal;
+        }
+        int random = ThreadLocalRandom.current().nextInt(totalWeight);
+        for (int i = 0; i < section.length; i++) {
+            if (random < section[i]) {
+                return invokers.get(i);
+            }
+        }
+
+        System.exit(1);
+
+
+        return null;
+
+//        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+    }
+//    @Override
+//    public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
+//        if (!inited.get()) {
+//            if (inited.compareAndSet(false,true)){
+//                Task task = new Task();
+//                executorService.execute(task);
+//            }
+//        }
+//
+//
+//        for (Invoker<T> invoker : invokers) {
+//            String key = invoker.getUrl().toString();
+//
+//            AtomicInteger atomicInteger = TestClientFilter.totalMap.get(key);
+//            if (atomicInteger != null) {
+//            }
+//
+//        }
+//
+//
+//        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+//    }
+
+//    @Override
+//    public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
 //
 //        Invoker defaultInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
 //        String defaultInvokerKey = defaultInvoker.getUrl().toString();
@@ -67,6 +142,5 @@ public class UserLoadBalance implements LoadBalance {
 //        } else {
 //            return defaultInvoker;
 //        }
-return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-    }
+//    }
 }
