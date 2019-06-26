@@ -31,8 +31,8 @@ public class Task implements Runnable {
                     for (Map.Entry<String, Boolean> entry : entries) {
                         if (entry.getValue()) {
                             int weight = weightMap.get(entry.getKey());
-                            weightMap.put(entry.getKey(), weight - 2);
-                            total += 2;
+                            weightMap.put(entry.getKey(), weight - 5);
+                            total += 5;
                         }
                     }
                     while (total > 0) {
@@ -48,14 +48,12 @@ public class Task implements Runnable {
 
                     int size = weightMap.size();
                     List<String> keyList = new ArrayList<>(weightMap.keySet());
-                    for (int i = 0; i < size; i++) {
                         int random = ThreadLocalRandom.current().nextInt(size);
-                        weightMap.compute(keyList.get(random), (k, v) -> v + 2);
-                    }
-                    for (int i = 0; i < size; i++) {
-                        int random = ThreadLocalRandom.current().nextInt(size);
-                        weightMap.compute(keyList.get(random), (k, v) -> v - 2);
-                    }
+                        weightMap.compute(keyList.get(random), (k, v) -> v +2);
+
+                        int random1 = ThreadLocalRandom.current().nextInt(size);
+                        weightMap.compute(keyList.get(random1), (k, v) -> v - 2);
+
 
                 }
 
@@ -65,9 +63,9 @@ public class Task implements Runnable {
                 TestClientFilter.exhaustedMap = new ConcurrentHashMap<>();
             }
 
-            System.out.println(weightMap);
+            System.out.println(weightMap.values());
             try {
-                Thread.sleep(100);
+                Thread.sleep(200);
             } catch (Exception e) {
                 e.printStackTrace();
             }
