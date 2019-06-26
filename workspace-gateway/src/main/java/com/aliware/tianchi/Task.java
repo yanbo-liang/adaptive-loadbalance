@@ -28,9 +28,9 @@ public class Task implements Runnable {
                 for (Map.Entry<String, Boolean> entry : entries) {
                     if (entry.getValue()) {
                         int weight = weightMap.get(entry.getKey());
-                        if (weight - 3 > 20) {
-                            weightMap.put(entry.getKey(), weight - 3);
-                            total += 3;
+                        if (weight - 7 > 20) {
+                            weightMap.put(entry.getKey(), weight - 7);
+                            total += 7;
                         }
                     }
                 }
@@ -56,7 +56,7 @@ public class Task implements Runnable {
                     }
                 }
                 if (key != null) {
-                    weightMap.compute(key, (k, v) -> v + 3);
+                    weightMap.compute(key, (k, v) -> v + 7);
 
                     Set<String> changeKeys = new HashSet<>();
                     Set<String> weightKeys = weightMap.keySet();
@@ -65,7 +65,7 @@ public class Task implements Runnable {
                             changeKeys.add(tmp);
                         }
                     }
-                    int total = 3;
+                    int total = 7;
                     while (total > 0) {
                         for (String tmp : changeKeys) {
                             if (total > 0) {
