@@ -1,9 +1,10 @@
 package com.aliware.tianchi;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Task implements Runnable {
@@ -102,8 +103,9 @@ public class Task implements Runnable {
 //            }
 
 
+
             try {
-                Thread.sleep(300);
+                Thread.sleep(200);
             } catch (Exception e) {
                 e.printStackTrace();
             }
