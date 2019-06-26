@@ -45,19 +45,16 @@ public class Task implements Runnable {
                         }
                     }
                 } else if (exhaustedMap.size() == 0) {
-                    if (mess) {
-                        mess = false;
-                        int size = weightMap.size();
-                        List<String> keyList = new ArrayList<>(weightMap.keySet());
-                        int random = ThreadLocalRandom.current().nextInt(size);
-                        weightMap.compute(keyList.get(random), (k, v) -> v + 5);
-                    } else {
-                        mess = true;
-                        int size = weightMap.size();
-                        List<String> keyList = new ArrayList<>(weightMap.keySet());
-                        int random = ThreadLocalRandom.current().nextInt(size);
-                        weightMap.compute(keyList.get(random), (k, v) -> v - 5);
 
+                    int size = weightMap.size();
+                    List<String> keyList = new ArrayList<>(weightMap.keySet());
+                    for (int i = 0; i < size; i++) {
+                        int random = ThreadLocalRandom.current().nextInt(size);
+                        weightMap.compute(keyList.get(random), (k, v) -> v + 2);
+                    }
+                    for (int i = 0; i < size; i++) {
+                        int random = ThreadLocalRandom.current().nextInt(size);
+                        weightMap.compute(keyList.get(random), (k, v) -> v - 2);
                     }
 
                 }
