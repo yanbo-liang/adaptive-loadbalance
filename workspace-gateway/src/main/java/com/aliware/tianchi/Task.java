@@ -56,7 +56,7 @@ public class Task implements Runnable {
                     }
                 }
                 if (key != null) {
-                    weightMap.compute(key, (k, v) -> v + 7);
+                    weightMap.compute(key, (k, v) -> v + 3);
 
                     Set<String> changeKeys = new HashSet<>();
                     Set<String> weightKeys = weightMap.keySet();
