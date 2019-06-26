@@ -28,9 +28,9 @@ public class Task implements Runnable {
                 for (Map.Entry<String, Boolean> entry : entries) {
                     if (entry.getValue()) {
                         int weight = weightMap.get(entry.getKey());
-                        if (weight - 5 > 20) {
-                            weightMap.put(entry.getKey(), weight - 5);
-                            total += 5;
+                        if (weight - 3 > 20) {
+                            weightMap.put(entry.getKey(), weight - 3);
+                            total += 3;
                         }
                     }
                 }
