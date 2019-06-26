@@ -25,7 +25,7 @@ public class TestClientFilter implements Filter {
 //
 //    public static final ConcurrentMap<String, AtomicLong> invokerRttMap = new ConcurrentHashMap<>();
 ////
-    public static final ConcurrentMap<String, AtomicInteger> pendingMap = new ConcurrentHashMap<>();
+//    public static final ConcurrentMap<String, AtomicInteger> pendingMap = new ConcurrentHashMap<>();
 
     public static ConcurrentMap<String, Boolean> exhaustedMap = new ConcurrentHashMap<>();
 
@@ -68,16 +68,16 @@ public class TestClientFilter implements Filter {
         try {
             String key = invoker.getUrl().toString();
 
-            AtomicInteger pendingCount = pendingMap.get(key);
-            if (pendingCount == null) {
-                synchronized (TestClientFilter.class) {
-                    if (pendingMap.get(key) == null) {
-                        pendingMap.put(key, new AtomicInteger(1));
-                    }
-                }
-            } else {
-                pendingCount.incrementAndGet();
-            }
+//            AtomicInteger pendingCount = pendingMap.get(key);
+//            if (pendingCount == null) {
+//                synchronized (TestClientFilter.class) {
+//                    if (pendingMap.get(key) == null) {
+//                        pendingMap.put(key, new AtomicInteger(1));
+//                    }
+//                }
+//            } else {
+//                pendingCount.incrementAndGet();
+//            }
 
 //            AtomicLong rtt = rttMap.get(invocation);
 //            if (rtt == null) {
@@ -99,7 +99,7 @@ public class TestClientFilter implements Filter {
         String key = invoker.getUrl().toString();
         if (startCheck) {
             if (result.hasException()) {
-                if (result.getException().getMessage().contains("EXHAUSTED")) {
+                if (result.getException() instanceof RuntimeException) {
                     boolean exhausted = exhaustedMap.getOrDefault(key, false);
                     if (!exhausted) {
                         exhaustedMap.put(key, true);
@@ -107,13 +107,13 @@ public class TestClientFilter implements Filter {
                 }
             }
         }
-        AtomicInteger pendingCount = pendingMap.get(key);
-        if (pendingCount != null) {
-            pendingCount.decrementAndGet();
-            if (result.hasException()) {
-                logger.info(pendingCount.get() + "");
-            }
-        }
+//        AtomicInteger pendingCount = pendingMap.get(key);
+//        if (pendingCount != null) {
+//            pendingCount.decrementAndGet();
+//            if (result.hasException()) {
+//                logger.info(pendingCount.get() + "");
+//            }
+//        }
 
 
 //        AtomicLong rtt = rttMap.get(invocation);

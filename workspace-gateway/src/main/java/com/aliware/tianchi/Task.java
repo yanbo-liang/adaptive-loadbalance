@@ -42,6 +42,8 @@ public class Task implements Runnable {
                             }
                         }
                     }
+                }else if(exhaustedMap.size()==0){
+
                 }
 
 
