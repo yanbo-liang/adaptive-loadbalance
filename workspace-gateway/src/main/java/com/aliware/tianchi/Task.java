@@ -56,7 +56,7 @@ public class Task implements Runnable {
                     }
                 }
                 if (key != null) {
-                    weightMap.compute(key, (k, v) -> v + 30);
+                    weightMap.compute(key, (k, v) -> v + 50);
 
                     Set<String> changeKeys = new HashSet<>();
                     Set<String> weightKeys = weightMap.keySet();
@@ -65,7 +65,7 @@ public class Task implements Runnable {
                             changeKeys.add(tmp);
                         }
                     }
-                    int total = 30;
+                    int total = 50;
                     while (total > 0) {
                         for (String tmp : changeKeys) {
                             if (total > 0) {
