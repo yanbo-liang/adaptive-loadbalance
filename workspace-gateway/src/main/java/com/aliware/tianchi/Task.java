@@ -96,7 +96,7 @@ public class Task implements Runnable {
             }
 
             try{
-                Thread.sleep(300);
+                Thread.sleep(1000);
 
             }catch (Exception e){
                 e.printStackTrace();
