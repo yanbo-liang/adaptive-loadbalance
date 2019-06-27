@@ -15,37 +15,37 @@ public class Task implements Runnable {
                 TestClientFilter.semaphore.acquire(1000);
             ConcurrentMap<String, Integer> weightMap = UserLoadBalance.weightMap;
             ConcurrentMap<String, Boolean> exhaustedMap = TestClientFilter.exhaustedMap;
-            if (exhaustedMap.size() > 0 && exhaustedMap.size() < weightMap.size()) {
-                Set<String> changeKeys = new HashSet<>();
-                Set<String> exhaustedKeys = exhaustedMap.keySet();
-                Set<String> weightKeys = weightMap.keySet();
-                for (String key : weightKeys) {
-                    if (!exhaustedKeys.contains(key)) {
-                        changeKeys.add(key);
-                    }
-                }
-
-                int total = 0;
-                Set<Map.Entry<String, Boolean>> entries = exhaustedMap.entrySet();
-                for (Map.Entry<String, Boolean> entry : entries) {
-                    if (entry.getValue()) {
-                        int weight = weightMap.get(entry.getKey());
-                        if (weight - 10 > 0) {
-                            weightMap.put(entry.getKey(), weight - 10);
-                            total += 10;
-                        }
-                    }
-                }
-                while (total > 0) {
-                    for (String key : changeKeys) {
-                        if (total > 0) {
-                            int weight = weightMap.get(key);
-                            weightMap.put(key, weight + 1);
-                            total -= 1;
-                        }
-                    }
-                }
-            }
+//            if (exhaustedMap.size() > 0 && exhaustedMap.size() < weightMap.size()) {
+//                Set<String> changeKeys = new HashSet<>();
+//                Set<String> exhaustedKeys = exhaustedMap.keySet();
+//                Set<String> weightKeys = weightMap.keySet();
+//                for (String key : weightKeys) {
+//                    if (!exhaustedKeys.contains(key)) {
+//                        changeKeys.add(key);
+//                    }
+//                }
+//
+//                int total = 0;
+//                Set<Map.Entry<String, Boolean>> entries = exhaustedMap.entrySet();
+//                for (Map.Entry<String, Boolean> entry : entries) {
+//                    if (entry.getValue()) {
+//                        int weight = weightMap.get(entry.getKey());
+//                        if (weight - 10 > 0) {
+//                            weightMap.put(entry.getKey(), weight - 10);
+//                            total += 10;
+//                        }
+//                    }
+//                }
+//                while (total > 0) {
+//                    for (String key : changeKeys) {
+//                        if (total > 0) {
+//                            int weight = weightMap.get(key);
+//                            weightMap.put(key, weight + 1);
+//                            total -= 1;
+//                        }
+//                    }
+//                }
+//            }
                 long a = Long.MAX_VALUE;
                 String key = null;
                 Set<Map.Entry<String, AtomicLong>> entries = TestClientFilter.totalRequestMap.entrySet();
