@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TestClientFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(TestClientFilter.class);
 
+
     public static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(1024, ConcurrentReferenceHashMap.ReferenceType.WEAK);
     public static ConcurrentMap<String, AtomicLong> totalRequestMap = new ConcurrentHashMap<>();
     public static ConcurrentMap<String, AtomicLong> totalTimeMap = new ConcurrentHashMap<>();
