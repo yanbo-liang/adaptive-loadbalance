@@ -117,7 +117,7 @@ public class TestClientFilter implements Filter {
                 long rtt = System.currentTimeMillis() -aLong;
                 AtomicLong totalRequest = totalRequestMap.get(key);
                 if (totalRequest == null) {
-                    synchronized (totalRequestMap) {
+                    synchronized (invoker) {
                         AtomicLong atomicLong = totalRequestMap.get(key);
                         if (atomicLong == null) {
                             totalRequestMap.put(key, new AtomicLong(1));
@@ -131,7 +131,7 @@ public class TestClientFilter implements Filter {
 
                 AtomicLong totalTime = totalTimeMap.get(key);
                 if (totalTime == null) {
-                    synchronized (totalTimeMap) {
+                    synchronized (invoker) {
                         AtomicLong atomicLong = totalTimeMap.get(key);
                         if (atomicLong == null) {
                             totalTimeMap.put(key, new AtomicLong(rtt));
