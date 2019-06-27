@@ -59,7 +59,7 @@ public class Task implements Runnable {
                     }
                 }
                 if (key != null&&(exhaustedMap.getOrDefault(key,false)==false)) {
-                    weightMap.compute(key, (k, v) -> v + 5);
+                    weightMap.compute(key, (k, v) -> v + 10);
 
                     Set<String> changeKeys = new HashSet<>();
                     Set<String> weightKeys = weightMap.keySet();
@@ -68,7 +68,7 @@ public class Task implements Runnable {
                             changeKeys.add(tmp);
                         }
                     }
-                    int total = 5;
+                    int total = 10;
                     while (total > 0) {
                         for (String tmp : changeKeys) {
                             if (total > 0) {
