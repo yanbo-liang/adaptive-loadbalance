@@ -28,9 +28,9 @@ public class Task implements Runnable {
                 for (Map.Entry<String, Boolean> entry : entries) {
                     if (entry.getValue()) {
                         int weight = weightMap.get(entry.getKey());
-                        if (weight - 10 > 0) {
-                            weightMap.put(entry.getKey(), weight - 10);
-                            total += 10;
+                        if (weight - 5 > 0) {
+                            weightMap.put(entry.getKey(), weight - 5);
+                            total += 5;
                         }
                     }
                 }
@@ -44,41 +44,41 @@ public class Task implements Runnable {
                     }
                 }
             } else if (exhaustedMap.size() == 0) {
-                long a = Long.MAX_VALUE;
-                String key = null;
-                Set<Map.Entry<String, AtomicLong>> entries = TestClientFilter.totalRequestMap.entrySet();
-                System.out.println("!!!!!!!!!");
-
-                for (Map.Entry<String, AtomicLong> entry : entries) {
-                    long totalTime = TestClientFilter.totalTimeMap.get(entry.getKey()).get();
-                    long average = totalTime / entry.getValue().get();
-                    System.out.println(average);
-                    if (average < a) {
-                        a = average;
-                        key = entry.getKey();
-                    }
-                }
-                if (key != null) {
-                    weightMap.compute(key, (k, v) -> v + 5);
-
-                    Set<String> changeKeys = new HashSet<>();
-                    Set<String> weightKeys = weightMap.keySet();
-                    for (String tmp : weightKeys) {
-                        if (!key.equals(tmp)) {
-                            changeKeys.add(tmp);
-                        }
-                    }
-                    int total = 5;
-                    while (total > 0) {
-                        for (String tmp : changeKeys) {
-                            if (total > 0) {
-                                int weight = weightMap.get(tmp);
-                                weightMap.put(tmp, weight - 1);
-                                total -= 1;
-                            }
-                        }
-                    }
-                }
+//                long a = Long.MAX_VALUE;
+//                String key = null;
+//                Set<Map.Entry<String, AtomicLong>> entries = TestClientFilter.totalRequestMap.entrySet();
+//                System.out.println("!!!!!!!!!");
+//
+//                for (Map.Entry<String, AtomicLong> entry : entries) {
+//                    long totalTime = TestClientFilter.totalTimeMap.get(entry.getKey()).get();
+//                    long average = totalTime / entry.getValue().get();
+//                    System.out.println(average);
+//                    if (average < a) {
+//                        a = average;
+//                        key = entry.getKey();
+//                    }
+//                }
+//                if (key != null) {
+//                    weightMap.compute(key, (k, v) -> v + 5);
+//
+//                    Set<String> changeKeys = new HashSet<>();
+//                    Set<String> weightKeys = weightMap.keySet();
+//                    for (String tmp : weightKeys) {
+//                        if (!key.equals(tmp)) {
+//                            changeKeys.add(tmp);
+//                        }
+//                    }
+//                    int total = 5;
+//                    while (total > 0) {
+//                        for (String tmp : changeKeys) {
+//                            if (total > 0) {
+//                                int weight = weightMap.get(tmp);
+//                                weightMap.put(tmp, weight - 1);
+//                                total -= 1;
+//                            }
+//                        }
+//                    }
+//                }
             }
             TestClientFilter.exhaustedMap.clear();
 //            TestClientFilter.totalRequestMap.clear();
