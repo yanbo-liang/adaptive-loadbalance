@@ -7,7 +7,6 @@ import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.cluster.LoadBalance;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
@@ -50,28 +49,61 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
 
+
         try {
             semaphore.acquire();
+            int[] weightArray = new int[invokers.size()];
+            long min = Long.MAX_VALUE;
+            int minIndex = 0;
+            for (int i = 0; i < invokers.size(); i++) {
+                HiveInvokerInfo hiveInvokerInfo = infoMap.get(invokers.get(i).getUrl());
+                weightArray[i] = hiveInvokerInfo.weight;
+
+                long rtt = hiveInvokerInfo.rtt.get();
+                if (rtt < min) {
+                    min = rtt;
+                    minIndex = i;
+                }
+            }
+            int change = 5;
+            weightArray[minIndex] += change;
+
+            while (change > 0) {
+                for (int i = 0; i < invokers.size(); i++) {
+                    if (change > 0) {
+                        if (i != minIndex) {
+                            weightArray[i] -= 1;
+                            change -= 1;
+                        }
+                    }
+                }
+            }
             int[] section = new int[invokers.size()];
             int totalWeight = 0;
             for (int i = 0; i < invokers.size(); i++) {
-                int weight = infoMap.get(invokers.get(i).getUrl()).weight;
+
+                int weight = weightArray[i];
                 totalWeight += weight;
                 section[i] = totalWeight;
             }
+
             int random = ThreadLocalRandom.current().nextInt(totalWeight);
             for (int i = 0; i < section.length; i++) {
                 if (random < section[i]) {
                     return invokers.get(i);
                 }
             }
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             e.printStackTrace();
         } finally {
             semaphore.release();
         }
 
-        throw new Error("should not happen");
+        throw new
+
+                Error("should not happen");
+
     }
 
     private void distributeWeight(int weight, List<Invoker> targets, boolean add) {
