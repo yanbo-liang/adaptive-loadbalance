@@ -109,6 +109,7 @@ public class TestClientFilter implements Filter {
                         if (!exhausted) {
                             exhaustedMap.put(key, true);
                         }
+                        return result;
                     }
                 }
             }
