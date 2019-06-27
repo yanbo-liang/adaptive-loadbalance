@@ -11,6 +11,8 @@ public class Task implements Runnable {
     @Override
     public void run() {
         while (true) {
+            try {
+                TestClientFilter.semaphore.acquire(1000);
             ConcurrentMap<String, Integer> weightMap = UserLoadBalance.weightMap;
             ConcurrentMap<String, Boolean> exhaustedMap = TestClientFilter.exhaustedMap;
             if (exhaustedMap.size() > 0 && exhaustedMap.size() < weightMap.size()) {
@@ -44,49 +46,59 @@ public class Task implements Runnable {
                     }
                 }
             } else if (exhaustedMap.size() == 0) {
-//                long a = Long.MAX_VALUE;
-//                String key = null;
-//                Set<Map.Entry<String, AtomicLong>> entries = TestClientFilter.totalRequestMap.entrySet();
-//                System.out.println("!!!!!!!!!");
-//
-//                for (Map.Entry<String, AtomicLong> entry : entries) {
-//                    long totalTime = TestClientFilter.totalTimeMap.get(entry.getKey()).get();
-//                    long average = totalTime / entry.getValue().get();
-//                    System.out.println(average);
-//                    if (average < a) {
-//                        a = average;
-//                        key = entry.getKey();
-//                    }
-//                }
-//                if (key != null) {
-//                    weightMap.compute(key, (k, v) -> v + 5);
-//
-//                    Set<String> changeKeys = new HashSet<>();
-//                    Set<String> weightKeys = weightMap.keySet();
-//                    for (String tmp : weightKeys) {
-//                        if (!key.equals(tmp)) {
-//                            changeKeys.add(tmp);
-//                        }
-//                    }
-//                    int total = 5;
-//                    while (total > 0) {
-//                        for (String tmp : changeKeys) {
-//                            if (total > 0) {
-//                                int weight = weightMap.get(tmp);
-//                                weightMap.put(tmp, weight - 1);
-//                                total -= 1;
-//                            }
-//                        }
-//                    }
-//                }
-            }
-            TestClientFilter.exhaustedMap.clear();
-//            TestClientFilter.totalRequestMap.clear();
-//            TestClientFilter.totalTimeMap.clear();
+                long a = Long.MAX_VALUE;
+                String key = null;
+                Set<Map.Entry<String, AtomicLong>> entries = TestClientFilter.totalRequestMap.entrySet();
+                System.out.println("!!!!!!!!!");
 
-            try {
-                Thread.sleep(200);
+                for (Map.Entry<String, AtomicLong> entry : entries) {
+                    long totalTime = TestClientFilter.totalTimeMap.get(entry.getKey()).get();
+                    long average = totalTime / entry.getValue().get();
+                    System.out.println(average);
+                    if (average < a) {
+                        a = average;
+                        key = entry.getKey();
+                    }
+                }
+                if (key != null) {
+                    weightMap.compute(key, (k, v) -> v + 5);
+
+                    Set<String> changeKeys = new HashSet<>();
+                    Set<String> weightKeys = weightMap.keySet();
+                    for (String tmp : weightKeys) {
+                        if (!key.equals(tmp)) {
+                            changeKeys.add(tmp);
+                        }
+                    }
+                    int total = 5;
+                    while (total > 0) {
+                        for (String tmp : changeKeys) {
+                            if (total > 0) {
+                                int weight = weightMap.get(tmp);
+                                weightMap.put(tmp, weight - 1);
+                                total -= 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            TestClientFilter.exhaustedMap.clear();
+            TestClientFilter.totalRequestMap.clear();
+            TestClientFilter.totalTimeMap.clear();
+
+
             } catch (Exception e) {
+                e.printStackTrace();
+            }
+            finally {
+                TestClientFilter.semaphore.release(1000);
+            }
+
+            try{
+                Thread.sleep(500);
+
+            }catch (Exception e){
                 e.printStackTrace();
             }
         }

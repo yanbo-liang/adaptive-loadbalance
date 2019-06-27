@@ -9,6 +9,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -25,7 +26,7 @@ public class TestClientFilter implements Filter {
     public static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(1024, ConcurrentReferenceHashMap.ReferenceType.WEAK);
     public static ConcurrentMap<String, AtomicLong> totalRequestMap = new ConcurrentHashMap<>();
     public static ConcurrentMap<String, AtomicLong> totalTimeMap = new ConcurrentHashMap<>();
-
+    public static Semaphore semaphore = new Semaphore(1000,true);
 
 //    public static final ConcurrentMap<String, AtomicLong> invokerRttMap = new ConcurrentHashMap<>();
 ////
@@ -73,7 +74,6 @@ public class TestClientFilter implements Filter {
             String key = invoker.getUrl().toString();
 
 
-
 //            AtomicInteger pendingCount = pendingMap.get(key);
 //            if (pendingCount == null) {
 //                synchronized (TestClientFilter.class) {
@@ -98,47 +98,51 @@ public class TestClientFilter implements Filter {
 
     @Override
     public Result onResponse(Result result, Invoker<?> invoker, Invocation invocation) {
-        String key = invoker.getUrl().toString();
-        if (startCheck) {
-            if (result.hasException()) {
-                if (result.getException().getMessage().contains("EXHAUSTED")) {
-                    boolean exhausted = exhaustedMap.getOrDefault(key, false);
-                    if (!exhausted) {
-                        exhaustedMap.put(key, true);
+        try {
+            semaphore.acquire();
+
+            String key = invoker.getUrl().toString();
+            if (startCheck) {
+                if (result.hasException()) {
+                    if (result.getException().getMessage().contains("EXHAUSTED")) {
+                        boolean exhausted = exhaustedMap.getOrDefault(key, false);
+                        if (!exhausted) {
+                            exhaustedMap.put(key, true);
+                        }
                     }
                 }
             }
-        }
-        long rtt = System.currentTimeMillis() - rttMap.get(invocation);
-
-        AtomicLong totalRequest = totalRequestMap.get(key);
-        if (totalRequest == null) {
-            synchronized (totalRequestMap) {
-                AtomicLong atomicLong = totalRequestMap.get(key);
-                if (atomicLong == null) {
-                    totalRequestMap.put(key, new AtomicLong(1));
+            Long aLong = rttMap.get(invocation);
+            if (aLong!=null) {
+                long rtt = System.currentTimeMillis() -aLong;
+                AtomicLong totalRequest = totalRequestMap.get(key);
+                if (totalRequest == null) {
+                    synchronized (totalRequestMap) {
+                        AtomicLong atomicLong = totalRequestMap.get(key);
+                        if (atomicLong == null) {
+                            totalRequestMap.put(key, new AtomicLong(1));
+                        } else {
+                            atomicLong.incrementAndGet();
+                        }
+                    }
                 } else {
-                    atomicLong.incrementAndGet();
+                    totalRequest.incrementAndGet();
+                }
+
+                AtomicLong totalTime = totalTimeMap.get(key);
+                if (totalTime == null) {
+                    synchronized (totalTimeMap) {
+                        AtomicLong atomicLong = totalTimeMap.get(key);
+                        if (atomicLong == null) {
+                            totalTimeMap.put(key, new AtomicLong(rtt));
+                        } else {
+                            atomicLong.updateAndGet(x -> x + rtt);
+                        }
+                    }
+                } else {
+                    totalTime.updateAndGet(x -> x + rtt);
                 }
             }
-        } else {
-            totalRequest.incrementAndGet();
-        }
-
-        AtomicLong totalTime = totalTimeMap.get(key);
-        if (totalTime == null) {
-            synchronized (totalTimeMap) {
-                AtomicLong atomicLong = totalTimeMap.get(key);
-                if (atomicLong == null) {
-                    totalTimeMap.put(key, new AtomicLong(rtt));
-                } else {
-                    atomicLong.updateAndGet(x -> x + rtt);
-                }
-            }
-        } else {
-            totalTime.updateAndGet(x -> x + rtt);
-        }
-
 
 //        AtomicInteger pendingCount = pendingMap.get(key);
 //        if (pendingCount != null) {
@@ -167,7 +171,11 @@ public class TestClientFilter implements Filter {
 //                invokerRtt.accumulateAndGet(tmp, (old, param) -> (long) (0.8 * old + 0.2 * param));
 //            }
 //
-
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            semaphore.release();
+        }
 
         return result;
     }
