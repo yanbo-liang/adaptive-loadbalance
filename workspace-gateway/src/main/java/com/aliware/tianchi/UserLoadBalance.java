@@ -30,12 +30,9 @@ public class UserLoadBalance implements LoadBalance {
                 }
             }
         }
-        System.out.println("--------------");
 
         for (Invoker<T> invoker : invokers) {
             HiveInvokerInfo hiveInvokerInfo = infoMap.get(invoker.getUrl());
-            System.out.println(hiveInvokerInfo.weight.get());
-
             if (hiveInvokerInfo.exhausted) {
                 try {
                     semaphore.acquire(100);
