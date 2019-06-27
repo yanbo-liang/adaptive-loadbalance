@@ -31,6 +31,7 @@ public class UserLoadBalance implements LoadBalance {
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
 
+
         int totalWeight = 0;
         for (Invoker<T> invoker : invokers) {
             String key = invoker.getUrl().toString();

@@ -47,6 +47,7 @@ public class Task implements Runnable {
                 long a = Long.MAX_VALUE;
                 String key = null;
                 Set<Map.Entry<String, AtomicLong>> entries = TestClientFilter.totalRequestMap.entrySet();
+
                 for (Map.Entry<String, AtomicLong> entry : entries) {
                     long totalTime = TestClientFilter.totalTimeMap.get(entry.getKey()).get();
                     long average = totalTime / entry.getValue().get();
@@ -78,9 +79,8 @@ public class Task implements Runnable {
                 }
             }
             TestClientFilter.exhaustedMap.clear();
-            TestClientFilter.totalRequestMap.clear();
-            TestClientFilter.totalTimeMap.clear();
-            System.out.println(weightMap.values());
+//            TestClientFilter.totalRequestMap.clear();
+//            TestClientFilter.totalTimeMap.clear();
 
             try {
                 Thread.sleep(200);
