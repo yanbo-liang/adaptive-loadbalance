@@ -58,7 +58,7 @@ public class Task implements Runnable {
                         key = entry.getKey();
                     }
                 }
-                if (key != null) {
+                if (key != null&&(exhaustedMap.getOrDefault(key,false)==false)) {
                     weightMap.compute(key, (k, v) -> v + 8);
 
                     Set<String> changeKeys = new HashSet<>();
