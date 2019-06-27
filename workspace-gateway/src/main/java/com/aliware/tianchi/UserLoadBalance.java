@@ -65,7 +65,7 @@ public class UserLoadBalance implements LoadBalance {
                     minIndex = i;
                 }
             }
-            int change = 20;
+            int change = 35;
             weightArray[minIndex] += change;
 
             while (change > 0) {
