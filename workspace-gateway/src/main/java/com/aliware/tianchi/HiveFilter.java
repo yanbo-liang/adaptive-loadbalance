@@ -40,7 +40,7 @@ public class HiveFilter implements Filter {
                 if (x == 0) {
                     return rtt;
                 } else {
-                    return (long) (x * 0.8 + rtt * 0.2);
+                    return (long) (x * 0.7 + rtt * 0.3);
                 }
             });
         }
