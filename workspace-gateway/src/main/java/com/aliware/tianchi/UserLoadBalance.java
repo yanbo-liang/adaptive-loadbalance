@@ -37,14 +37,10 @@ public class UserLoadBalance implements LoadBalance {
                 try {
                     semaphore.acquire(100);
                     hiveInvokerInfo.exhausted = false;
-                    hiveInvokerInfo.weight.updateAndGet(x -> {
-                        if (x - 5 > 0) {
-                            return x - 5;
-                        } else {
-                            return x;
-                        }
-                    });
-                    distributeWeight(5, invokers.stream().filter(x -> x != invoker).collect(Collectors.toList()), true);
+                    if (hiveInvokerInfo.weight - 5 > 0) {
+                        hiveInvokerInfo.weight -= 5;
+                        distributeWeight(5, invokers.stream().filter(x -> x != invoker).collect(Collectors.toList()), true);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -59,7 +55,7 @@ public class UserLoadBalance implements LoadBalance {
             int[] section = new int[invokers.size()];
             int totalWeight = 0;
             for (int i = 0; i < invokers.size(); i++) {
-                int weight = infoMap.get(invokers.get(i).getUrl()).weight.get();
+                int weight = infoMap.get(invokers.get(i).getUrl()).weight;
                 totalWeight += weight;
                 section[i] = totalWeight;
             }
@@ -84,9 +80,9 @@ public class UserLoadBalance implements LoadBalance {
                 if (weight > 0) {
                     HiveInvokerInfo hiveInvokerInfo = infoMap.get(invoker.getUrl());
                     if (add) {
-                        hiveInvokerInfo.weight.incrementAndGet();
+                        hiveInvokerInfo.weight += 1;
                     } else {
-                        hiveInvokerInfo.weight.decrementAndGet();
+                        hiveInvokerInfo.weight -= 1;
                     }
                     weight -= 1;
                 }
