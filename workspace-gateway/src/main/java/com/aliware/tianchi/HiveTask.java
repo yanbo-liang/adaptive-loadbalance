@@ -13,10 +13,10 @@ public class HiveTask implements Runnable {
 
     @Override
     public void run() {
-        Semaphore rttSemaphore = HiveFilter.rttSemaphore;
+//        Semaphore rttSemaphore = HiveFilter.rttSemaphore;
         while (true) {
             try {
-                rttSemaphore.acquire(100);
+//                rttSemaphore.acquire(100);
                 UserLoadBalance.infoMap.forEach((k, v) -> {
                     v.averageRtt = Long.MAX_VALUE;
                     if (v.totalRequest.get() != 0) {
@@ -28,7 +28,7 @@ public class HiveTask implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                rttSemaphore.release(100);
+//                rttSemaphore.release(100);
             }
             System.out.println();
 
