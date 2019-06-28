@@ -30,12 +30,12 @@ public class HiveTask implements Runnable {
             } finally {
 //                rttSemaphore.release(100);
             }
-            System.out.println();
-
-            UserLoadBalance.infoMap.forEach((k, v) -> {
-                System.out.println(v);
-
-            });
+//            System.out.println();
+//
+//            UserLoadBalance.infoMap.forEach((k, v) -> {
+//                System.out.println(v);
+//
+//            });
             try {
                 Thread.sleep(1000);
             } catch (Exception e) {
