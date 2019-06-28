@@ -31,10 +31,10 @@ public class CallbackServiceImpl implements CallbackService {
                     for (Map.Entry<String, CallbackListener> entry : listeners.entrySet()) {
                         try {
                             DataStore defaultExtension = ExtensionLoader.getExtensionLoader(DataStore.class).getDefaultExtension();
-                            Map<String,Object> map = defaultExtension.get(Constants.EXECUTOR_SERVICE_COMPONENT_KEY);
+                            Map<String, Object> map = defaultExtension.get(Constants.EXECUTOR_SERVICE_COMPONENT_KEY);
                             Object port = new ArrayList<>(map.keySet()).get(0);
                             ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) map.get(port);
-                            entry.getValue().receiveServerMsg(System.getProperty("quota") + threadPoolExecutor.getMaximumPoolSize());
+                            entry.getValue().receiveServerMsg(System.getProperty("quota") + "-" + threadPoolExecutor.getMaximumPoolSize());
                         } catch (Throwable t1) {
                             t1.printStackTrace();
                             listeners.remove(entry.getKey());
@@ -42,7 +42,7 @@ public class CallbackServiceImpl implements CallbackService {
                     }
                 }
             }
-        }, 0, 5000);
+        }, 0, 1000);
     }
 
     private Timer timer = new Timer();

@@ -18,7 +18,6 @@ public class HiveTask implements Runnable {
             try {
                 rttSemaphore.acquire(500);
                 UserLoadBalance.infoMap.forEach((k, v) -> {
-                    v.rttWeight = 0;
                     v.averageRtt = Long.MAX_VALUE;
                     if (v.totalRequest.get() != 0) {
                         v.averageRtt = v.totalRtt.get() / v.totalRequest.get();
@@ -26,28 +25,11 @@ public class HiveTask implements Runnable {
                     v.totalRtt.updateAndGet(x -> 0);
                     v.totalRequest.updateAndGet(x -> 0);
                 });
-
-                List<HiveInvokerInfo> sortedInfo = UserLoadBalance.infoMap.values().stream()
-                        .sorted(Comparator.comparingLong(x -> x.averageRtt)).collect(Collectors.toList());
-                if (sortedInfo.size() > 1) {
-                    int change = 20;
-                    sortedInfo.get(0).rttWeight += change;
-                    while (change > 0) {
-                        for (int i = 1; i < sortedInfo.size(); i++) {
-                            if (change > 0) {
-                                change -= 1;
-                                sortedInfo.get(i).rttWeight -= 1;
-                            }
-                        }
-                    }
-                }
-                System.out.println(sortedInfo);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 rttSemaphore.release(500);
             }
-
             try {
                 Thread.sleep(500);
             } catch (Exception e) {
