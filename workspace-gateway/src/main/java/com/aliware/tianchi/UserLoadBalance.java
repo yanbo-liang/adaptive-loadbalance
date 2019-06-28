@@ -17,18 +17,13 @@ import java.util.stream.Collectors;
 public class UserLoadBalance implements LoadBalance {
     private static final AtomicBoolean inited = new AtomicBoolean(false);
 
-    public static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
-    Semaphore semaphore = new Semaphore(100);
+    static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
+    private static final Semaphore semaphore = new Semaphore(100);
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-        if (!inited.get()) {
-            if (inited.compareAndSet(false, true)) {
-                for (Invoker<T> invoker : invokers) {
-                    infoMap.put(invoker.getUrl(), new HiveInvokerInfo());
-                }
-            }
-        }
+
+        init(invokers);
 
         for (Invoker<T> invoker : invokers) {
             HiveInvokerInfo hiveInvokerInfo = infoMap.get(invoker.getUrl());
@@ -36,16 +31,15 @@ public class UserLoadBalance implements LoadBalance {
                 try {
                     semaphore.acquire(100);
                     hiveInvokerInfo.exhausted = false;
-                    if (hiveInvokerInfo.weight - 5 > 0) {
-                        hiveInvokerInfo.weight -= 5;
-                        distributeWeight(5, invokers.stream().filter(x -> x != invoker).collect(Collectors.toList()), true);
+                    if (hiveInvokerInfo.weight - 3 > 0) {
+                        hiveInvokerInfo.weight -= 3;
+                        distributeWeight(3, invokers.stream().filter(x -> x != invoker).collect(Collectors.toList()), true);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
                     semaphore.release(100);
                 }
-
             }
         }
 
@@ -65,7 +59,7 @@ public class UserLoadBalance implements LoadBalance {
                     minIndex = i;
                 }
             }
-            int change = 25;
+            int change = 15;
             weightArray[minIndex] += change;
 
             while (change > 0) {
@@ -104,6 +98,16 @@ public class UserLoadBalance implements LoadBalance {
 
                 Error("should not happen");
 
+    }
+
+    private <T> void init(List<Invoker<T>> invokers) {
+        if (!inited.get()) {
+            if (inited.compareAndSet(false, true)) {
+                for (Invoker<T> invoker : invokers) {
+                    infoMap.put(invoker.getUrl(), new HiveInvokerInfo());
+                }
+            }
+        }
     }
 
     private void distributeWeight(int weight, List<Invoker> targets, boolean add) {
