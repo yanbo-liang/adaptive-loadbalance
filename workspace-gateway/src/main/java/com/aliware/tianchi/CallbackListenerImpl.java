@@ -15,13 +15,16 @@ public class CallbackListenerImpl implements CallbackListener {
     @Override
     public void receiveServerMsg(String msg) {
         int index = msg.indexOf('-');
-        String name = msg.substring(0, index);
-        long maxRequest = Long.valueOf(msg.substring(index + 1));
-        UserLoadBalance.infoMap.forEach((k, v) -> {
-            if (v.name.equals(name)) {
-                v.maxRequest = maxRequest;
-            }
-        });
+        if (index != -1) {
+            String name = msg.substring(0, index);
+            long maxRequest = Long.valueOf(msg.substring(index + 1));
+            UserLoadBalance.infoMap.forEach((k, v) -> {
+                if (v.name.equals(name)) {
+                    v.maxRequest = maxRequest;
+                }
+            });
+        }
+
         System.out.println("receive msg from server :" + msg);
     }
 }

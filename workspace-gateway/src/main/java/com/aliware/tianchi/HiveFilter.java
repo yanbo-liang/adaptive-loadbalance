@@ -17,10 +17,14 @@ public class HiveFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         try {
-            UserLoadBalance.infoMap.get(invoker.getUrl()).currentRequest.incrementAndGet();
-            rttMap.put(invocation, System.currentTimeMillis());
+            HiveInvokerInfo hiveInvokerInfo = UserLoadBalance.infoMap.get(invoker.getUrl());
+            if (hiveInvokerInfo != null) {
+                hiveInvokerInfo.currentRequest.incrementAndGet();
+                rttMap.put(invocation, System.currentTimeMillis());
+            }
             return invoker.invoke(invocation);
         } catch (Exception e) {
+            e.printStackTrace();
             throw e;
         }
     }
