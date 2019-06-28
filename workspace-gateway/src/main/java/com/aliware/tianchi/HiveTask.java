@@ -18,7 +18,7 @@ public class HiveTask implements Runnable {
             try {
 //                rttSemaphore.acquire(100);
                 UserLoadBalance.infoMap.forEach((k, v) -> {
-                    v.averageRtt = Long.MAX_VALUE;
+//                    v.averageRtt = Long.MAX_VALUE;
                     if (v.totalRequest.get() != 0) {
                         v.averageRtt = v.totalRtt.get() / v.totalRequest.get();
                     }
