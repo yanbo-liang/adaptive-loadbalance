@@ -156,21 +156,21 @@
 //
 //
 ////
-////            AtomicLong invokerRtt = invokerRttMap.get(key);
-////            if (invokerRtt == null) {
+////            AtomicLong averageRtt = invokerRttMap.get(key);
+////            if (averageRtt == null) {
 ////                synchronized (TestClientFilter.class) {
 ////                    if (invokerRttMap.get(key) == null) {
 ////                        invokerRttMap.put(key, new AtomicLong(tmp));
 ////                    }
 ////                }
 ////            } else {
-////                long a = invokerRtt.get();
+////                long a = averageRtt.get();
 ////                if (tmp > a * 1.5) {
 ////                    blockMap.get(key).updateAndGet(x -> x + 1);
 ////                } else {
 ////
 ////                }
-////                invokerRtt.accumulateAndGet(tmp, (old, param) -> (long) (0.8 * old + 0.2 * param));
+////                averageRtt.accumulateAndGet(tmp, (old, param) -> (long) (0.8 * old + 0.2 * param));
 ////            }
 ////
 //        }catch (Exception e){

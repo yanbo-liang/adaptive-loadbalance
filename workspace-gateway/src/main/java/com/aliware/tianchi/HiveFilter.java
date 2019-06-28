@@ -6,16 +6,18 @@ import org.apache.dubbo.rpc.*;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Semaphore;
 
 @Activate(group = Constants.CONSUMER)
 public class HiveFilter implements Filter {
-    public static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(1024, ConcurrentReferenceHashMap.ReferenceType.WEAK);
+    static final Semaphore rttSemaphore = new Semaphore(500, true);
+
+    static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(1024, ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         try {
             rttMap.put(invocation, System.currentTimeMillis());
-
             return invoker.invoke(invocation);
         } catch (Exception e) {
             throw e;
@@ -36,13 +38,15 @@ public class HiveFilter implements Filter {
         if (start != null) {
             long rtt = System.currentTimeMillis() - start;
             HiveInvokerInfo hiveInvokerInfo = UserLoadBalance.infoMap.get(invoker.getUrl());
-            hiveInvokerInfo.rtt.updateAndGet(x -> {
-                if (x == 0) {
-                    return rtt;
-                } else {
-                    return (long) (x * 0.3 + rtt * 0.8);
-                }
-            });
+            try {
+                rttSemaphore.acquire();
+                hiveInvokerInfo.totalRtt.updateAndGet(x -> x + rtt);
+                hiveInvokerInfo.totalRequest.incrementAndGet();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                rttSemaphore.release();
+            }
         }
         return result;
     }

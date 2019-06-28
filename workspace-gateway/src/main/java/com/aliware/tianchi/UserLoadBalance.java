@@ -7,14 +7,13 @@ import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.cluster.LoadBalance;
 
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class UserLoadBalance implements LoadBalance {
+    private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
     private static final AtomicBoolean inited = new AtomicBoolean(false);
 
     static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
@@ -43,35 +42,14 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
 
-
         try {
             semaphore.acquire();
             int[] weightArray = new int[invokers.size()];
-            long min = Long.MAX_VALUE;
-            int minIndex = 0;
+
             for (int i = 0; i < invokers.size(); i++) {
                 HiveInvokerInfo hiveInvokerInfo = infoMap.get(invokers.get(i).getUrl());
-                weightArray[i] = hiveInvokerInfo.weight;
+                weightArray[i] = hiveInvokerInfo.weight + hiveInvokerInfo.rttWeight;
 
-                long rtt = hiveInvokerInfo.rtt.get();
-                if (rtt < min) {
-                    min = rtt;
-                    minIndex = i;
-                }
-            }
-
-            int change = 25;
-            weightArray[minIndex] += change;
-
-            while (change > 0) {
-                for (int i = 0; i < invokers.size(); i++) {
-                    if (change > 0) {
-                        if (i != minIndex) {
-                            weightArray[i] -= 1;
-                            change -= 1;
-                        }
-                    }
-                }
             }
 
             int[] section = new int[invokers.size()];
@@ -108,6 +86,8 @@ public class UserLoadBalance implements LoadBalance {
                 for (Invoker<T> invoker : invokers) {
                     infoMap.put(invoker.getUrl(), new HiveInvokerInfo());
                 }
+                HiveTask hiveTask = new HiveTask();
+                executorService.execute(hiveTask);
             }
         }
     }
