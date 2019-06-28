@@ -25,7 +25,7 @@ public class UserLoadBalance implements LoadBalance {
                 .collect(Collectors.toList());
 
         for (HiveInvokerInfo info : sortedInfo) {
-            if (info.currentRequest.get() < (long) (info.maxRequest )) {
+            if (info.currentRequest.get() < (long) (info.maxRequest*1.2 )) {
                 return info.invoker;
             }
         }
