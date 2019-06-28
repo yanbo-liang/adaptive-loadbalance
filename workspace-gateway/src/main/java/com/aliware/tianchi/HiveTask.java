@@ -31,7 +31,7 @@ public class HiveTask implements Runnable {
                 rttSemaphore.release(500);
             }
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (Exception e) {
                 e.printStackTrace();
             }
