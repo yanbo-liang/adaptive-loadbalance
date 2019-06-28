@@ -67,16 +67,13 @@ public class UserLoadBalance implements LoadBalance {
                     return invokers.get(i);
                 }
             }
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             semaphore.release();
         }
 
-        throw new
-
-                Error("should not happen");
+        throw new Error("should not happen");
 
     }
 

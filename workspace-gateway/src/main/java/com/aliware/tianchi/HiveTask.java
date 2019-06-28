@@ -30,7 +30,7 @@ public class HiveTask implements Runnable {
                 List<HiveInvokerInfo> sortedInfo = UserLoadBalance.infoMap.values().stream()
                         .sorted(Comparator.comparingLong(x -> x.averageRtt)).collect(Collectors.toList());
                 if (sortedInfo.size() > 1) {
-                    int change = 25;
+                    int change = 20;
                     sortedInfo.get(0).rttWeight += change;
                     while (change > 0) {
                         for (int i = 1; i < sortedInfo.size(); i++) {
@@ -49,7 +49,7 @@ public class HiveTask implements Runnable {
             }
 
             try {
-                Thread.sleep(2000);
+                Thread.sleep(500);
             } catch (Exception e) {
                 e.printStackTrace();
             }
