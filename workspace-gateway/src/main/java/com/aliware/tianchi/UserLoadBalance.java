@@ -59,19 +59,21 @@ public class UserLoadBalance implements LoadBalance {
                     minIndex = i;
                 }
             }
-            int change = 25;
-            weightArray[minIndex] += change;
 
-            while (change > 0) {
-                for (int i = 0; i < invokers.size(); i++) {
-                    if (change > 0) {
-                        if (i != minIndex) {
-                            weightArray[i] -= 1;
-                            change -= 1;
-                        }
-                    }
-                }
-            }
+//            int change = 25;
+//            weightArray[minIndex] += change;
+//
+//            while (change > 0) {
+//                for (int i = 0; i < invokers.size(); i++) {
+//                    if (change > 0) {
+//                        if (i != minIndex) {
+//                            weightArray[i] -= 1;
+//                            change -= 1;
+//                        }
+//                    }
+//                }
+//            }
+
             int[] section = new int[invokers.size()];
             int totalWeight = 0;
             for (int i = 0; i < invokers.size(); i++) {

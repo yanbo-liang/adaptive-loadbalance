@@ -7,4 +7,5 @@ public class HiveInvokerInfo {
     int weight = 100;
     AtomicLong rtt = new AtomicLong(0);
     volatile boolean exhausted = false;
+    AtomicLong lastChangeTime = new AtomicLong(0);
 }
