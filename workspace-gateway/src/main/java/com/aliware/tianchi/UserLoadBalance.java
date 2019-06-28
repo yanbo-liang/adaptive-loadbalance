@@ -24,12 +24,44 @@ public class UserLoadBalance implements LoadBalance {
                 .sorted(Comparator.comparingLong(x -> x.averageRtt))
                 .collect(Collectors.toList());
 
-        for (HiveInvokerInfo info : sortedInfo) {
-            if (info.currentRequest.get() < (long) (info.maxRequest *0.85)) {
-                return info.invoker;
+        int[] weightArray = new int[sortedInfo.size()];
+        int subWeight = sortedInfo.size();
+        for (int i = 0; i < sortedInfo.size(); i++) {
+            long max = sortedInfo.get(i).maxRequest;
+            if (max == -1) {
+                weightArray[i] = 100;
+            } else {
+                weightArray[i] = (int) max * (subWeight - i);
             }
         }
-        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+
+        int[] section = new int[sortedInfo.size()];
+        int totalWeight = 0;
+        for (int i = 0; i < sortedInfo.size(); i++) {
+            int weight = weightArray[i];
+            totalWeight += weight;
+            section[i] = totalWeight;
+        }
+
+        HiveInvokerInfo targetInfo = null;
+        int random = ThreadLocalRandom.current().nextInt(totalWeight);
+        for (int i = 0; i < section.length; i++) {
+            if (random < section[i]) {
+                targetInfo = sortedInfo.get(i);
+
+            }
+        }
+        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
+            return targetInfo.invoker;
+        } else {
+            for (int i = 0; i < invokers.size(); i++) {
+                HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
+                if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+                    return hiveInvokerInfo.invoker;
+                }
+            }
+            return invokers.get(0);
+        }
     }
 
     private <T> void init(List<Invoker<T>> invokers) {
