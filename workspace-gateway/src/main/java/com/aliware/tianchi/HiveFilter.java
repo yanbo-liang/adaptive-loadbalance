@@ -10,7 +10,7 @@ import java.util.concurrent.Semaphore;
 
 @Activate(group = Constants.CONSUMER)
 public class HiveFilter implements Filter {
-    static final Semaphore rttSemaphore = new Semaphore(500, true);
+    static final Semaphore rttSemaphore = new Semaphore(100, true);
 
     static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(2048, ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
