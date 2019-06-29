@@ -31,8 +31,8 @@ public class UserLoadBalance implements LoadBalance {
             if (max == -1) {
                 return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
             } else {
-//                weightArray[i] = (int) max * (subWeight - i);
-                weightArray[i] = subWeight - i;
+                weightArray[i] = (int) max * (subWeight - i);
+//                weightArray[i] = subWeight - i;
 
             }
         }
