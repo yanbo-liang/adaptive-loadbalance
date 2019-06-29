@@ -49,22 +49,22 @@ public class UserLoadBalance implements LoadBalance {
         int random = ThreadLocalRandom.current().nextInt(totalWeight);
         for (int i = 0; i < section.length; i++) {
             if (random < section[i]) {
-//                targetInfo = sortedInfo.get(i);
-                return sortedInfo.get(i).invoker;
+                targetInfo = sortedInfo.get(i);
+//                return sortedInfo.get(i).invoker;
             }
         }
-//        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
-//            return targetInfo.invoker;
-//        } else {
-//            for (int i = 0; i < invokers.size(); i++) {
-//                HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-//                if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
-//                    return hiveInvokerInfo.invoker;
-//                }
-//            }
-//            return invokers.get(0);
-//        }
-        return invokers.get(0);
+        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
+            return targetInfo.invoker;
+        } else {
+            for (int i = 0; i < invokers.size(); i++) {
+                HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
+                if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+                    return hiveInvokerInfo.invoker;
+                }
+            }
+            return invokers.get(0);
+        }
+//        return invokers.get(0);
 
     }
 
