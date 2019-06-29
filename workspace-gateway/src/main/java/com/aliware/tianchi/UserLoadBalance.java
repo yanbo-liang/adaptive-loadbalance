@@ -31,7 +31,9 @@ public class UserLoadBalance implements LoadBalance {
             if (max == -1) {
                 weightArray[i] = 100;
             } else {
-                weightArray[i] = (int) max * (subWeight - i);
+//                weightArray[i] = (int) max * (subWeight - i);
+                weightArray[i] = subWeight - i;
+
             }
         }
 
@@ -62,7 +64,7 @@ public class UserLoadBalance implements LoadBalance {
 //            }
 //            return invokers.get(0);
 //        }
-                    return invokers.get(0);
+        return invokers.get(0);
 
     }
 
