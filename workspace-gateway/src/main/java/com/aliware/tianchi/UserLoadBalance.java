@@ -62,7 +62,7 @@ public class UserLoadBalance implements LoadBalance {
                     return hiveInvokerInfo.invoker;
                 }
             }
-            return invokers.get(0);
+            return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
         }
 //        return invokers.get(0);
 
