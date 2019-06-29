@@ -5,6 +5,8 @@ import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.cluster.LoadBalance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
 import java.util.List;
@@ -16,6 +18,7 @@ public class UserLoadBalance implements LoadBalance {
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private static final AtomicBoolean inited = new AtomicBoolean(false);
     static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(UserLoadBalance.class);
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
@@ -26,14 +29,15 @@ public class UserLoadBalance implements LoadBalance {
 
         int[] weightArray = new int[sortedInfo.size()];
         int subWeight = sortedInfo.size();
+//        System.out.println();
+
         for (int i = 0; i < sortedInfo.size(); i++) {
             long max = sortedInfo.get(i).maxRequest;
             if (max == -1) {
                 return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
             } else {
-                weightArray[i] = (int) max * (subWeight - i);
-//                weightArray[i] = subWeight - i;
-
+                weightArray[i] = subWeight - i;
+//                System.out.println(weightArray[i]);
             }
         }
 
