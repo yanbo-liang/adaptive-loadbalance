@@ -31,8 +31,8 @@ public class UserLoadBalance implements LoadBalance {
             if (max == -1) {
                 weightArray[i] = 100;
             } else {
-//                weightArray[i] = (int) max * (subWeight - i);
-                weightArray[i] = subWeight - i;
+                weightArray[i] = (int) max * (subWeight - i);
+//                weightArray[i] = subWeight - i;
 
             }
         }
@@ -53,12 +53,12 @@ public class UserLoadBalance implements LoadBalance {
 //                return sortedInfo.get(i).invoker;
             }
         }
-        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest*0.95)) {
+        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest*0.9)) {
             return targetInfo.invoker;
         } else {
             for (int i = 0; i < invokers.size(); i++) {
                 HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-                if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest*0.95)) {
+                if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest*0.9)) {
                     return hiveInvokerInfo.invoker;
                 }
             }
