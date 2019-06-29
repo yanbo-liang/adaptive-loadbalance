@@ -53,12 +53,12 @@ public class UserLoadBalance implements LoadBalance {
 //                return sortedInfo.get(i).invoker;
             }
         }
-        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
+        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest*0.9)) {
             return targetInfo.invoker;
         } else {
             for (int i = 0; i < invokers.size(); i++) {
                 HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-                if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+                if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest*0.9)) {
                     return hiveInvokerInfo.invoker;
                 }
             }
