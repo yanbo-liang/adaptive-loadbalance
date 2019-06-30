@@ -77,25 +77,25 @@ public class UserLoadBalance implements LoadBalance {
 //                System.out.println(averaverageRttCache+ "  "+ targetInfo.averageRttCache * 1.1);
                 if (averaverageRttCache < targetInfo.averageRtt * 1.05) {
 
-                    targetInfo.averageRttCache=averaverageRttCache;
+                    targetInfo.averageRttCache = averaverageRttCache;
 
                     return targetInfo.invoker;
                 }
             }
-            targetInfo.averageRttCache=averaverageRttCache;
-
-        } else {
-            for (int i = 0; i < invokers.size(); i++) {
-                HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-                if (hiveInvokerInfo==targetInfo){
-                    continue;
-                }
-                if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
-                    return hiveInvokerInfo.invoker;
-                }
-            }
+            targetInfo.averageRttCache = averaverageRttCache;
 
         }
+        for (int i = 0; i < invokers.size(); i++) {
+            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
+            if (hiveInvokerInfo == targetInfo) {
+                continue;
+            }
+            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+                return hiveInvokerInfo.invoker;
+            }
+        }
+
+
         return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 
