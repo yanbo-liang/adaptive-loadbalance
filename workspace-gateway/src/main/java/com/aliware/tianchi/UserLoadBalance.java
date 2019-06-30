@@ -23,25 +23,25 @@ public class UserLoadBalance implements LoadBalance {
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
         init(invokers);
-//        List<HiveInvokerInfo> sortedInfo = infoMap.values().stream()
-//                .sorted(Comparator.comparingLong(x -> x.averageRtt))
-//                .collect(Collectors.toList());
-//
-//        for (HiveInvokerInfo info : sortedInfo) {
-//            long l = averageRttCache(info);
-//            if (info.currentRequest.get() < info.maxRequest) {
-//                if (info.averageRtt != Long.MAX_VALUE) {
-//                    if (l < info.averageRtt * 1.3) {
-//                        info.averageRttCache = l;
-//                        return info.invoker;
-//                    } else {
-////                        System.out.println(l + "  " + info.averageRttCache * 1.1);
-//
-//                    }
-//                }
-//            }
-//            info.averageRttCache = l;
-//        }
+        List<HiveInvokerInfo> sortedInfo = infoMap.values().stream()
+                .sorted(Comparator.comparingLong(x -> x.averageRtt))
+                .collect(Collectors.toList());
+
+        for (HiveInvokerInfo info : sortedInfo) {
+            long l = averageRttCache(info);
+            if (info.currentRequest.get() < info.maxRequest) {
+                if (info.averageRtt != Long.MAX_VALUE) {
+                    if (l < info.averageRtt * 1.3) {
+                        info.averageRttCache = l;
+                        return info.invoker;
+                    } else {
+//                        System.out.println(l + "  " + info.averageRttCache * 1.1);
+
+                    }
+                }
+            }
+            info.averageRttCache = l;
+        }
 
 
 //        int[] weightArray = new int[sortedInfo.size()];
