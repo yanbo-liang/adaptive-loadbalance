@@ -37,27 +37,23 @@ public class UserLoadBalance implements LoadBalance {
 //
 //            }
 //        }
-
+//
         List<HiveInvokerInfo> sortedInfo = HiveTask.sortedInfo;
+        if (sortedInfo.size() == 0) {
+            return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+        }
+
+
         int[] weightArray = new int[sortedInfo.size()];
         int subWeight = sortedInfo.size();
-        System.out.println();
-
         for (int i = 0; i < sortedInfo.size(); i++) {
-            long max = sortedInfo.get(i).maxRequest;
-            if (max == -1) {
-                return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-            } else {
-                weightArray[i] = subWeight - i;
-//                System.out.println(weightArray[i]);
-            }
+            weightArray[i] = subWeight - i;
         }
 
         int[] section = new int[sortedInfo.size()];
         int totalWeight = 0;
         for (int i = 0; i < sortedInfo.size(); i++) {
-            int weight = weightArray[i];
-            totalWeight += weight;
+            totalWeight += weightArray[i];
             section[i] = totalWeight;
         }
 
@@ -66,8 +62,8 @@ public class UserLoadBalance implements LoadBalance {
         for (int i = 0; i < section.length; i++) {
             if (random < section[i]) {
                 targetInfo = sortedInfo.get(i);
-//                break;
-                return sortedInfo.get(i).invoker;
+                break;
+//                return sortedInfo.get(i).invoker;
             }
         }
 //        long averaverageRttCache = averageRttCache(targetInfo);
@@ -80,7 +76,7 @@ public class UserLoadBalance implements LoadBalance {
 //
 //                    targetInfo.averageRttCache = averaverageRttCache;
 
-                    return targetInfo.invoker;
+            return targetInfo.invoker;
 //                }
 //            }
 //            targetInfo.averageRttCache = averaverageRttCache;
@@ -88,9 +84,9 @@ public class UserLoadBalance implements LoadBalance {
         }
         for (int i = 0; i < invokers.size(); i++) {
             HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-//            if (hiveInvokerInfo == targetInfo) {
-//                continue;
-//            }
+            if (hiveInvokerInfo == targetInfo) {
+                continue;
+            }
             if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
                 return hiveInvokerInfo.invoker;
             }
