@@ -47,10 +47,10 @@ public class UserLoadBalance implements LoadBalance {
         int[] weightArray = new int[sortedInfo.size()];
         int subWeight = sortedInfo.size();
         for (int i = 0; i < sortedInfo.size(); i++) {
-            if (sortedInfo.get(i).maxRequest==-1){
+            if (sortedInfo.get(i).maxRequest == -1) {
                 return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
             }
-            weightArray[i] = (int)sortedInfo.get(i).maxRequest * (subWeight - i);
+            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
 //            weightArray[i] = subWeight - i;
         }
 
@@ -74,7 +74,7 @@ public class UserLoadBalance implements LoadBalance {
             long l = averageRttCache(targetInfo);
 
             if (targetInfo.averageRttCache != -1) {
-                if (l < targetInfo.averageRttCache) {
+                if (l < targetInfo.averageRttCache*1.05) {
                     targetInfo.averageRttCache = l;
                     return targetInfo.invoker;
                 }
@@ -87,32 +87,39 @@ public class UserLoadBalance implements LoadBalance {
             if (hiveInvokerInfo == targetInfo) {
                 continue;
             }
+            long l = averageRttCache(targetInfo);
             if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
-                return hiveInvokerInfo.invoker;
-            }
-        }
 
+                if (targetInfo.averageRttCache != -1) {
+                    if (l < targetInfo.averageRttCache*1.05) {
+                        return hiveInvokerInfo.invoker;
 
-        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-    }
-
-    private <T> void init(List<Invoker<T>> invokers) {
-        if (!inited.get()) {
-            if (inited.compareAndSet(false, true)) {
-                for (Invoker<T> invoker : invokers) {
-                    infoMap.put(invoker.getUrl(), new HiveInvokerInfo(invoker));
+                    }
                 }
-                HiveTask hiveTask = new HiveTask();
-                executorService.execute(hiveTask);
+                }
+            }
+
+
+            return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+        }
+
+        private <T > void init (List < Invoker < T >> invokers) {
+            if (!inited.get()) {
+                if (inited.compareAndSet(false, true)) {
+                    for (Invoker<T> invoker : invokers) {
+                        infoMap.put(invoker.getUrl(), new HiveInvokerInfo(invoker));
+                    }
+                    HiveTask hiveTask = new HiveTask();
+                    executorService.execute(hiveTask);
+                }
             }
         }
-    }
 
-    private long averageRttCache(HiveInvokerInfo hiveInvokerInfo) {
-        long total = 0;
-        for (int i = 0; i < hiveInvokerInfo.rttCache.length; i++) {
-            total += hiveInvokerInfo.rttCache[i];
+        private long averageRttCache (HiveInvokerInfo hiveInvokerInfo){
+            long total = 0;
+            for (int i = 0; i < hiveInvokerInfo.rttCache.length; i++) {
+                total += hiveInvokerInfo.rttCache[i];
+            }
+            return total / hiveInvokerInfo.rttCache.length;
         }
-        return total / hiveInvokerInfo.rttCache.length;
     }
-}
