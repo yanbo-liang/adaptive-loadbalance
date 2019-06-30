@@ -73,12 +73,11 @@ public class UserLoadBalance implements LoadBalance {
         if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
             long l = averageRttCache(targetInfo);
 
-            if (targetInfo.averageRttCache != -1) {
-                if (l < targetInfo.averageRttCache*200) {
-                    targetInfo.averageRttCache = l;
+//            if (targetInfo.averageRttCache != -1) {
+                if (l < targetInfo.averageRtt *1.1) {
                     return targetInfo.invoker;
                 }
-            }
+//            }
             targetInfo.averageRttCache = l;
 
         }
@@ -87,39 +86,32 @@ public class UserLoadBalance implements LoadBalance {
             if (hiveInvokerInfo == targetInfo) {
                 continue;
             }
-            long l = averageRttCache(targetInfo);
             if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
-
-                if (targetInfo.averageRttCache != -1) {
-                    if (l < targetInfo.averageRttCache*200) {
-                        return hiveInvokerInfo.invoker;
-
-                    }
-                }
-                }
-            }
-
-
-            return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-        }
-
-        private <T > void init (List < Invoker < T >> invokers) {
-            if (!inited.get()) {
-                if (inited.compareAndSet(false, true)) {
-                    for (Invoker<T> invoker : invokers) {
-                        infoMap.put(invoker.getUrl(), new HiveInvokerInfo(invoker));
-                    }
-                    HiveTask hiveTask = new HiveTask();
-                    executorService.execute(hiveTask);
-                }
+                return hiveInvokerInfo.invoker;
             }
         }
 
-        private long averageRttCache (HiveInvokerInfo hiveInvokerInfo){
-            long total = 0;
-            for (int i = 0; i < hiveInvokerInfo.rttCache.length; i++) {
-                total += hiveInvokerInfo.rttCache[i];
+
+        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+    }
+
+    private <T> void init(List<Invoker<T>> invokers) {
+        if (!inited.get()) {
+            if (inited.compareAndSet(false, true)) {
+                for (Invoker<T> invoker : invokers) {
+                    infoMap.put(invoker.getUrl(), new HiveInvokerInfo(invoker));
+                }
+                HiveTask hiveTask = new HiveTask();
+                executorService.execute(hiveTask);
             }
-            return total / hiveInvokerInfo.rttCache.length;
         }
     }
+
+    private long averageRttCache(HiveInvokerInfo hiveInvokerInfo) {
+        long total = 0;
+        for (int i = 0; i < hiveInvokerInfo.rttCache.length; i++) {
+            total += hiveInvokerInfo.rttCache[i];
+        }
+        return total / hiveInvokerInfo.rttCache.length;
+    }
+}
