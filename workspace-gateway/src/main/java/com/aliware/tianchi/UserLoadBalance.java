@@ -71,34 +71,33 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
 //        long averaverageRttCache = averageRttCache(targetInfo);
-//
-//        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
+
+        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
 //            long l = averageRttCache(targetInfo);
-//
+
 //            if (targetInfo.averageRttCache != -1) {
 //                if (averaverageRttCache < targetInfo.averageRttCache * 1.05) {
 //
 //                    targetInfo.averageRttCache = averaverageRttCache;
-//
-//                    return targetInfo.invoker;
+
+                    return targetInfo.invoker;
 //                }
 //            }
 //            targetInfo.averageRttCache = averaverageRttCache;
-//
-//        }
-//        for (int i = 0; i < invokers.size(); i++) {
-//            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
+
+        }
+        for (int i = 0; i < invokers.size(); i++) {
+            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
 //            if (hiveInvokerInfo == targetInfo) {
 //                continue;
 //            }
-//            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
-//                return hiveInvokerInfo.invoker;
-//            }
-//        }
-//
-//
-//        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-        throw new Error();
+            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+                return hiveInvokerInfo.invoker;
+            }
+        }
+
+
+        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 
     private <T> void init(List<Invoker<T>> invokers) {
