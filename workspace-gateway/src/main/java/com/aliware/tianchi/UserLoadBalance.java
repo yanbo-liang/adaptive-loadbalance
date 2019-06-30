@@ -70,7 +70,7 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
 
-        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest*0.8)) {
+        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
             long l = averageRttCache(targetInfo);
 
             if (targetInfo.averageRttCache != -1) {
@@ -87,7 +87,7 @@ public class UserLoadBalance implements LoadBalance {
             if (hiveInvokerInfo == targetInfo) {
                 continue;
             }
-            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest*0.8)) {
+            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
                 return hiveInvokerInfo.invoker;
             }
         }
