@@ -30,8 +30,8 @@ public class UserLoadBalance implements LoadBalance {
         for (HiveInvokerInfo info : sortedInfo) {
             long l = averageRttCache(info);
             if (info.currentRequest.get() < info.maxRequest) {
-                if (info.averageRttCache != -1) {
-                    if (l < info.averageRttCache *1.05) {
+                if (info.averageRtt != Long.MAX_VALUE) {
+                    if (l < info.averageRtt*1.1) {
                         info.averageRttCache = l;
                         return info.invoker;
                     }else{
