@@ -24,18 +24,18 @@ public class UserLoadBalance implements LoadBalance {
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
         init(invokers);
         for (HiveInvokerInfo info : HiveTask.sortedInfo) {
-            long l = averageRttCache(info);
             if (info.currentRequest.get() < info.maxRequest) {
-                    if (l <= info.averageRttCache ) {
+                long l = averageRttCache(info);
+                if (l <= info.averageRttCache ) {
                         info.averageRttCache = l;
                         return info.invoker;
                     } else {
 //                        System.out.println(l + "  " + info.averageRttCache * 1.1);
 
                     }
+                info.averageRttCache = l;
 
             }
-            info.averageRttCache = l;
         }
 
 
