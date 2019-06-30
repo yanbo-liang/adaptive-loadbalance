@@ -26,7 +26,7 @@ public class UserLoadBalance implements LoadBalance {
         for (HiveInvokerInfo info : HiveTask.sortedInfo) {
             long l = averageRttCache(info);
             if (info.currentRequest.get() < info.maxRequest) {
-                    if (l < info.averageRttCache * 1.03) {
+                    if (l <= info.averageRttCache ) {
                         info.averageRttCache = l;
                         return info.invoker;
                     } else {
