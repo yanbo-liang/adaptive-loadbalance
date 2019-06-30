@@ -66,15 +66,16 @@ public class UserLoadBalance implements LoadBalance {
         for (int i = 0; i < section.length; i++) {
             if (random < section[i]) {
                 targetInfo = sortedInfo.get(i);
+                break;
 //                return sortedInfo.get(i).invoker;
             }
         }
         long averaverageRttCache = averageRttCache(targetInfo);
 
         if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
-            if (targetInfo.averageRttCache != -1) {
+            if (targetInfo.averageRtt != Long.MAX_VALUE) {
 //                System.out.println(averaverageRttCache+ "  "+ targetInfo.averageRttCache * 1.1);
-                if (averaverageRttCache < targetInfo.averageRttCache * 1.05) {
+                if (averaverageRttCache < targetInfo.averageRtt * 1.05) {
 
                     targetInfo.averageRttCache=averaverageRttCache;
 
@@ -86,13 +87,13 @@ public class UserLoadBalance implements LoadBalance {
         } else {
             for (int i = 0; i < invokers.size(); i++) {
                 HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
+                if (hiveInvokerInfo==targetInfo){
+                    continue;
+                }
                 if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
-                    targetInfo.averageRttCache=averaverageRttCache;
-
                     return hiveInvokerInfo.invoker;
                 }
             }
-            targetInfo.averageRttCache=averaverageRttCache;
 
         }
         return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
