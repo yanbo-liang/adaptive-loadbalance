@@ -62,7 +62,7 @@ public class UserLoadBalance implements LoadBalance {
         if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
             if (targetInfo.averageRttCache != -1) {
 //                System.out.println(averaverageRttCache+ "  "+ targetInfo.averageRttCache * 1.1);
-                if (averaverageRttCache < targetInfo.averageRttCache * 1.1) {
+                if (averaverageRttCache < targetInfo.averageRttCache * 0.9) {
 
                     targetInfo.averageRttCache=averaverageRttCache;
 
