@@ -31,7 +31,7 @@ public class UserLoadBalance implements LoadBalance {
             long l = averageRttCache(info);
             if (info.currentRequest.get() < info.maxRequest) {
                 if (info.averageRttCache != -1) {
-                    if (l < info.averageRttCache ) {
+                    if (l < info.averageRttCache *1.05) {
                         info.averageRttCache = l;
                         return info.invoker;
                     }else{
