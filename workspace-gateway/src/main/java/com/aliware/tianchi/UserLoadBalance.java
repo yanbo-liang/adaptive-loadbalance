@@ -35,7 +35,7 @@ public class UserLoadBalance implements LoadBalance {
                         info.averageRttCache = l;
                         return info.invoker;
                     } else {
-                        System.out.println(l + "  " + info.averageRttCache * 1.1);
+//                        System.out.println(l + "  " + info.averageRttCache * 1.1);
 
                     }
                 }
