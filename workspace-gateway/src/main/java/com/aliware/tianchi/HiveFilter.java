@@ -7,12 +7,15 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Activate(group = Constants.CONSUMER)
 public class HiveFilter implements Filter {
     static final Semaphore rttSemaphore = new Semaphore(100, true);
 
     static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(2048, ConcurrentReferenceHashMap.ReferenceType.WEAK);
+
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
@@ -46,6 +49,14 @@ public class HiveFilter implements Filter {
                 } finally {
                     rttSemaphore.release();
                 }
+                int index = hiveInvokerInfo.rttCacheIndex.updateAndGet(x -> {
+                    if (x < 99) {
+                        return x + 1;
+                    } else {
+                        return 0;
+                    }
+                });
+                hiveInvokerInfo.rttCache[index] = rtt;
             }
         }
         return result;

@@ -57,18 +57,24 @@ public class UserLoadBalance implements LoadBalance {
 //                return sortedInfo.get(i).invoker;
             }
         }
-        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest * 0.8)) {
-            return targetInfo.invoker;
+        long averaverageRttCache = averageRttCache(targetInfo);
+        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
+            if (targetInfo.averageRttCache != -1) {
+                if (averaverageRttCache < targetInfo.averageRttCache * 1.3) {
+                    return targetInfo.invoker;
+                }
+            }
         } else {
             for (int i = 0; i < invokers.size(); i++) {
                 HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-                if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest * 0.8)) {
+                if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
                     return hiveInvokerInfo.invoker;
                 }
             }
             return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
         }
-//        return invokers.get(0);
+        targetInfo.averageRttCache=averaverageRttCache;
+        return invokers.get(0);
 
     }
 
@@ -82,5 +88,13 @@ public class UserLoadBalance implements LoadBalance {
                 executorService.execute(hiveTask);
             }
         }
+    }
+
+    private long averageRttCache(HiveInvokerInfo hiveInvokerInfo) {
+        long total = 0;
+        for (int i = 0; i < hiveInvokerInfo.rttCache.length; i++) {
+            total += hiveInvokerInfo.rttCache[i];
+        }
+        return total / hiveInvokerInfo.rttCache.length;
     }
 }

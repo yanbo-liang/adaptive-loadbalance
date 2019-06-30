@@ -2,6 +2,7 @@ package com.aliware.tianchi;
 
 import org.apache.dubbo.rpc.Invoker;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class HiveInvokerInfo {
@@ -15,6 +16,10 @@ public class HiveInvokerInfo {
     volatile String name;
     volatile Invoker invoker;
 
+
+    long[] rttCache = new long[100];
+    AtomicInteger rttCacheIndex = new AtomicInteger(-1);
+    long averageRttCache =-1;
     public HiveInvokerInfo(Invoker invoker) {
         String host = invoker.getUrl().getHost();
         int start = host.indexOf('-');
