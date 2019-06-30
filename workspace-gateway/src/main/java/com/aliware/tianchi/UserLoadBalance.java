@@ -71,11 +71,9 @@ public class UserLoadBalance implements LoadBalance {
                     return hiveInvokerInfo.invoker;
                 }
             }
-            return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
         }
         targetInfo.averageRttCache=averaverageRttCache;
-        return invokers.get(0);
-
+        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 
     private <T> void init(List<Invoker<T>> invokers) {
