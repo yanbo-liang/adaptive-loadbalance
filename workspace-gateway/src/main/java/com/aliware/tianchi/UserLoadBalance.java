@@ -66,38 +66,39 @@ public class UserLoadBalance implements LoadBalance {
         for (int i = 0; i < section.length; i++) {
             if (random < section[i]) {
                 targetInfo = sortedInfo.get(i);
-                break;
-//                return sortedInfo.get(i).invoker;
+//                break;
+                return sortedInfo.get(i).invoker;
             }
         }
-        long averaverageRttCache = averageRttCache(targetInfo);
-
-        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
-            long l = averageRttCache(targetInfo);
-
-            if (targetInfo.averageRttCache != -1) {
-                if (averaverageRttCache < targetInfo.averageRttCache * 1.05) {
-
-                    targetInfo.averageRttCache = averaverageRttCache;
-
-                    return targetInfo.invoker;
-                }
-            }
-            targetInfo.averageRttCache = averaverageRttCache;
-
-        }
-        for (int i = 0; i < invokers.size(); i++) {
-            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-            if (hiveInvokerInfo == targetInfo) {
-                continue;
-            }
-            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
-                return hiveInvokerInfo.invoker;
-            }
-        }
-
-
-        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+//        long averaverageRttCache = averageRttCache(targetInfo);
+//
+//        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
+//            long l = averageRttCache(targetInfo);
+//
+//            if (targetInfo.averageRttCache != -1) {
+//                if (averaverageRttCache < targetInfo.averageRttCache * 1.05) {
+//
+//                    targetInfo.averageRttCache = averaverageRttCache;
+//
+//                    return targetInfo.invoker;
+//                }
+//            }
+//            targetInfo.averageRttCache = averaverageRttCache;
+//
+//        }
+//        for (int i = 0; i < invokers.size(); i++) {
+//            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
+//            if (hiveInvokerInfo == targetInfo) {
+//                continue;
+//            }
+//            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+//                return hiveInvokerInfo.invoker;
+//            }
+//        }
+//
+//
+//        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+        throw new Error();
     }
 
     private <T> void init(List<Invoker<T>> invokers) {
