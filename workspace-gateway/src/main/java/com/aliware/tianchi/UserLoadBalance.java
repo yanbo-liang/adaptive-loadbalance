@@ -74,7 +74,7 @@ public class UserLoadBalance implements LoadBalance {
             long l = averageRttCache(targetInfo);
 
             if (targetInfo.averageRttCache != -1) {
-                if (l < targetInfo.averageRttCache*1.05) {
+                if (l < targetInfo.averageRttCache*2) {
                     targetInfo.averageRttCache = l;
                     return targetInfo.invoker;
                 }
@@ -91,7 +91,7 @@ public class UserLoadBalance implements LoadBalance {
             if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
 
                 if (targetInfo.averageRttCache != -1) {
-                    if (l < targetInfo.averageRttCache*1.05) {
+                    if (l < targetInfo.averageRttCache*2) {
                         return hiveInvokerInfo.invoker;
 
                     }
