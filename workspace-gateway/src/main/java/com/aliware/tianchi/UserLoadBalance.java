@@ -23,11 +23,9 @@ public class UserLoadBalance implements LoadBalance {
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
         init(invokers);
-        List<HiveInvokerInfo> sortedInfo = infoMap.values().stream()
-                .sorted(Comparator.comparingLong(x -> x.averageRtt))
-                .collect(Collectors.toList());
 
-        for (HiveInvokerInfo info : sortedInfo) {
+
+        for (HiveInvokerInfo info : HiveTask.sortedInfo) {
             long l = averageRttCache(info);
             if (info.currentRequest.get() < info.maxRequest) {
                 if (info.averageRtt != Long.MAX_VALUE) {
