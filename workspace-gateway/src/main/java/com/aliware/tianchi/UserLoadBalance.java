@@ -58,21 +58,31 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
         long averaverageRttCache = averageRttCache(targetInfo);
+
         if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
             if (targetInfo.averageRttCache != -1) {
+//                System.out.println(averaverageRttCache+ "  "+ targetInfo.averageRttCache * 1.1);
                 if (averaverageRttCache < targetInfo.averageRttCache * 1.1) {
+
+                    targetInfo.averageRttCache=averaverageRttCache;
+
                     return targetInfo.invoker;
                 }
             }
+            targetInfo.averageRttCache=averaverageRttCache;
+
         } else {
             for (int i = 0; i < invokers.size(); i++) {
                 HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
                 if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+                    targetInfo.averageRttCache=averaverageRttCache;
+
                     return hiveInvokerInfo.invoker;
                 }
             }
+            targetInfo.averageRttCache=averaverageRttCache;
+
         }
-        targetInfo.averageRttCache=averaverageRttCache;
         return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 
