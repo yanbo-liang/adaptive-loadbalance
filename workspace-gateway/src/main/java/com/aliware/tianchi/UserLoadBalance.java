@@ -71,15 +71,15 @@ public class UserLoadBalance implements LoadBalance {
         }
 
         if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest*0.8)) {
-//            long l = averageRttCache(targetInfo);
-//
-//            if (targetInfo.averageRttCache != -1) {
-//                if (l < targetInfo.averageRttCache * 1.15) {
-//                    targetInfo.averageRttCache = l;
+            long l = averageRttCache(targetInfo);
+
+            if (targetInfo.averageRttCache != -1) {
+                if (l < targetInfo.averageRttCache * 1.15) {
+                    targetInfo.averageRttCache = l;
                     return targetInfo.invoker;
-//                }
-//            }
-//            targetInfo.averageRttCache = l;
+                }
+            }
+            targetInfo.averageRttCache = l;
 
         }
         for (int i = 0; i < invokers.size(); i++) {
