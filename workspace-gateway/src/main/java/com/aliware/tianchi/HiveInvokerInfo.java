@@ -17,7 +17,7 @@ public class HiveInvokerInfo {
     volatile Invoker invoker;
 
 
-    long[] rttCache = new long[80];
+    long[] rttCache = new long[30];
     AtomicInteger rttCacheIndex = new AtomicInteger(-1);
     volatile long averageRttCache = -1;
 
