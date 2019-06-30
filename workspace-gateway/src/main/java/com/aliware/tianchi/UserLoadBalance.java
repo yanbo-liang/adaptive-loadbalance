@@ -70,16 +70,16 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
 
-        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
-            long l = averageRttCache(targetInfo);
-
-            if (targetInfo.averageRttCache != -1) {
-                if (l < targetInfo.averageRttCache * 1.15) {
-                    targetInfo.averageRttCache = l;
+        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest*0.8)) {
+//            long l = averageRttCache(targetInfo);
+//
+//            if (targetInfo.averageRttCache != -1) {
+//                if (l < targetInfo.averageRttCache * 1.15) {
+//                    targetInfo.averageRttCache = l;
                     return targetInfo.invoker;
-                }
-            }
-            targetInfo.averageRttCache = l;
+//                }
+//            }
+//            targetInfo.averageRttCache = l;
 
         }
         for (int i = 0; i < invokers.size(); i++) {
@@ -87,7 +87,7 @@ public class UserLoadBalance implements LoadBalance {
             if (hiveInvokerInfo == targetInfo) {
                 continue;
             }
-            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest*0.8)) {
                 return hiveInvokerInfo.invoker;
             }
         }
