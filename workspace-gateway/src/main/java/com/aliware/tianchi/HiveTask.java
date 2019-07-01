@@ -54,7 +54,7 @@ public class HiveTask implements Runnable {
 
             logger.info(stringBuilder.toString());
             try {
-                Thread.sleep(300);
+                Thread.sleep(50);
             } catch (Exception e) {
                 e.printStackTrace();
             }
