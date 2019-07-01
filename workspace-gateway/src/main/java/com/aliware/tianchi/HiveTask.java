@@ -21,9 +21,9 @@ public class HiveTask implements Runnable {
         Semaphore rttSemaphore = HiveFilter.rttSemaphore;
         while (true) {
             try {
-//                rttSemaphore.acquire(100);
+                rttSemaphore.acquire(100);
                 UserLoadBalance.infoMap.forEach((k, v) -> {
-//                    v.averageRtt = Long.MAX_VALUE;
+                    v.averageRtt = Long.MAX_VALUE;
                     if (v.totalRequest.get() != 0) {
                         v.averageRtt = v.totalRtt.get() / v.totalRequest.get();
                     }
@@ -33,7 +33,7 @@ public class HiveTask implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-//                rttSemaphore.release(100);
+                rttSemaphore.release(100);
             }
 
 
@@ -54,7 +54,7 @@ public class HiveTask implements Runnable {
 
             logger.info(stringBuilder.toString());
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (Exception e) {
                 e.printStackTrace();
             }
