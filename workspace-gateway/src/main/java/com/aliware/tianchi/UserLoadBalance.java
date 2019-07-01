@@ -41,8 +41,8 @@ public class UserLoadBalance implements LoadBalance {
         int[] weightArray = new int[sortedInfo.size()];
         int subWeight = sortedInfo.size();
         for (int i = 0; i < sortedInfo.size(); i++) {
-            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
-//            weightArray[i] = sortedInfo.size()-i;
+//            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
+            weightArray[i] = sortedInfo.size()-i;
         }
 
         HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
