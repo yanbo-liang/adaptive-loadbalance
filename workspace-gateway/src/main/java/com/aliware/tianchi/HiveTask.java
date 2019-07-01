@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class HiveTask implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(HiveTask.class);
     static List<HiveInvokerInfo> sortedInfo = Collections.EMPTY_LIST;
-
+int a = 0;
     @Override
     public void run() {
         Semaphore rttSemaphore = HiveFilter.rttSemaphore;
@@ -37,6 +37,17 @@ public class HiveTask implements Runnable {
             sortedInfo = UserLoadBalance.infoMap.values().stream()
                     .sorted(Comparator.comparingLong(x -> x.averageRtt))
                     .collect(Collectors.toList());
+
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(a++);
+            stringBuilder.append('-');
+            for (HiveInvokerInfo info : sortedInfo) {
+                stringBuilder.append(info.invoker.getUrl().getHost());
+                stringBuilder.append(':');
+                stringBuilder.append(info.averageRtt);
+            }
+
+            logger.info(stringBuilder.toString());
             try {
                 Thread.sleep(300);
             } catch (Exception e) {
