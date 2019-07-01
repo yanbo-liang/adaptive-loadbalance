@@ -54,42 +54,34 @@ public class UserLoadBalance implements LoadBalance {
 //            weightArray[i] = subWeight - i;
         }
 
-        int[] section = new int[sortedInfo.size()];
-        int totalWeight = 0;
-        for (int i = 0; i < sortedInfo.size(); i++) {
-            totalWeight += weightArray[i];
-            section[i] = totalWeight;
-        }
-
-        HiveInvokerInfo targetInfo = null;
-        int random = ThreadLocalRandom.current().nextInt(totalWeight);
-        for (int i = 0; i < section.length; i++) {
-            if (random < section[i]) {
-                targetInfo = sortedInfo.get(i);
-                break;
-            }
-        }
+        int index = pickByWeight(weightArray);
+        HiveInvokerInfo targetInfo = sortedInfo.get(index);
 
         if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
             long l = averageRttCache(targetInfo);
 
-//            if (targetInfo.averageRttCache != -1) {
-                if (l < targetInfo.averageRtt *2) {
-                    return targetInfo.invoker;
+            if (targetInfo.averageRttCache != -1) {
+                if (l < targetInfo.averageRttCache * 1.05) {
+                    targetInfo.averageRttCache = l;
+                    weightArray[index]=(int)targetInfo.maxRequest;
+                    return sortedInfo.get(pickByWeight(weightArray)).invoker;
                 }
-//            }
+            }
             targetInfo.averageRttCache = l;
 
         }
-        for (int i = 0; i < invokers.size(); i++) {
-            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-            if (hiveInvokerInfo == targetInfo) {
-                continue;
-            }
-            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
-                return hiveInvokerInfo.invoker;
-            }
-        }
+//        for (int i = 0; i < invokers.size(); i++) {
+//            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
+//            if (hiveInvokerInfo == targetInfo) {
+//                continue;
+//            }
+//            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+//
+//                return hiveInvokerInfo.invoker;
+//
+//
+//            }
+//        }
 
 
         return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
@@ -113,5 +105,22 @@ public class UserLoadBalance implements LoadBalance {
             total += hiveInvokerInfo.rttCache[i];
         }
         return total / hiveInvokerInfo.rttCache.length;
+    }
+
+    private int pickByWeight(int[] weightArray) {
+        int[] section = new int[weightArray.length];
+        int totalWeight = 0;
+        for (int i = 0; i < weightArray.length; i++) {
+            totalWeight += weightArray[i];
+            section[i] = totalWeight;
+        }
+
+        int random = ThreadLocalRandom.current().nextInt(totalWeight);
+        for (int i = 0; i < section.length; i++) {
+            if (random < section[i]) {
+                return i;
+            }
+        }
+        return 0;
     }
 }
