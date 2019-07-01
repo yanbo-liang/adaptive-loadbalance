@@ -70,7 +70,7 @@ public class UserLoadBalance implements LoadBalance {
         int index = pickByWeight(weightArray);
         HiveInvokerInfo a = sortedInfo.get(index);
 
-        if (a.currentRequest.get() < (long) (a.maxRequest*0.8)) {
+        if (a.currentRequest.get() < (long) (a.maxRequest*0.75)) {
             return a.invoker;
         }
         for (int i = 0; i < invokers.size(); i++) {
@@ -78,7 +78,7 @@ public class UserLoadBalance implements LoadBalance {
             if (hiveInvokerInfo == a) {
                 continue;
             }
-            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest*0.8)) {
+            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest*0.75)) {
 
                 return hiveInvokerInfo.invoker;
 
