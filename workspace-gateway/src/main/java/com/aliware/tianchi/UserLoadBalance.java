@@ -60,7 +60,7 @@ public class UserLoadBalance implements LoadBalance {
             long l = averageRttCache(targetInfo);
             if (targetInfo.averageRttCache != -1) {
                 if (l < targetInfo.averageRttCache * 1.3) {
-                    weightArray[i] /=4;
+                    weightArray[i] /=2;
                 }
             }
             targetInfo.averageRttCache = l;
