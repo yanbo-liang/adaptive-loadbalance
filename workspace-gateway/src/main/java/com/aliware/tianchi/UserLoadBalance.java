@@ -57,7 +57,7 @@ public class UserLoadBalance implements LoadBalance {
             HiveInvokerInfo targetInfo = sortedInfo.get(i);
             long l = averageRttCache(targetInfo);
             if (targetInfo.averageRttCache != -1) {
-                if (l < targetInfo.averageRttCache * 1.05) {
+                if (l < targetInfo.averageRttCache * 1.8) {
                     weightArray[i] /=3;
                 }
             }
