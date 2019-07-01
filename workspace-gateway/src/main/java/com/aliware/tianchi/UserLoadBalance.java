@@ -61,7 +61,7 @@ public class UserLoadBalance implements LoadBalance {
             long l = averageRttCache(targetInfo);
 
             if (targetInfo.averageRttCache != -1) {
-                if (l < targetInfo.averageRttCache * 1.10) {
+                if (l < targetInfo.averageRttCache * 1.03) {
                     targetInfo.averageRttCache = l;
                     weightArray[index]=(int)targetInfo.maxRequest;
                     return sortedInfo.get(pickByWeight(weightArray)).invoker;
