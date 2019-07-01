@@ -38,7 +38,7 @@ public class HiveTask implements Runnable {
                     .sorted(Comparator.comparingLong(x -> x.averageRtt))
                     .collect(Collectors.toList());
             try {
-                Thread.sleep(300);
+                Thread.sleep(800);
             } catch (Exception e) {
                 e.printStackTrace();
             }
