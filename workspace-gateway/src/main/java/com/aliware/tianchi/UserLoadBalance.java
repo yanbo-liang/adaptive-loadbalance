@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
@@ -16,52 +17,48 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class UserLoadBalance implements LoadBalance {
-    private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private static final AtomicBoolean inited = new AtomicBoolean(false);
     static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(UserLoadBalance.class);
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
+        Invoker<T> randomInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+
         init(invokers);
-        List<HiveInvokerInfo> sortedInfo = infoMap.values().stream().sorted(Comparator.comparingLong(x ->
-                (long) Arrays.stream(x.rttCache).average().orElse(0)
-        )).collect(Collectors.toList());
+
+        Collection<HiveInvokerInfo> infos = infoMap.values();
+        for (HiveInvokerInfo info : infos) {
+            if (info.maxRequest == 0) {
+                return randomInvoker;
+            }
+        }
+
+        List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x ->
+                (long) Arrays.stream(x.rttCache).average().orElse(0)))
+                .collect(Collectors.toList());
+
         int[] weightArray = new int[sortedInfo.size()];
         int subWeight = sortedInfo.size();
         for (int i = 0; i < sortedInfo.size(); i++) {
-            if (sortedInfo.get(i).maxRequest == -1) {
-                return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-            }
-
             weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
-
-
-
         }
 
-        int index = pickByWeight(weightArray);
-        HiveInvokerInfo a = sortedInfo.get(index);
+        HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
 
-
-        if (a.currentRequest.get() < (long) (a.maxRequest)) {
-            return a.invoker;
+        if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest) {
+            return pickedInvoker.invoker;
         }
         for (int i = 0; i < invokers.size(); i++) {
             HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-            if (hiveInvokerInfo == a) {
+            if (hiveInvokerInfo == pickedInvoker) {
                 continue;
             }
-            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
-
+            if (hiveInvokerInfo.currentRequest.get() < hiveInvokerInfo.maxRequest) {
                 return hiveInvokerInfo.invoker;
-
-
             }
         }
-
-
-        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+        return randomInvoker;
 
 //
 //        List<HiveInvokerInfo> sortedInfo = HiveTask.sortedInfo;
@@ -120,20 +117,18 @@ public class UserLoadBalance implements LoadBalance {
                 for (Invoker<T> invoker : invokers) {
                     infoMap.put(invoker.getUrl(), new HiveInvokerInfo(invoker));
                 }
-//                HiveTask hiveTask = new HiveTask();
-//                executorService.execute(hiveTask);
             }
         }
     }
 
-    //
-    private long averageRttCache(HiveInvokerInfo hiveInvokerInfo) {
-        long total = 0;
-        for (int i = 0; i < hiveInvokerInfo.rttCache.length; i++) {
-            total += hiveInvokerInfo.rttCache[i];
-        }
-        return total / hiveInvokerInfo.rttCache.length;
-    }
+
+//    private long averageRttCache(HiveInvokerInfo hiveInvokerInfo) {
+//        long total = 0;
+//        for (int i = 0; i < hiveInvokerInfo.rttCache.length; i++) {
+//            total += hiveInvokerInfo.rttCache[i];
+//        }
+//        return total / hiveInvokerInfo.rttCache.length;
+//    }
 
     private int pickByWeight(int[] weightArray) {
         int[] section = new int[weightArray.length];
