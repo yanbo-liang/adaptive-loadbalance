@@ -51,7 +51,7 @@ public class UserLoadBalance implements LoadBalance {
         }
         for (int i = 0; i < invokers.size(); i++) {
             HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-            if (hiveInvokerInfo == pickedInvoker) {
+            if (hiveInvokerInfo.invoker.getUrl().equals(pickedInvoker.invoker.getUrl())) {
                 continue;
             }
             if (hiveInvokerInfo.currentRequest.get() < hiveInvokerInfo.maxRequest) {
