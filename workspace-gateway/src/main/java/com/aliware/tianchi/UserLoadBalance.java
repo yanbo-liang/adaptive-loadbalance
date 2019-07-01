@@ -55,15 +55,15 @@ public class UserLoadBalance implements LoadBalance {
 
             weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
 
-//            weightArray[i] = (subWeight - i);
-//            HiveInvokerInfo targetInfo = sortedInfo.get(i);
-//            long l = averageRttCache(targetInfo);
-//            if (targetInfo.averageRttCache != -1) {
-//                if (l < targetInfo.averageRttCache * 1.3) {
-//                    weightArray[i] /=4;
-//                }
-//            }
-//            targetInfo.averageRttCache = l;
+            weightArray[i] = (subWeight - i);
+            HiveInvokerInfo targetInfo = sortedInfo.get(i);
+            long l = averageRttCache(targetInfo);
+            if (targetInfo.averageRttCache != -1) {
+                if (l < targetInfo.averageRttCache * 1.3) {
+                    weightArray[i] /=4;
+                }
+            }
+            targetInfo.averageRttCache = l;
 
         }
 
