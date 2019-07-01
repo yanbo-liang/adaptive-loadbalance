@@ -8,6 +8,7 @@ import org.apache.dubbo.rpc.cluster.LoadBalance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
@@ -38,6 +39,7 @@ public class UserLoadBalance implements LoadBalance {
 //            }
 //        }
 //
+
         List<HiveInvokerInfo> sortedInfo = HiveTask.sortedInfo;
         if (sortedInfo.size() == 0) {
             return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
@@ -47,40 +49,28 @@ public class UserLoadBalance implements LoadBalance {
         int[] weightArray = new int[sortedInfo.size()];
         int subWeight = sortedInfo.size();
         for (int i = 0; i < sortedInfo.size(); i++) {
-            if (sortedInfo.get(i).maxRequest==-1){
+            if (sortedInfo.get(i).maxRequest == -1) {
                 return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
             }
-            weightArray[i] = (int)sortedInfo.get(i).maxRequest * (subWeight - i);
+            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
 //            weightArray[i] = subWeight - i;
         }
 
-        int[] section = new int[sortedInfo.size()];
-        int totalWeight = 0;
-        for (int i = 0; i < sortedInfo.size(); i++) {
-            totalWeight += weightArray[i];
-            section[i] = totalWeight;
-        }
-
-        HiveInvokerInfo targetInfo = null;
-        int random = ThreadLocalRandom.current().nextInt(totalWeight);
-        for (int i = 0; i < section.length; i++) {
-            if (random < section[i]) {
-                targetInfo = sortedInfo.get(i);
-                break;
-            }
-        }
+        int index = pickByWeight(weightArray);
+        HiveInvokerInfo targetInfo = sortedInfo.get(index);
 
         if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest*0.8)) {
 //            long l = averageRttCache(targetInfo);
 //
 //            if (targetInfo.averageRttCache != -1) {
-//                if (l < targetInfo.averageRttCache * 1.15) {
+//                if (l < targetInfo.averageRttCache * 1.5) {
 //                    targetInfo.averageRttCache = l;
-                    return targetInfo.invoker;
+//                    weightArray[index]=(int)targetInfo.maxRequest;
+//                    return sortedInfo.get(pickByWeight(weightArray)).invoker;
 //                }
 //            }
 //            targetInfo.averageRttCache = l;
-
+return targetInfo.invoker;
         }
         for (int i = 0; i < invokers.size(); i++) {
             HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
@@ -88,7 +78,10 @@ public class UserLoadBalance implements LoadBalance {
                 continue;
             }
             if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest*0.8)) {
+
                 return hiveInvokerInfo.invoker;
+
+
             }
         }
 
@@ -114,5 +107,22 @@ public class UserLoadBalance implements LoadBalance {
             total += hiveInvokerInfo.rttCache[i];
         }
         return total / hiveInvokerInfo.rttCache.length;
+    }
+
+    private int pickByWeight(int[] weightArray) {
+        int[] section = new int[weightArray.length];
+        int totalWeight = 0;
+        for (int i = 0; i < weightArray.length; i++) {
+            totalWeight += weightArray[i];
+            section[i] = totalWeight;
+        }
+
+        int random = ThreadLocalRandom.current().nextInt(totalWeight);
+        for (int i = 0; i < section.length; i++) {
+            if (random < section[i]) {
+                return i;
+            }
+        }
+        return 0;
     }
 }

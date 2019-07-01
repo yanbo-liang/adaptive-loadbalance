@@ -3,6 +3,7 @@ package com.aliware.tianchi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -12,15 +13,17 @@ import java.util.stream.Collectors;
 public class HiveTask implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(HiveTask.class);
     static List<HiveInvokerInfo> sortedInfo = Collections.EMPTY_LIST;
-int a = 0;
+
+    static int a = 0;
+
     @Override
     public void run() {
         Semaphore rttSemaphore = HiveFilter.rttSemaphore;
         while (true) {
             try {
-                rttSemaphore.acquire(100);
+//                rttSemaphore.acquire(100);
                 UserLoadBalance.infoMap.forEach((k, v) -> {
-                    v.averageRtt = Long.MAX_VALUE;
+//                    v.averageRtt = Long.MAX_VALUE;
                     if (v.totalRequest.get() != 0) {
                         v.averageRtt = v.totalRtt.get() / v.totalRequest.get();
                     }
@@ -30,13 +33,15 @@ int a = 0;
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-                rttSemaphore.release(100);
+//                rttSemaphore.release(100);
             }
 
 
             sortedInfo = UserLoadBalance.infoMap.values().stream()
                     .sorted(Comparator.comparingLong(x -> x.averageRtt))
                     .collect(Collectors.toList());
+
+            System.out.println();
 
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(a++);
@@ -49,7 +54,7 @@ int a = 0;
 
             logger.info(stringBuilder.toString());
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (Exception e) {
                 e.printStackTrace();
             }
