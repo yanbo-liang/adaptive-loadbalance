@@ -52,13 +52,16 @@ public class UserLoadBalance implements LoadBalance {
             if (sortedInfo.get(i).maxRequest == -1) {
                 return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
             }
+            weightArray[i] = (int) sortedInfo.get(i).maxRequest / 10 * (10 + sortedInfo.size() - i);
+
 //            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
-            weightArray[i] = (subWeight - i)*100;
+
+//            weightArray[i] = (subWeight - i);
             HiveInvokerInfo targetInfo = sortedInfo.get(i);
             long l = averageRttCache(targetInfo);
             if (targetInfo.averageRttCache != -1) {
                 if (l < targetInfo.averageRttCache * 1.3) {
-                    weightArray[i] /=3;
+                    weightArray[i] = (int) sortedInfo.get(i).maxRequest;
                 }
             }
             targetInfo.averageRttCache = l;
