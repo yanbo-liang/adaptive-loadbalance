@@ -7,8 +7,6 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Activate(group = Constants.CONSUMER)
 public class HiveFilter implements Filter {
@@ -23,6 +21,7 @@ public class HiveFilter implements Filter {
             HiveInvokerInfo hiveInvokerInfo = UserLoadBalance.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
                 hiveInvokerInfo.currentRequest.incrementAndGet();
+
                 rttMap.put(invocation, System.currentTimeMillis());
             }
             return invoker.invoke(invocation);
@@ -40,16 +39,9 @@ public class HiveFilter implements Filter {
                 hiveInvokerInfo.currentRequest.decrementAndGet();
                 Long start = rttMap.get(invocation);
                 if (start != null) {
+
                     long rtt = System.currentTimeMillis() - start;
-                    try {
-                        rttSemaphore.acquire();
-                        hiveInvokerInfo.totalRtt.updateAndGet(x -> x + rtt);
-                        hiveInvokerInfo.totalRequest.incrementAndGet();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        rttSemaphore.release();
-                    }
+
                     int index = hiveInvokerInfo.rttCacheIndex.updateAndGet(x -> {
                         if (x < 29) {
                             return x + 1;
@@ -64,7 +56,6 @@ public class HiveFilter implements Filter {
             e.printStackTrace();
             System.exit(1);
         }
-
         return result;
     }
 }
