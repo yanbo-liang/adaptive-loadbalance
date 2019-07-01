@@ -18,9 +18,9 @@ int a = 0;
         Semaphore rttSemaphore = HiveFilter.rttSemaphore;
         while (true) {
             try {
-//                rttSemaphore.acquire(100);
+                rttSemaphore.acquire(100);
                 UserLoadBalance.infoMap.forEach((k, v) -> {
-//                    v.averageRtt = Long.MAX_VALUE;
+                    v.averageRtt = Long.MAX_VALUE;
                     if (v.totalRequest.get() != 0) {
                         v.averageRtt = v.totalRtt.get() / v.totalRequest.get();
                     }
@@ -30,7 +30,7 @@ int a = 0;
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
-//                rttSemaphore.release(100);
+                rttSemaphore.release(100);
             }
 
 
@@ -49,7 +49,7 @@ int a = 0;
 
             logger.info(stringBuilder.toString());
             try {
-                Thread.sleep(300);
+                Thread.sleep(500);
             } catch (Exception e) {
                 e.printStackTrace();
             }
