@@ -37,15 +37,16 @@ public class UserLoadBalance implements LoadBalance {
         List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x ->
                 (long) Arrays.stream(x.rttCache).average().orElse(0)))
                 .collect(Collectors.toList());
-
-        int[] weightArray = new int[sortedInfo.size()];
-        int subWeight = sortedInfo.size();
-        for (int i = 0; i < sortedInfo.size(); i++) {
-//            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
-            weightArray[i] = sortedInfo.size()-i;
-        }
-
-        HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
+//
+//        int[] weightArray = new int[sortedInfo.size()];
+//        int subWeight = sortedInfo.size();
+//        for (int i = 0; i < sortedInfo.size(); i++) {
+////            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
+//            weightArray[i] = sortedInfo.size()-i;
+//        }
+//
+//        HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
+        HiveInvokerInfo pickedInvoker = sortedInfo.get(0);
 
         if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest) {
             return pickedInvoker.invoker;
