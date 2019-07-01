@@ -71,6 +71,7 @@ public class UserLoadBalance implements LoadBalance {
         HiveInvokerInfo a = sortedInfo.get(index);
 
         return a.invoker;
+
 //        if (a.currentRequest.get() < (long) (a.maxRequest*0.8)) {
 //            return a.invoker;
 //        }
