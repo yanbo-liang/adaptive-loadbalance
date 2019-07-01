@@ -40,7 +40,7 @@ public class HiveFilter implements Filter {
                     long rtt = System.currentTimeMillis() - start;
 
                     int index = hiveInvokerInfo.rttCacheIndex.updateAndGet(x -> {
-                        if (x < 29) {
+                        if (x < 9) {
                             return x + 1;
                         } else {
                             return 0;
