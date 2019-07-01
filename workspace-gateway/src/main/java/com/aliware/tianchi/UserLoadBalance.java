@@ -70,18 +70,18 @@ public class UserLoadBalance implements LoadBalance {
             targetInfo.averageRttCache = l;
 
         }
-//        for (int i = 0; i < invokers.size(); i++) {
-//            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-//            if (hiveInvokerInfo == targetInfo) {
-//                continue;
-//            }
-//            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
-//
-//                return hiveInvokerInfo.invoker;
-//
-//
-//            }
-//        }
+        for (int i = 0; i < invokers.size(); i++) {
+            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
+            if (hiveInvokerInfo == targetInfo) {
+                continue;
+            }
+            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+
+                return hiveInvokerInfo.invoker;
+
+
+            }
+        }
 
 
         return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
