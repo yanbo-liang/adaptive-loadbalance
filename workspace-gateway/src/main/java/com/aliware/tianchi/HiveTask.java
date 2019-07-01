@@ -3,7 +3,6 @@ package com.aliware.tianchi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -13,8 +12,6 @@ import java.util.stream.Collectors;
 public class HiveTask implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(HiveTask.class);
     static List<HiveInvokerInfo> sortedInfo = Collections.EMPTY_LIST;
-
-    static int a = 0;
 
     @Override
     public void run() {
@@ -40,21 +37,8 @@ public class HiveTask implements Runnable {
             sortedInfo = UserLoadBalance.infoMap.values().stream()
                     .sorted(Comparator.comparingLong(x -> x.averageRtt))
                     .collect(Collectors.toList());
-
-            System.out.println();
-
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(a++);
-            stringBuilder.append('-');
-            for (HiveInvokerInfo info : sortedInfo) {
-                stringBuilder.append(info.invoker.getUrl().getHost());
-                stringBuilder.append(':');
-                stringBuilder.append(info.averageRtt);
-            }
-
-            logger.info(stringBuilder.toString());
             try {
-                Thread.sleep(1000);
+                Thread.sleep(300);
             } catch (Exception e) {
                 e.printStackTrace();
             }
