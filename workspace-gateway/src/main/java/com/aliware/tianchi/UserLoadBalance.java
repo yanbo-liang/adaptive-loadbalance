@@ -8,6 +8,7 @@ import org.apache.dubbo.rpc.cluster.LoadBalance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
@@ -38,6 +39,7 @@ public class UserLoadBalance implements LoadBalance {
 //            }
 //        }
 //
+
         List<HiveInvokerInfo> sortedInfo = HiveTask.sortedInfo;
         if (sortedInfo.size() == 0) {
             return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
