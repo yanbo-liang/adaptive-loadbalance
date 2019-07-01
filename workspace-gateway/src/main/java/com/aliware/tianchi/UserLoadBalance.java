@@ -59,25 +59,25 @@ public class UserLoadBalance implements LoadBalance {
         int index = pickByWeight(weightArray);
         HiveInvokerInfo targetInfo = sortedInfo.get(index);
 
-        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest)) {
-            long l = averageRttCache(targetInfo);
-
-            if (targetInfo.averageRttCache != -1) {
-                if (l < targetInfo.averageRttCache * 1.5) {
-                    targetInfo.averageRttCache = l;
-                    weightArray[index]=(int)targetInfo.maxRequest;
-                    return sortedInfo.get(pickByWeight(weightArray)).invoker;
-                }
-            }
-            targetInfo.averageRttCache = l;
-
+        if (targetInfo.currentRequest.get() < (long) (targetInfo.maxRequest*0.8)) {
+//            long l = averageRttCache(targetInfo);
+//
+//            if (targetInfo.averageRttCache != -1) {
+//                if (l < targetInfo.averageRttCache * 1.5) {
+//                    targetInfo.averageRttCache = l;
+//                    weightArray[index]=(int)targetInfo.maxRequest;
+//                    return sortedInfo.get(pickByWeight(weightArray)).invoker;
+//                }
+//            }
+//            targetInfo.averageRttCache = l;
+return targetInfo.invoker;
         }
         for (int i = 0; i < invokers.size(); i++) {
             HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
             if (hiveInvokerInfo == targetInfo) {
                 continue;
             }
-            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest*0.8)) {
 
                 return hiveInvokerInfo.invoker;
 
