@@ -34,6 +34,10 @@ public class HiveTask implements Runnable {
                     hiveInvokerInfo.stressCoefficient += 0.01;
                 }
             }
+//            System.out.println();
+//            for (HiveInvokerInfo info:values){
+//                System.out.println(info.stressCoefficient);
+//            }
             Thread.sleep(2000);
         } catch (
                 Exception e) {

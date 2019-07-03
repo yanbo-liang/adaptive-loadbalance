@@ -24,6 +24,7 @@ public class UserLoadBalance implements LoadBalance {
     static volatile HiveInvokerInfo stressInvokerInfo = null;
     static volatile boolean stress = false;
 
+    static ExecutorService executorService = Executors.newSingleThreadExecutor();
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
         init(invokers);
@@ -141,6 +142,8 @@ public class UserLoadBalance implements LoadBalance {
                 for (Invoker<T> invoker : invokers) {
                     infoMap.put(invoker.getUrl(), new HiveInvokerInfo(invoker));
                 }
+                HiveTask task = new HiveTask();
+                executorService.execute(task);
             }
         }
     }
