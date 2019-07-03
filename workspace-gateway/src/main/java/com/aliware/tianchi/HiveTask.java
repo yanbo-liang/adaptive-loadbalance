@@ -31,7 +31,7 @@ public class HiveTask implements Runnable {
                         hiveInvokerInfo.rttTotalCount.updateAndGet(x -> 0);
 
                         if (j != 0) {
-                            if (average > totalAverage / (j) * 1.8) {
+                            if (average > totalAverage / (j) * 1.5) {
                                 break;
                             }
                         }
