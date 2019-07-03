@@ -30,6 +30,7 @@ public class UserLoadBalance implements LoadBalance {
         Collection<HiveInvokerInfo> infos = infoMap.values();
         for (HiveInvokerInfo info : infos) {
             if (info.maxRequest == 0) {
+                System.out.println("f");
                 return randomInvoker;
             }
         }
@@ -67,7 +68,7 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
 //        }
-        return sortedInfo.get(sortedInfo.size()-1).invoker;
+        return randomInvoker;
 
 //
 //        List<HiveInvokerInfo> sortedInfo = HiveTask.sortedInfo;
