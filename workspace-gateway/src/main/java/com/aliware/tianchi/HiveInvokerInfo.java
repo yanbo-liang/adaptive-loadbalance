@@ -8,15 +8,21 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class HiveInvokerInfo {
+
     volatile String name;
     volatile Invoker invoker;
 
     volatile long maxRequest = 0;
     AtomicLong currentRequest = new AtomicLong(0);
 
-    long[] rttCache = new long[30];
+    volatile AtomicInteger rttTotalTime = new AtomicInteger(0);
+    volatile AtomicInteger rttTotalCount = new AtomicInteger(0);
+
+    volatile double stressCoefficient = 0.5;
+
+    long[] rttCache = new long[15];
     AtomicInteger rttCacheIndex = new AtomicInteger(-1);
-     final ReadWriteLock lock = new ReentrantReadWriteLock();
+//    final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public HiveInvokerInfo(Invoker invoker) {
         String host = invoker.getUrl().getHost();

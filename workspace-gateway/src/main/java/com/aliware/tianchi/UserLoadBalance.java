@@ -21,11 +21,13 @@ public class UserLoadBalance implements LoadBalance {
     static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(UserLoadBalance.class);
 
+    static volatile HiveInvokerInfo stressInvokerInfo = null;
+    static volatile boolean stress = false;
+
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-        Invoker<T> randomInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-
         init(invokers);
+        Invoker<T> randomInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
 
         Collection<HiveInvokerInfo> infos = infoMap.values();
         for (HiveInvokerInfo info : infos) {
@@ -34,25 +36,41 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
 
+        if (stress && stressInvokerInfo != null) {
+            if (stressInvokerInfo.currentRequest.get() < stressInvokerInfo.maxRequest * stressInvokerInfo.stressCoefficient) {
+                return stressInvokerInfo.invoker;
+            } else {
+                for (int i = 0; i < invokers.size(); i++) {
+                    HiveInvokerInfo info = infoMap.get(invokers.get(i).getUrl());
+                    if (stressInvokerInfo.invoker.getUrl().equals(info.invoker.getUrl())) {
+                        continue;
+                    }
+                    if (info.currentRequest.get() < info.maxRequest) {
+                        return info.invoker;
+                    }
+                }
+            }
+        }
+
+
         List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x -> {
-            x.lock.readLock().lock();
+//            x.lock.readLock().lock();
             long tmp = (long) Arrays.stream(x.rttCache).average().orElse(0);
-            x.lock.readLock().unlock();
+//            x.lock.readLock().unlock();
             return tmp;
-        }))
-                .collect(Collectors.toList());
+        })).collect(Collectors.toList());
 
         int[] weightArray = new int[sortedInfo.size()];
         int subWeight = sortedInfo.size();
         for (int i = 0; i < sortedInfo.size(); i++) {
-            weightArray[i] = (int) sortedInfo.get(i).maxRequest / 10 * (10 + subWeight - i - 1);
-//            weightArray[i] = sortedInfo.size()-i;
+//            weightArray[i] = (int) sortedInfo.get(i).maxRequest / 10 * (10 + subWeight - i - 1);
+            weightArray[i] = sortedInfo.size()-i;
         }
 
         HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
 //        HiveInvokerInfo pickedInvoker = sortedInfo.get(0);
 
-        if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest) {
+        if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest * pickedInvoker.stressCoefficient) {
             return pickedInvoker.invoker;
         }
         for (int i = 0; i < invokers.size(); i++) {
@@ -60,7 +78,7 @@ public class UserLoadBalance implements LoadBalance {
             if (hiveInvokerInfo.invoker.getUrl().equals(pickedInvoker.invoker.getUrl())) {
                 continue;
             }
-            if (hiveInvokerInfo.currentRequest.get() < hiveInvokerInfo.maxRequest) {
+            if (hiveInvokerInfo.currentRequest.get() < hiveInvokerInfo.maxRequest * hiveInvokerInfo.stressCoefficient) {
                 return hiveInvokerInfo.invoker;
             }
         }
