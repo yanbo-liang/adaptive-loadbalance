@@ -4,6 +4,8 @@ import org.apache.dubbo.rpc.Invoker;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class HiveInvokerInfo {
     volatile String name;
@@ -14,6 +16,7 @@ public class HiveInvokerInfo {
 
     long[] rttCache = new long[30];
     AtomicInteger rttCacheIndex = new AtomicInteger(-1);
+     final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public HiveInvokerInfo(Invoker invoker) {
         String host = invoker.getUrl().getHost();

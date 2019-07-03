@@ -7,11 +7,12 @@ import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Activate(group = Constants.CONSUMER)
 public class HiveFilter implements Filter {
     static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(2000, ConcurrentReferenceHashMap.ReferenceType.WEAK);
-
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         try {
@@ -46,7 +47,9 @@ public class HiveFilter implements Filter {
                             return 0;
                         }
                     });
+                    hiveInvokerInfo.lock.writeLock().lock();
                     hiveInvokerInfo.rttCache[index] = rtt;
+                    hiveInvokerInfo.lock.writeLock().unlock();
                 }
             }
         }catch (Exception e){
