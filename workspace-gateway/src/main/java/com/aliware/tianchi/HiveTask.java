@@ -16,7 +16,7 @@ public class HiveTask implements Runnable {
                     int lastAverage = 0;
                     hiveInvokerInfo.stressCoefficient = 0.5;
                     UserLoadBalance.stressInvokerInfo = hiveInvokerInfo;
-                    for (int j = 0; j < 50; j++) {
+                    for (int j = 0; j < 25; j++) {
                         UserLoadBalance.stress = true;
                         HiveFilter.stress = true;
                         Thread.sleep(2);
@@ -32,7 +32,7 @@ public class HiveTask implements Runnable {
                         if (lastAverage == 0) {
                             lastAverage = average;
                         } else {
-                            if (average > lastAverage * 1.5) {
+                            if (average > lastAverage * 1.3) {
                                 break;
                             }
                         }
