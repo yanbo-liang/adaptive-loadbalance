@@ -44,17 +44,17 @@ public class UserLoadBalance implements LoadBalance {
 
         })).collect(Collectors.toList());
 
-//        int[] weightArray = new int[sortedInfo.size()];
-//        int subWeight = sortedInfo.size();
-//        for (int i = 0; i < sortedInfo.size(); i++) {
-//            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
-////            weightArray[i] = sortedInfo.size()-i;
-//        }
-//
-//        HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
-////        HiveInvokerInfo pickedInvoker = sortedInfo.get(0);
+        int[] weightArray = new int[sortedInfo.size()];
+        int subWeight = sortedInfo.size();
+        for (int i = 0; i < sortedInfo.size(); i++) {
+            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
+//            weightArray[i] = sortedInfo.size()-i;
+        }
 
-        for (HiveInvokerInfo pickedInvoker : sortedInfo) {
+        HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
+//        HiveInvokerInfo pickedInvoker = sortedInfo.get(0);
+
+//        for (HiveInvokerInfo pickedInvoker : sortedInfo) {
             if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest) {
                 return pickedInvoker.invoker;
             }
@@ -67,7 +67,7 @@ public class UserLoadBalance implements LoadBalance {
                     return hiveInvokerInfo.invoker;
                 }
             }
-        }
+//        }
         return randomInvoker;
 
 //
