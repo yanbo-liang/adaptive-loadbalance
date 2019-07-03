@@ -41,7 +41,7 @@ public class UserLoadBalance implements LoadBalance {
         int[] weightArray = new int[sortedInfo.size()];
         int subWeight = sortedInfo.size();
         for (int i = 0; i < sortedInfo.size(); i++) {
-            weightArray[i] = (int) sortedInfo.get(i).maxRequest / 12 * (12 + subWeight - i - 1);
+            weightArray[i] = (int) sortedInfo.get(i).maxRequest / 15 * (15 + subWeight - i - 1);
 //            weightArray[i] = sortedInfo.size()-i;
         }
 
