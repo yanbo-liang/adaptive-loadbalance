@@ -35,7 +35,7 @@ public class UserLoadBalance implements LoadBalance {
         }
 
         List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x ->
-                (long) Arrays.stream(x.rttCache).max().orElse(0)))
+                (long) Arrays.stream(x.rttCache).average().orElse(0)))
                 .collect(Collectors.toList());
 
         int[] weightArray = new int[sortedInfo.size()];

@@ -12,7 +12,7 @@ public class HiveInvokerInfo {
     volatile long maxRequest = 0;
     AtomicLong currentRequest = new AtomicLong(0);
 
-    long[] rttCache = new long[300];
+    long[] rttCache = new long[10];
     AtomicInteger rttCacheIndex = new AtomicInteger(-1);
 
     public HiveInvokerInfo(Invoker invoker) {
