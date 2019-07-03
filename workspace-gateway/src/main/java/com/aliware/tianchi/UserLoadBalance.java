@@ -20,6 +20,7 @@ public class UserLoadBalance implements LoadBalance {
     private static final AtomicBoolean inited = new AtomicBoolean(false);
     static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(UserLoadBalance.class);
+    private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
@@ -34,16 +35,19 @@ public class UserLoadBalance implements LoadBalance {
                 return randomInvoker;
             }
         }
-        List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x -> {
-            try {
-//                x.lock.readLock().lock();
-                return (long) Arrays.stream(x.rttCache).max().orElse(0);
-            } finally {
-//                x.lock.readLock().unlock();
-            }
+//        List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x -> {
+//            try {
+////                x.lock.readLock().lock();
+//                return (long) Arrays.stream(x.rttCache).max().orElse(0);
+//            } finally {
+////                x.lock.readLock().unlock();
+//            }
 
-        })).collect(Collectors.toList());
-
+//        })).collect(Collectors.toList());
+        List<HiveInvokerInfo> sortedInfo = HiveTask.sortedInfo;
+        if (sortedInfo.size()==0){
+            return randomInvoker;
+        }
         int[] weightArray = new int[sortedInfo.size()];
         int subWeight = sortedInfo.size();
         for (int i = 0; i < sortedInfo.size(); i++) {
@@ -55,18 +59,18 @@ public class UserLoadBalance implements LoadBalance {
 //        HiveInvokerInfo pickedInvoker = sortedInfo.get(0);
 
 //        for (HiveInvokerInfo pickedInvoker : sortedInfo) {
-            if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest) {
-                return pickedInvoker.invoker;
+        if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest) {
+            return pickedInvoker.invoker;
+        }
+        for (int i = 0; i < invokers.size(); i++) {
+            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
+            if (hiveInvokerInfo.invoker.getUrl().equals(pickedInvoker.invoker.getUrl())) {
+                continue;
             }
-            for (int i = 0; i < invokers.size(); i++) {
-                HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-                if (hiveInvokerInfo.invoker.getUrl().equals(pickedInvoker.invoker.getUrl())) {
-                    continue;
-                }
-                if (hiveInvokerInfo.currentRequest.get() < hiveInvokerInfo.maxRequest) {
-                    return hiveInvokerInfo.invoker;
-                }
+            if (hiveInvokerInfo.currentRequest.get() < hiveInvokerInfo.maxRequest) {
+                return hiveInvokerInfo.invoker;
             }
+        }
 //        }
         return randomInvoker;
 
@@ -127,6 +131,9 @@ public class UserLoadBalance implements LoadBalance {
                 for (Invoker<T> invoker : invokers) {
                     infoMap.put(invoker.getUrl(), new HiveInvokerInfo(invoker));
                 }
+
+                HiveTask hiveTask = new HiveTask();
+                executorService.execute(hiveTask);
             }
         }
     }
