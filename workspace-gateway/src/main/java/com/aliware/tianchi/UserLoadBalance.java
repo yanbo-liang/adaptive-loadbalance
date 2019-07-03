@@ -36,10 +36,10 @@ public class UserLoadBalance implements LoadBalance {
         }
         List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x -> {
             try {
-                x.lock.readLock().lock();
+//                x.lock.readLock().lock();
                 return (long) Arrays.stream(x.rttCache).max().orElse(0);
             } finally {
-                x.lock.readLock().unlock();
+//                x.lock.readLock().unlock();
             }
 
         })).collect(Collectors.toList());
