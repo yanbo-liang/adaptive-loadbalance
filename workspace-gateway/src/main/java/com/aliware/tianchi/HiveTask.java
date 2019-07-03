@@ -24,7 +24,7 @@ public class HiveTask implements Runnable {
                     for (int j = 0; j < 10; j++) {
                         UserLoadBalance.stress = true;
                         HiveFilter.stress = true;
-                        Thread.sleep(10);
+                        Thread.sleep(8);
                         UserLoadBalance.stress = false;
                         HiveFilter.stress = false;
                         int rttTotalCount = hiveInvokerInfo.rttTotalCount.get();
@@ -56,7 +56,7 @@ public class HiveTask implements Runnable {
                 for (HiveInvokerInfo info : values) {
                     System.out.println(info.stressCoefficient);
                 }
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             }
         } catch (
                 Exception e) {
