@@ -13,7 +13,7 @@ public class HiveInvokerInfo {
     volatile long maxRequest = 0;
     AtomicLong currentRequest = new AtomicLong(0);
 
-    static int length = 50;
+    static int length = 500;
     long[] rttCache = new long[length];
     AtomicInteger rttCacheIndex = new AtomicInteger(-1);
      final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
