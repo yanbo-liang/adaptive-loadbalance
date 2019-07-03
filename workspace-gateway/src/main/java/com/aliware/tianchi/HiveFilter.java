@@ -39,8 +39,9 @@ public class HiveFilter implements Filter {
 
                     long rtt = System.currentTimeMillis() - start;
 
+                    int length = HiveInvokerInfo.length;
                     int index = hiveInvokerInfo.rttCacheIndex.updateAndGet(x -> {
-                        if (x < 49) {
+                        if (x < length - 1) {
                             return x + 1;
                         } else {
                             return 0;
@@ -51,7 +52,7 @@ public class HiveFilter implements Filter {
                     hiveInvokerInfo.lock.writeLock().unlock();
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
