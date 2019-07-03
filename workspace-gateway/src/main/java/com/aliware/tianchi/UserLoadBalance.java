@@ -46,6 +46,7 @@ public class UserLoadBalance implements LoadBalance {
 //        })).collect(Collectors.toList());
         List<HiveInvokerInfo> sortedInfo = HiveTask.sortedInfo;
         if (sortedInfo.size()==0){
+            System.out.println("f");
             return randomInvoker;
         }
         int[] weightArray = new int[sortedInfo.size()];

@@ -11,7 +11,7 @@ import java.util.concurrent.Semaphore;
 @Activate(group = Constants.CONSUMER)
 public class HiveFilter implements Filter {
     static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(2000, ConcurrentReferenceHashMap.ReferenceType.WEAK);
-    static final Semaphore semaphore = new Semaphore(100);
+    static final Semaphore semaphore = new Semaphore(100,true);
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
