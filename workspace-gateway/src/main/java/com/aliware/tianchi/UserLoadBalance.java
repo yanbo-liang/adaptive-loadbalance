@@ -67,7 +67,7 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
 //        }
-        return randomInvoker;
+        return sortedInfo.get(sortedInfo.size()-1).invoker;
 
 //
 //        List<HiveInvokerInfo> sortedInfo = HiveTask.sortedInfo;
