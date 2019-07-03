@@ -25,6 +25,7 @@ public class UserLoadBalance implements LoadBalance {
     static volatile boolean stress = false;
 
     static ExecutorService executorService = Executors.newSingleThreadExecutor();
+
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
         init(invokers);
@@ -54,18 +55,24 @@ public class UserLoadBalance implements LoadBalance {
         }
 
 
-        List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x -> {
-//            x.lock.readLock().lock();
-            long tmp = (long) Arrays.stream(x.rttCache).average().orElse(0);
-//            x.lock.readLock().unlock();
-            return tmp;
-        })).collect(Collectors.toList());
+//        List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x -> {
+////            x.lock.readLock().lock();
+//            long tmp = (long) Arrays.stream(x.rttCache).average().orElse(0);
+////            x.lock.readLock().unlock();
+//            return tmp;
+//        })).collect(Collectors.toList());
+        List<HiveInvokerInfo> sortedInfo = HiveTask.sortedInfo;
+        if (sortedInfo == null) {
+            return randomInvoker;
+        }
+
 
         int[] weightArray = new int[sortedInfo.size()];
         int subWeight = sortedInfo.size();
-        for (int i = 0; i < sortedInfo.size(); i++) {
+        for (
+                int i = 0; i < sortedInfo.size(); i++) {
 //            weightArray[i] = (int) sortedInfo.get(i).maxRequest / 10 * (10 + subWeight - i - 1);
-            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight-i);
+            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
 
 //            weightArray[i] = sortedInfo.size()-i;
         }
@@ -76,7 +83,8 @@ public class UserLoadBalance implements LoadBalance {
         if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest * pickedInvoker.stressCoefficient) {
             return pickedInvoker.invoker;
         }
-        for (int i = 0; i < invokers.size(); i++) {
+        for (
+                int i = 0; i < invokers.size(); i++) {
             HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
             if (hiveInvokerInfo.invoker.getUrl().equals(pickedInvoker.invoker.getUrl())) {
                 continue;

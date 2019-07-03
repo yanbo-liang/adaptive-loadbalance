@@ -2,9 +2,13 @@ package com.aliware.tianchi;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HiveTask implements Runnable {
+    static volatile List<HiveInvokerInfo> sortedInfo;
+
     @Override
     public void run() {
         try {
@@ -14,6 +18,7 @@ public class HiveTask implements Runnable {
                 for (int i = 0; i < values.size(); i++) {
                     HiveInvokerInfo hiveInvokerInfo = values.get(i);
                     int totalAverage = 0;
+                    int totalCount = 0;
                     hiveInvokerInfo.stressCoefficient = 0.5;
                     UserLoadBalance.stressInvokerInfo = hiveInvokerInfo;
                     for (int j = 0; j < 10; j++) {
@@ -39,10 +44,13 @@ public class HiveTask implements Runnable {
                             }
                         }
                         totalAverage += average;
-
+                        totalCount += 1;
+                        hiveInvokerInfo.averageRtt = totalAverage / totalCount;
                         hiveInvokerInfo.stressCoefficient += 0.05;
                     }
                 }
+                sortedInfo = values.stream().sorted(Comparator.comparingInt(x -> x.averageRtt)).collect(Collectors.toList());
+
                 long end = System.currentTimeMillis();
                 System.out.println("time" + (end - start));
                 for (HiveInvokerInfo info : values) {

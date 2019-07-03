@@ -17,7 +17,7 @@ public class HiveInvokerInfo {
 
     volatile AtomicInteger rttTotalTime = new AtomicInteger(0);
     volatile AtomicInteger rttTotalCount = new AtomicInteger(0);
-
+    volatile int averageRtt = Integer.MAX_VALUE;
     volatile double stressCoefficient = 0.5;
 
     long[] rttCache = new long[20];
