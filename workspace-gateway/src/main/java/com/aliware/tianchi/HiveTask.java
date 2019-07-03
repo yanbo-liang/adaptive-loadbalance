@@ -9,6 +9,7 @@ public class HiveTask implements Runnable {
     public void run() {
         try {
             while (true) {
+                long start =System.currentTimeMillis();
                 List<HiveInvokerInfo> values = new ArrayList<>(UserLoadBalance.infoMap.values());
                 for (int i = 0; i < values.size(); i++) {
                     HiveInvokerInfo hiveInvokerInfo = values.get(i);
@@ -31,14 +32,15 @@ public class HiveTask implements Runnable {
                         if (lastAverage == 0) {
                             lastAverage = average;
                         } else {
-                            if (average > lastAverage * 1.1) {
+                            if (average > lastAverage * 1.15) {
                                 break;
                             }
                         }
                         hiveInvokerInfo.stressCoefficient += 0.01;
                     }
                 }
-                System.out.println();
+                long end = System.currentTimeMillis();
+                System.out.println(end-start);
                 for (HiveInvokerInfo info : values) {
                     System.out.println(info.stressCoefficient);
                 }
