@@ -16,10 +16,10 @@ public class HiveTask implements Runnable {
                     int totalAverage = 0;
                     hiveInvokerInfo.stressCoefficient = 0.5;
                     UserLoadBalance.stressInvokerInfo = hiveInvokerInfo;
-                    for (int j = 0; j < 25; j++) {
+                    for (int j = 0; j < 10; j++) {
                         UserLoadBalance.stress = true;
                         HiveFilter.stress = true;
-                        Thread.sleep(2);
+                        Thread.sleep(10);
                         UserLoadBalance.stress = false;
                         HiveFilter.stress = false;
                         int rttTotalCount = hiveInvokerInfo.rttTotalCount.get();
@@ -31,21 +31,24 @@ public class HiveTask implements Runnable {
                         hiveInvokerInfo.rttTotalCount.updateAndGet(x -> 0);
 
                         if (j != 0) {
+                            System.out.println();
+
+                            System.out.println(average + " " + totalAverage / (j) * 1.5);
                             if (average > totalAverage / (j) * 1.5) {
                                 break;
                             }
                         }
                         totalAverage += average;
 
-                        hiveInvokerInfo.stressCoefficient += 0.02;
+                        hiveInvokerInfo.stressCoefficient += 0.05;
                     }
                 }
                 long end = System.currentTimeMillis();
-                System.out.println(end - start);
+                System.out.println("time" + (end - start));
                 for (HiveInvokerInfo info : values) {
                     System.out.println(info.stressCoefficient);
                 }
-                Thread.sleep(1000);
+                Thread.sleep(2000);
             }
         } catch (
                 Exception e) {
