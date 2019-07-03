@@ -34,14 +34,18 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
 
-        List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x ->
-                (long) Arrays.stream(x.rttCache).max().orElse(0)))
+        List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x -> {
+            long a = (long) Arrays.stream(x.rttCache).max().orElse(0);
+            System.out.println(a);
+            return a;
+        }))
                 .collect(Collectors.toList());
+
 
         int[] weightArray = new int[sortedInfo.size()];
         int subWeight = sortedInfo.size();
         for (int i = 0; i < sortedInfo.size(); i++) {
-            weightArray[i] = (int) sortedInfo.get(i).maxRequest /13 * (13 + subWeight - i - 1);
+            weightArray[i] = (int) sortedInfo.get(i).maxRequest / 13 * (13 + subWeight - i - 1);
 //            weightArray[i] = sortedInfo.size()-i;
         }
 
