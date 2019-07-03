@@ -32,7 +32,7 @@ public class HiveTask implements Runnable {
                         if (lastAverage == 0) {
                             lastAverage = average;
                         } else {
-                            if (average > lastAverage * 1.5) {
+                            if (average > lastAverage * 1.9) {
                                 break;
                             }
                         }
