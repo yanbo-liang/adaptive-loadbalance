@@ -48,7 +48,7 @@ public class HiveFilter implements Filter {
                     }
 
                     int index = hiveInvokerInfo.rttCacheIndex.updateAndGet(x -> {
-                        if (x < 14) {
+                        if (x < 29) {
                             return x + 1;
                         } else {
                             return 0;

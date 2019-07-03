@@ -20,7 +20,7 @@ public class HiveInvokerInfo {
 
     volatile double stressCoefficient = 0.5;
 
-    long[] rttCache = new long[15];
+    long[] rttCache = new long[30];
     AtomicInteger rttCacheIndex = new AtomicInteger(-1);
 //    final ReadWriteLock lock = new ReentrantReadWriteLock();
 
