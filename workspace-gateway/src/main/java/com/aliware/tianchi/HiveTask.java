@@ -34,7 +34,7 @@ public class HiveTask implements Runnable {
                             System.out.println();
 
                             System.out.println(average + " " + totalAverage / (j) * 1.8);
-                            if (average > totalAverage / (j) * 1.5) {
+                            if (average > totalAverage / (j) * 1.3) {
                                 break;
                             }
                         }
