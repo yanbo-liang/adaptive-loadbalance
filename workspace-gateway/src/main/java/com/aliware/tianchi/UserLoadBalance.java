@@ -14,6 +14,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 public class UserLoadBalance implements LoadBalance {
@@ -33,10 +36,15 @@ public class UserLoadBalance implements LoadBalance {
                 return randomInvoker;
             }
         }
+        List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x -> {
+            try {
+                x.lock.readLock().lock();
+                return (long) Arrays.stream(x.rttCache).max().orElse(0);
+            } finally {
+                x.lock.readLock().unlock();
+            }
 
-        List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x ->
-                (long) Arrays.stream(x.rttCache).max().orElse(0)))
-                .collect(Collectors.toList());
+        })).collect(Collectors.toList());
 
 //        int[] weightArray = new int[sortedInfo.size()];
 //        int subWeight = sortedInfo.size();

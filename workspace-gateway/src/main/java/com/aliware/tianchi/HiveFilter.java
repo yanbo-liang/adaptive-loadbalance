@@ -46,7 +46,9 @@ public class HiveFilter implements Filter {
                             return 0;
                         }
                     });
+                    hiveInvokerInfo.lock.writeLock().lock();
                     hiveInvokerInfo.rttCache[index] = rtt;
+                    hiveInvokerInfo.lock.writeLock().unlock();
                 }
             }
         }catch (Exception e){
