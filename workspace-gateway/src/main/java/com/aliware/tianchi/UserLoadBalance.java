@@ -67,19 +67,19 @@ public class UserLoadBalance implements LoadBalance {
         }
 
 
-        int[] weightArray = new int[sortedInfo.size()];
-        int subWeight = sortedInfo.size();
-        for (
-                int i = 0; i < sortedInfo.size(); i++) {
-//            weightArray[i] = (int) sortedInfo.get(i).maxRequest / 10 * (10 + subWeight - i - 1);
-            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
+//        int[] weightArray = new int[sortedInfo.size()];
+//        int subWeight = sortedInfo.size();
+//        for (
+//                int i = 0; i < sortedInfo.size(); i++) {
+////            weightArray[i] = (int) sortedInfo.get(i).maxRequest / 10 * (10 + subWeight - i - 1);
+//            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
+//
+////            weightArray[i] = sortedInfo.size()-i;
+//        }
+//
+//        HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
 
-//            weightArray[i] = sortedInfo.size()-i;
-        }
-
-        HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
-
-//        for (HiveInvokerInfo pickedInvoker : sortedInfo) {
+        for (HiveInvokerInfo pickedInvoker : sortedInfo) {
         if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest * pickedInvoker.stressCoefficient) {
             return pickedInvoker.invoker;
         }
@@ -93,7 +93,7 @@ public class UserLoadBalance implements LoadBalance {
                 return hiveInvokerInfo.invoker;
             }
         }
-//        }
+        }
         return randomInvoker;
 
 //
