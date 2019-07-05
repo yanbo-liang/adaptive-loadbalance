@@ -41,6 +41,8 @@ public class UserLoadBalance implements LoadBalance {
         if (stress && stressInvokerInfo != null) {
             if (stressInvokerInfo.currentRequest.get() < stressInvokerInfo.maxRequest * stressInvokerInfo.stressCoefficient) {
                 return stressInvokerInfo.invoker;
+            }else{
+                throw new RpcException();
             }
 //            else {
 //                for (int i = 0; i < invokers.size(); i++) {
