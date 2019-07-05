@@ -41,20 +41,19 @@ public class UserLoadBalance implements LoadBalance {
         if (stress && stressInvokerInfo != null) {
             if (stressInvokerInfo.currentRequest.get() < stressInvokerInfo.maxRequest * stressInvokerInfo.stressCoefficient) {
                 return stressInvokerInfo.invoker;
-            }else{
-                throw new RpcException();
             }
-//            else {
-//                for (int i = 0; i < invokers.size(); i++) {
-//                    HiveInvokerInfo info = infoMap.get(invokers.get(i).getUrl());
-//                    if (stressInvokerInfo.invoker.getUrl().equals(info.invoker.getUrl())) {
-//                        continue;
-//                    }
-//                    if (info.currentRequest.get() < info.maxRequest) {
-//                        return info.invoker;
-//                    }
-//                }
-//            }
+            else {
+                System.out.println("aa");
+                for (int i = 0; i < invokers.size(); i++) {
+                    HiveInvokerInfo info = infoMap.get(invokers.get(i).getUrl());
+                    if (stressInvokerInfo.invoker.getUrl().equals(info.invoker.getUrl())) {
+                        continue;
+                    }
+                    if (info.currentRequest.get() < info.maxRequest) {
+                        return info.invoker;
+                    }
+                }
+            }
         }
 
 
