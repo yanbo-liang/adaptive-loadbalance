@@ -24,7 +24,7 @@ public class HiveTask implements Runnable {
                     for (int j = 0; j < 4; j++) {
                         UserLoadBalance.stress = true;
                         HiveFilter.stress = true;
-                        Thread.sleep(12);
+                        Thread.sleep(40);
                         UserLoadBalance.stress = false;
                         HiveFilter.stress = false;
                         int rttTotalCount = hiveInvokerInfo.rttTotalCount.get();
@@ -38,7 +38,7 @@ public class HiveTask implements Runnable {
                         if (j != 0) {
 
                             System.out.println(average + " " + totalAverage / (j));
-                            if (average > totalAverage / (j) * 1.3) {
+                            if (average > totalAverage / (j) * 1.15) {
                                 break;
                             }
                         }
