@@ -52,10 +52,10 @@ public class HiveTask implements Runnable {
                         for (int i = 0; i < currentWeight.length; i++) {
                             if (currentWeight[i] < weights[i]) {
                                 //good
-                                weights[i] *= 1.10;
+                                weights[i] *= 1.15;
                             } else {
                                 //bad
-                                weights[i] /= 1.10;
+                                weights[i] /= 1.15;
                             }
 
                         }
