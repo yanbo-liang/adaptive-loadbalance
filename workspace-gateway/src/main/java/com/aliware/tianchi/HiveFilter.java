@@ -21,7 +21,7 @@ public class HiveFilter implements Filter {
         try {
             HiveInvokerInfo hiveInvokerInfo = UserLoadBalance.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
-                hiveInvokerInfo.currentRequest.incrementAndGet();
+                hiveInvokerInfo.pendingRequest.incrementAndGet();
 
                 rttMap.put(invocation, System.currentTimeMillis());
             }
@@ -37,15 +37,15 @@ public class HiveFilter implements Filter {
         try {
             HiveInvokerInfo hiveInvokerInfo = UserLoadBalance.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
-                hiveInvokerInfo.currentRequest.decrementAndGet();
+                hiveInvokerInfo.pendingRequest.decrementAndGet();
                 Long start = rttMap.get(invocation);
                 if (start != null) {
                     int rtt = (int) (System.currentTimeMillis() - start);
 
-                    if (stress) {
-                        hiveInvokerInfo.rttTotalCount.incrementAndGet();
-                        hiveInvokerInfo.rttTotalTime.updateAndGet(x -> x + rtt);
-                    }
+//                    if (stress) {
+//                        hiveInvokerInfo.rttTotalCount.incrementAndGet();
+//                        hiveInvokerInfo.rttTotalTime.updateAndGet(x -> x + rtt);
+//                    }
 
 //                    int index = hiveInvokerInfo.rttCacheIndex.updateAndGet(x -> {
 //                        if (x < 19) {

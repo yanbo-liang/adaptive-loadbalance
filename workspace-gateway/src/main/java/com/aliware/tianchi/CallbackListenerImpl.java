@@ -17,13 +17,13 @@ public class CallbackListenerImpl implements CallbackListener {
         int index = msg.indexOf('-');
         if (index != -1) {
             String name = msg.substring(0, index);
-            long maxRequest = Long.valueOf(msg.substring(index + 1));
+            int maxRequest = Integer.valueOf(msg.substring(index + 1));
             UserLoadBalance.infoMap.forEach((k, v) -> {
                 if (v.name.equals(name)) {
                     v.maxRequest = maxRequest;
                 }
             });
         }
-//        System.out.println("receive msg from server :" + msg);
+        System.out.println("receive msg from server :" + msg);
     }
 }

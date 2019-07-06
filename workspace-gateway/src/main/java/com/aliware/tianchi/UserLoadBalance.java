@@ -31,30 +31,30 @@ public class UserLoadBalance implements LoadBalance {
         init(invokers);
         Invoker<T> randomInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
 
-        Collection<HiveInvokerInfo> infos = infoMap.values();
-        for (HiveInvokerInfo info : infos) {
-            if (info.maxRequest == 0) {
-                return randomInvoker;
-            }
-        }
-
-        if (stress && stressInvokerInfo != null) {
-            if (stressInvokerInfo.currentRequest.get() < stressInvokerInfo.maxRequest * stressInvokerInfo.stressCoefficient) {
-                return stressInvokerInfo.invoker;
-            }
-            else {
-                System.out.println("aa");
-                for (int i = 0; i < invokers.size(); i++) {
-                    HiveInvokerInfo info = infoMap.get(invokers.get(i).getUrl());
-                    if (stressInvokerInfo.invoker.getUrl().equals(info.invoker.getUrl())) {
-                        continue;
-                    }
-                    if (info.currentRequest.get() < info.maxRequest) {
-                        return info.invoker;
-                    }
-                }
-            }
-        }
+//        Collection<HiveInvokerInfo> infos = infoMap.values();
+//        for (HiveInvokerInfo info : infos) {
+//            if (info.maxRequest == 0) {
+//                return randomInvoker;
+//            }
+//        }
+//
+//        if (stress && stressInvokerInfo != null) {
+//            if (stressInvokerInfo.currentRequest.get() < stressInvokerInfo.maxRequest * stressInvokerInfo.stressCoefficient) {
+//                return stressInvokerInfo.invoker;
+//            }
+//            else {
+//                System.out.println("aa");
+//                for (int i = 0; i < invokers.size(); i++) {
+//                    HiveInvokerInfo info = infoMap.get(invokers.get(i).getUrl());
+//                    if (stressInvokerInfo.invoker.getUrl().equals(info.invoker.getUrl())) {
+//                        continue;
+//                    }
+//                    if (info.currentRequest.get() < info.maxRequest) {
+//                        return info.invoker;
+//                    }
+//                }
+//            }
+//        }
 
 
 //        List<HiveInvokerInfo> sortedInfo = infos.stream().sorted(Comparator.comparingLong(x -> {
@@ -63,10 +63,13 @@ public class UserLoadBalance implements LoadBalance {
 ////            x.lock.readLock().unlock();
 //            return tmp;
 //        })).collect(Collectors.toList());
-        List<HiveInvokerInfo> sortedInfo = HiveTask.sortedInfo;
-        if (sortedInfo == null) {
+        List<HiveInvokerInfo> infoList = HiveTask.infoList;
+        if (infoList == null) {
             return randomInvoker;
         }
+
+        double[] weightArray = infoList.stream().mapToDouble(x -> x.weight).toArray();
+        return invokers.get(pickByWeight(weightArray));
 
 
 //        int[] weightArray = new int[sortedInfo.size()];
@@ -81,22 +84,22 @@ public class UserLoadBalance implements LoadBalance {
 //
 //        HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
 
-        for (HiveInvokerInfo pickedInvoker : sortedInfo) {
-        if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest * pickedInvoker.stressCoefficient) {
-            return pickedInvoker.invoker;
-        }
-        for (
-                int i = 0; i < invokers.size(); i++) {
-            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
-            if (hiveInvokerInfo.invoker.getUrl().equals(pickedInvoker.invoker.getUrl())) {
-                continue;
-            }
-            if (hiveInvokerInfo.currentRequest.get() < hiveInvokerInfo.maxRequest * hiveInvokerInfo.stressCoefficient) {
-                return hiveInvokerInfo.invoker;
-            }
-        }
-        }
-        return randomInvoker;
+//        for (HiveInvokerInfo pickedInvoker : sortedInfo) {
+//        if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest * pickedInvoker.stressCoefficient) {
+//            return pickedInvoker.invoker;
+//        }
+//        for (
+//                int i = 0; i < invokers.size(); i++) {
+//            HiveInvokerInfo hiveInvokerInfo = sortedInfo.get(i);
+//            if (hiveInvokerInfo.invoker.getUrl().equals(pickedInvoker.invoker.getUrl())) {
+//                continue;
+//            }
+//            if (hiveInvokerInfo.currentRequest.get() < hiveInvokerInfo.maxRequest * hiveInvokerInfo.stressCoefficient) {
+//                return hiveInvokerInfo.invoker;
+//            }
+//        }
+//        }
+//        return randomInvoker;
 
 //
 //        List<HiveInvokerInfo> sortedInfo = HiveTask.sortedInfo;
@@ -160,7 +163,22 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
     }
+    private int pickByWeight(double[] weightArray) {
+        double[] section = new double[weightArray.length];
+        double totalWeight = 0;
+        for (int i = 0; i < weightArray.length; i++) {
+            totalWeight += weightArray[i];
+            section[i] = totalWeight;
+        }
 
+        double random = ThreadLocalRandom.current().nextDouble(totalWeight);
+        for (int i = 0; i < section.length; i++) {
+            if (random < section[i]) {
+                return i;
+            }
+        }
+        return 0;
+    }
 
 //    private long averageRttCache(HiveInvokerInfo hiveInvokerInfo) {
 //        long total = 0;
@@ -170,20 +188,20 @@ public class UserLoadBalance implements LoadBalance {
 //        return total / hiveInvokerInfo.rttCache.length;
 //    }
 
-    private int pickByWeight(int[] weightArray) {
-        int[] section = new int[weightArray.length];
-        int totalWeight = 0;
-        for (int i = 0; i < weightArray.length; i++) {
-            totalWeight += weightArray[i];
-            section[i] = totalWeight;
-        }
-
-        int random = ThreadLocalRandom.current().nextInt(totalWeight);
-        for (int i = 0; i < section.length; i++) {
-            if (random < section[i]) {
-                return i;
-            }
-        }
-        return 0;
-    }
+//    private int pickByWeight(int[] weightArray) {
+//        int[] section = new int[weightArray.length];
+//        int totalWeight = 0;
+//        for (int i = 0; i < weightArray.length; i++) {
+//            totalWeight += weightArray[i];
+//            section[i] = totalWeight;
+//        }
+//
+//        int random = ThreadLocalRandom.current().nextInt(totalWeight);
+//        for (int i = 0; i < section.length; i++) {
+//            if (random < section[i]) {
+//                return i;
+//            }
+//        }
+//        return 0;
+//    }
 }

@@ -12,14 +12,14 @@ public class HiveInvokerInfo {
     volatile String name;
     volatile Invoker invoker;
 
-    volatile long maxRequest = 0;
-    AtomicLong currentRequest = new AtomicLong(0);
+    volatile int maxRequest = 0;
+    AtomicLong pendingRequest = new AtomicLong(0);
 
     volatile AtomicInteger rttTotalTime = new AtomicInteger(0);
     volatile AtomicInteger rttTotalCount = new AtomicInteger(0);
     volatile int averageRtt = Integer.MAX_VALUE;
-    volatile double stressCoefficient = 0.5;
-
+//    volatile double stressCoefficient = 0.5;
+    volatile double weight=0;
 //    long[] rttCache = new long[20];
 //    AtomicInteger rttCacheIndex = new AtomicInteger(-1);
 //    final ReadWriteLock lock = new ReentrantReadWriteLock();
