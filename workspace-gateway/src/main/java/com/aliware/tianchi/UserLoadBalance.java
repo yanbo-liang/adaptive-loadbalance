@@ -69,7 +69,7 @@ public class UserLoadBalance implements LoadBalance {
         }
 
         double[] weightArray = infoList.stream().mapToDouble(x -> x.weight).toArray();
-        return invokers.get(pickByWeight(weightArray));
+        return infoList.get(pickByWeight(weightArray)).invoker;
 
 
 //        int[] weightArray = new int[sortedInfo.size()];
