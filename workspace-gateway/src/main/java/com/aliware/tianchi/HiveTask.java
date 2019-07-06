@@ -21,7 +21,7 @@ public class HiveTask implements Runnable {
         int totalMaxRequest = hiveInvokerInfos.stream().mapToInt(x -> x.maxRequest).sum();
 
         for (HiveInvokerInfo info : hiveInvokerInfos) {
-            info.weight = ((double) info.maxRequest) / totalMaxRequest;
+            info.weight = ((double) info.maxRequest) / (double)totalMaxRequest;
         }
         infoList = new ArrayList<>(UserLoadBalance.infoMap.values());
 
@@ -43,7 +43,7 @@ public class HiveTask implements Runnable {
                     long totalPendingRequests = Arrays.stream(pendingRequests).sum();
                     if (totalPendingRequests != 0) {
                         for (int i = 0; i < currentWeight.length; i++) {
-                            currentWeight[i] = pendingRequests[i] / totalPendingRequests;
+                            currentWeight[i] = ((double)pendingRequests[i]) / totalPendingRequests;
                         }
 
                         for (int i = 0; i < currentWeight.length; i++) {
