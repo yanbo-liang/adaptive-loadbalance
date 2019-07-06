@@ -53,6 +53,8 @@ public class HiveTask implements Runnable {
                             double tmp = (weights[i] + currentWeight[i]) / 2;
                             if (tmp>infoList.get(i).weightBound) {
                                 weights[i] =infoList.get(i).weightBound;
+                            }else{
+                                weights[i]=tmp;
                             }
                         }
                         System.out.println(Arrays.toString(weights));
