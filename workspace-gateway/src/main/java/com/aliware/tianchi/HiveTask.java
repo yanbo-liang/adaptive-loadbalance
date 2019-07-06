@@ -23,7 +23,9 @@ public class HiveTask implements Runnable {
         for (HiveInvokerInfo info : hiveInvokerInfos) {
             info.weight = ((double) info.maxRequest) / (double)totalMaxRequest;
             info.weightBound = info.weight;
+            System.out.println(info.toString());
         }
+
         infoList = new ArrayList<>(UserLoadBalance.infoMap.values());
 
         inited = true;
@@ -49,8 +51,8 @@ public class HiveTask implements Runnable {
 
                         for (int i = 0; i < currentWeight.length; i++) {
                             double tmp = (weights[i] + currentWeight[i]) / 2;
-                            if (tmp<infoList.get(i).weightBound) {
-                                weights[i] =tmp;
+                            if (tmp>infoList.get(i).weightBound) {
+                                weights[i] =infoList.get(i).weightBound;
                             }
                         }
                         System.out.println(Arrays.toString(weights));

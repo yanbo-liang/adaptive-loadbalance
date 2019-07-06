@@ -31,4 +31,19 @@ public class HiveInvokerInfo {
         this.name = host.substring(start + 1);
         this.invoker = invoker;
     }
+
+    @Override
+    public String toString() {
+        return "HiveInvokerInfo{" +
+                "name='" + name + '\'' +
+                ", invoker=" + invoker +
+                ", maxRequest=" + maxRequest +
+                ", pendingRequest=" + pendingRequest +
+                ", rttTotalTime=" + rttTotalTime +
+                ", rttTotalCount=" + rttTotalCount +
+                ", averageRtt=" + averageRtt +
+                ", weight=" + weight +
+                ", weightBound=" + weightBound +
+                '}';
+    }
 }

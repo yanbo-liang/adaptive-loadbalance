@@ -172,8 +172,14 @@ public class UserLoadBalance implements LoadBalance {
         }
 
         double random = ThreadLocalRandom.current().nextDouble(totalWeight);
+
+
         for (int i = 0; i < section.length; i++) {
             if (random < section[i]) {
+//                System.out.println(random);
+//                System.out.println(Arrays.toString(weightArray));
+//                System.out.println(Arrays.toString(section));
+//                System.out.println(i);
                 return i;
             }
         }
