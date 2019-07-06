@@ -61,7 +61,7 @@ public class HiveTask implements Runnable {
                     }
                 }
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(400);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
