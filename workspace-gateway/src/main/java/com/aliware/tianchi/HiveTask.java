@@ -21,7 +21,7 @@ public class HiveTask implements Runnable {
         int totalMaxRequest = hiveInvokerInfos.stream().mapToInt(x -> x.maxRequest).sum();
 
         for (HiveInvokerInfo info : hiveInvokerInfos) {
-            info.weight = ((double) info.maxRequest) / (double)totalMaxRequest;
+            info.weight = ((double) info.maxRequest) / (double) totalMaxRequest;
             info.weightBound = info.weight;
             System.out.println(info.toString());
         }
@@ -46,16 +46,23 @@ public class HiveTask implements Runnable {
                     long totalPendingRequests = Arrays.stream(pendingRequests).sum();
                     if (totalPendingRequests != 0) {
                         for (int i = 0; i < currentWeight.length; i++) {
-                            currentWeight[i] = ((double)pendingRequests[i]) / ((double)totalPendingRequests);
+                            currentWeight[i] = ((double) pendingRequests[i]) / ((double) totalPendingRequests);
                         }
 
                         for (int i = 0; i < currentWeight.length; i++) {
-                            double tmp = (weights[i] + currentWeight[i]) / 2;
-//                            if (tmp>infoList.get(i).weightBound) {
-//                                weights[i] =infoList.get(i).weightBound;
-//                            }else{
-                                weights[i]=tmp;
-//                            }
+                            if (currentWeight[i] < weights[i]) {
+                                //good
+                                weights[i] *= 1.05;
+                            } else {
+                                //bad
+                                weights[i] /= 1.05;
+                            }
+
+                        }
+
+                        double sum = Arrays.stream(weights).sum();
+                        for (int i = 0; i < currentWeight.length; i++) {
+                            weights[i] = weights[i] / sum;
                         }
                         System.out.println(Arrays.toString(weights));
                     }
