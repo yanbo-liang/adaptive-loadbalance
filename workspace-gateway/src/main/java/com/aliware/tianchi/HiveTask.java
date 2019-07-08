@@ -69,10 +69,10 @@ public class HiveTask implements Runnable {
                             }
                             if (info.upCount == 1) {
                                 info.upCount = 0;
-                                if (info.maxRequestCoefficient + 0.08 > 1) {
+                                if (info.maxRequestCoefficient + 0.05 > 1) {
                                     info.maxRequestCoefficient = 1;
                                 } else {
-                                    info.maxRequestCoefficient += 0.08;
+                                    info.maxRequestCoefficient += 0.05;
                                 }
                                 info.rttAverage = rttAverageNew;
                                 info.weight *= 1.1;
