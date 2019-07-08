@@ -8,6 +8,8 @@ public class HiveTask implements Runnable {
 
     static boolean inited = false;
 
+    static boolean tick = false;
+
     private void init() {
         if (inited) {
             return;
@@ -38,7 +40,7 @@ public class HiveTask implements Runnable {
 
             while (true) {
                 init();
-                if (inited) {
+                if (inited && tick) {
                     double[] weights = infoList.stream().mapToDouble(x -> x.weight).toArray();
                     double[] currentWeight = new double[infoList.size()];
 
@@ -53,7 +55,7 @@ public class HiveTask implements Runnable {
                             if (currentWeight[i] < weights[i]) {
                                 //good
                                 weights[i] *= 1.5;
-                            } else {
+                            } else if(currentWeight[i] > weights[i]) {
                                 //bad
                                 weights[i] /= 1.5;
                             }
@@ -68,11 +70,15 @@ public class HiveTask implements Runnable {
                     }
                 }
                 try {
-                    Thread.sleep(1);
+                    Thread.sleep(100);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
+                if (tick) {
+                    tick = false;
+                } else {
+                    tick = true;
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
