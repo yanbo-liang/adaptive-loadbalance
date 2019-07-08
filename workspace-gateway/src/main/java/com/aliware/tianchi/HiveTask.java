@@ -52,7 +52,7 @@ public class HiveTask implements Runnable {
                             rttAverageNew = (double) (rttTotalTime) / (double) (rttTotalCount);
                             if (rttAverageOld == 0D) {
                                 info.rttAverage = rttAverageNew;
-                            } else if (rttAverageOld * 0.9 < rttAverageNew && rttAverageNew < rttAverageOld * 1.1) {
+                            } else if (rttAverageOld * 0.9 < rttAverageNew & rttAverageNew < rttAverageOld * 1.1) {
                                 info.maxRequestCoefficient += 0.05;
                                 upCount = 0;
                                 downCount = 0;
@@ -66,10 +66,12 @@ public class HiveTask implements Runnable {
                             if (upCount == 2) {
                                 upCount = 0;
                                 info.maxRequestCoefficient += 0.1;
+                                info.rttAverage=rttAverageNew;
                             }
                             if (downCount == 2) {
                                 downCount = 0;
                                 info.maxRequestCoefficient -= 0.1;
+                                info.rttAverage=rttAverageNew;
                             }
                         }
                         System.out.println(rttAverageNew);
