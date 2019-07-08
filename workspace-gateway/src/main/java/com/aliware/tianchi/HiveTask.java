@@ -61,10 +61,9 @@ public class HiveTask implements Runnable {
                                 info.upCount = 0;
                                 info.downCount = 0;
                             } else if (rttAverageNew < rttAverageOld * 0.92) {
-//                                info.upCount += 1;
-//                                info.downCount = 0;
-                                info.upCount = 0;
-                                info.downCount += 1;
+                                info.upCount += 1;
+                                info.downCount = 0;
+
                             } else if (rttAverageNew > rttAverageOld * 1.08) {
                                 info.upCount = 0;
                                 info.downCount += 1;
