@@ -63,15 +63,11 @@ public class HiveTask implements Runnable {
                             } else if (rttAverageNew < rttAverageOld * 0.92) {
 //                                info.upCount += 1;
 //                                info.downCount = 0;
-                                info.maxRequestCoefficient = 0.6;
-                                info.rttAverage = rttAverageNew;
-
+                                info.upCount = 0;
+                                info.downCount += 1;
                             } else if (rttAverageNew > rttAverageOld * 1.08) {
-//                                info.upCount = 0;
-//                                info.downCount += 1;
-                                info.maxRequestCoefficient = 0.6;
-                                info.rttAverage = rttAverageNew;
-
+                                info.upCount = 0;
+                                info.downCount += 1;
                             }
                             if (info.upCount == 1) {
                                 info.upCount = 0;
