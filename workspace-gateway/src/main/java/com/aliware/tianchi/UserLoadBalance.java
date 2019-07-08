@@ -69,9 +69,25 @@ public class UserLoadBalance implements LoadBalance {
         }
 
         double[] weightArray = infoList.stream().mapToDouble(x -> x.weight).toArray();
-        return infoList.get(pickByWeight(weightArray)).invoker;
+        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
+
+        if (pickedInfo.pendingRequest.get() < pickedInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
+            return pickedInfo.invoker;
+        }
+        for (int i = 0; i < invokers.size(); i++) {
+            HiveInvokerInfo hiveInvokerInfo = infoList.get(i);
+            if (hiveInvokerInfo == pickedInfo) {
+                continue;
+            }
+            if (hiveInvokerInfo.pendingRequest.get() < hiveInvokerInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
+
+                return hiveInvokerInfo.invoker;
 
 
+            }
+        }
+
+return randomInvoker;
 //        int[] weightArray = new int[sortedInfo.size()];
 //        int subWeight = sortedInfo.size();
 //        for (
@@ -163,6 +179,7 @@ public class UserLoadBalance implements LoadBalance {
             }
         }
     }
+
     private int pickByWeight(double[] weightArray) {
         double[] section = new double[weightArray.length];
         double totalWeight = 0;
