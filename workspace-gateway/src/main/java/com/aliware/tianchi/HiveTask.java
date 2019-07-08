@@ -94,16 +94,33 @@ public class HiveTask implements Runnable {
                         info.rttTotalCount.updateAndGet(x -> 0);
                         info.rttTotalTime.updateAndGet(x -> 0);
 
+                        info.weight=info.weightBound;
 
                     }
                     infoList = infoList.stream().sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
-//                    double total = 0;
-//                    for (HiveInvokerInfo info : infoList) {
-//                        total += info.weight;
-//                    }
-//                    for (HiveInvokerInfo info : infoList) {
-//                        info.weight += info.weight / total;
-//                    }
+
+
+                    HiveInvokerInfo first = infoList.get(0);
+                    double expectRtt = first.rttAverage * (1 + (1 - first.maxRequestCoefficient) / first.maxRequestCoefficient);
+                    if (expectRtt < infoList.get(2).rttAverage) {
+                        first.weight *= 1.5;
+                    }
+                    HiveInvokerInfo second = infoList.get(1);
+                    double expectRttsecond = second.rttAverage * (1 + (1 - second.maxRequestCoefficient) / second.maxRequestCoefficient);
+                    if (expectRttsecond < infoList.get(2).rttAverage) {
+                        second.weight *= 1.5;
+                    }
+//
+//
+//
+//
+                    double total = 0;
+                    for (HiveInvokerInfo info : infoList) {
+                        total += info.weight;
+                    }
+                    for (HiveInvokerInfo info : infoList) {
+                        info.weight += info.weight / total;
+                    }
 
                 }
 
