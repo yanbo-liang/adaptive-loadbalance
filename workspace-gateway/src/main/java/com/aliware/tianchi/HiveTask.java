@@ -75,6 +75,7 @@ public class HiveTask implements Runnable {
                                     info.maxRequestCoefficient += 0.08;
                                 }
                                 info.rttAverage = rttAverageNew;
+                                info.weight *= 1.1;
                             }
                             if (info.downCount == 1) {
                                 info.downCount = 0;
@@ -84,6 +85,8 @@ public class HiveTask implements Runnable {
                                     info.maxRequestCoefficient -= 0.1;
                                 }
                                 info.rttAverage = rttAverageNew;
+                                info.weight /= 1.1;
+
                             }
                         }
                         System.out.println(rttAverageNew);
@@ -94,6 +97,13 @@ public class HiveTask implements Runnable {
 
                     }
                     infoList = infoList.stream().sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
+                    double total = 0;
+                    for (HiveInvokerInfo info : infoList) {
+                        total += info.weight;
+                    }
+                    for (HiveInvokerInfo info : infoList) {
+                        info.weight += info.weight / total;
+                    }
 
                 }
 
