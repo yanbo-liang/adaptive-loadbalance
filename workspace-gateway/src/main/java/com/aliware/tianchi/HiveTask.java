@@ -93,7 +93,7 @@ public class HiveTask implements Runnable {
 
 
                     }
-
+                    infoList = infoList.stream().sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
 
                 }
 
