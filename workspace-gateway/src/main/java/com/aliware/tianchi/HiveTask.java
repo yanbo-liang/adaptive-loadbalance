@@ -41,6 +41,7 @@ public class HiveTask implements Runnable {
             Thread.sleep(100);
             while (true) {
                 init();
+
                 if (inited) {
                     for (HiveInvokerInfo info : infoList) {
                         double rttAverageNew;
@@ -71,14 +72,15 @@ public class HiveTask implements Runnable {
                                 info.maxRequestCoefficient -= 0.1;
                             }
                         }
-
                     }
 
-
+                    for (HiveInvokerInfo invokerInfo:infoList){
+                        System.out.println(invokerInfo);
+                    }
                 }
+
+
                 Thread.sleep(100);
-
-
             }
         } catch (Exception e) {
             e.printStackTrace();
