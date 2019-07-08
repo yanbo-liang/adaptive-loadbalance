@@ -12,12 +12,15 @@ public class HiveInvokerInfo {
     volatile String name;
     volatile Invoker invoker;
 
+    volatile double maxRequestCoefficient = 0.5;
     volatile int maxRequest = 0;
     AtomicLong pendingRequest = new AtomicLong(0);
 
-    volatile AtomicInteger rttTotalTime = new AtomicInteger(0);
-    volatile AtomicInteger rttTotalCount = new AtomicInteger(0);
-    volatile int averageRtt = Integer.MAX_VALUE;
+    volatile AtomicLong rttTotalTime = new AtomicLong(0);
+    volatile AtomicLong rttTotalCount = new AtomicLong(0);
+    volatile double rttAverage = 0;
+
+
 //    volatile double stressCoefficient = 0.5;
     volatile double weight=0;
     volatile double weightBound = 0;
@@ -41,7 +44,6 @@ public class HiveInvokerInfo {
                 ", pendingRequest=" + pendingRequest +
                 ", rttTotalTime=" + rttTotalTime +
                 ", rttTotalCount=" + rttTotalCount +
-                ", averageRtt=" + averageRtt +
                 ", weight=" + weight +
                 ", weightBound=" + weightBound +
                 '}';

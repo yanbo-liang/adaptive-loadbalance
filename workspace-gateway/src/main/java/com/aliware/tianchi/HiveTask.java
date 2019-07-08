@@ -8,7 +8,6 @@ public class HiveTask implements Runnable {
 
     static boolean inited = false;
 
-    static boolean tick = false;
 
     private void init() {
         if (inited) {
@@ -33,52 +32,53 @@ public class HiveTask implements Runnable {
         inited = true;
     }
 
+    static int upCount = 0;
+    static int downCount = 0;
+
     @Override
     public void run() {
         try {
-            Thread.sleep(3000);
-
+            Thread.sleep(100);
             while (true) {
                 init();
-                if (inited && tick) {
-                    double[] weights = infoList.stream().mapToDouble(x -> x.weight).toArray();
-                    double[] currentWeight = new double[infoList.size()];
-
-                    long[] pendingRequests = infoList.stream().mapToLong(x -> x.pendingRequest.get()).toArray();
-                    long totalPendingRequests = Arrays.stream(pendingRequests).sum();
-                    if (totalPendingRequests != 0) {
-                        for (int i = 0; i < currentWeight.length; i++) {
-                            currentWeight[i] = ((double) pendingRequests[i]) / ((double) totalPendingRequests);
-                        }
-
-                        for (int i = 0; i < currentWeight.length; i++) {
-                            if (currentWeight[i] < weights[i]) {
-                                //good
-                                weights[i] *= 1.5;
-                            } else if(currentWeight[i] > weights[i]) {
-                                //bad
-                                weights[i] /= 1.5;
+                if (inited) {
+                    for (HiveInvokerInfo info : infoList) {
+                        double rttAverageNew;
+                        double rttAverageOld = info.rttAverage;
+                        long rttTotalCount = info.rttTotalCount.get();
+                        long rttTotalTime = info.rttTotalTime.get();
+                        if (rttTotalCount != 0) {
+                            rttAverageNew = (double) (rttTotalTime) / (double) (rttTotalCount);
+                            if (rttAverageOld == 0D) {
+                                info.rttAverage = rttAverageNew;
+                            } else if (rttAverageOld * 0.9 < rttAverageNew && rttAverageNew < rttAverageOld * 1.1) {
+                                info.maxRequestCoefficient += 0.05;
+                                upCount=0;
+                                downCount=0;
+                            } else if (rttAverageNew < rttAverageOld * 0.9) {
+                                upCount+=1;
+                                downCount=0;
+                            } else if (rttAverageNew > rttAverageOld * 1.1) {
+                                upCount=0;
+                                downCount+=1;
                             }
-
+                            if (upCount==2){
+                                upCount=0;
+                                info.maxRequestCoefficient += 0.1;
+                            }
+                            if (downCount==2){
+                                downCount=0;
+                                info.maxRequestCoefficient -= 0.1;
+                            }
                         }
 
-                        double sum = Arrays.stream(weights).sum();
-                        for (int i = 0; i < currentWeight.length; i++) {
-                            weights[i] = weights[i] / sum;
-                        }
-                        System.out.println(Arrays.toString(weights));
                     }
+
+
                 }
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (tick) {
-                    tick = false;
-                } else {
-                    tick = true;
-                }
+                Thread.sleep(100);
+
+
             }
         } catch (Exception e) {
             e.printStackTrace();

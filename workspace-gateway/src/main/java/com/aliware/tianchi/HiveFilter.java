@@ -14,16 +14,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class HiveFilter implements Filter {
     static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(2000, ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
-    static volatile boolean stress = false;
-
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         try {
             HiveInvokerInfo hiveInvokerInfo = UserLoadBalance.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
+
                 hiveInvokerInfo.pendingRequest.incrementAndGet();
 
                 rttMap.put(invocation, System.currentTimeMillis());
+
             }
             return invoker.invoke(invocation);
         } catch (Exception e) {
@@ -37,31 +37,20 @@ public class HiveFilter implements Filter {
         try {
             HiveInvokerInfo hiveInvokerInfo = UserLoadBalance.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
+
                 hiveInvokerInfo.pendingRequest.decrementAndGet();
+
                 Long start = rttMap.get(invocation);
                 if (start != null) {
-                    int rtt = (int) (System.currentTimeMillis() - start);
+                    long rtt = System.currentTimeMillis() - start;
 
-//                    if (stress) {
-//                        hiveInvokerInfo.rttTotalCount.incrementAndGet();
-//                        hiveInvokerInfo.rttTotalTime.updateAndGet(x -> x + rtt);
-//                    }
+                    hiveInvokerInfo.rttTotalCount.incrementAndGet();
+                    hiveInvokerInfo.rttTotalTime.updateAndGet(x -> x + rtt);
 
-//                    int index = hiveInvokerInfo.rttCacheIndex.updateAndGet(x -> {
-//                        if (x < 19) {
-//                            return x + 1;
-//                        } else {
-//                            return 0;
-//                        }
-//                    });
-////                    hiveInvokerInfo.lock.writeLock().lock();
-//                    hiveInvokerInfo.rttCache[index] = rtt;
-////                    hiveInvokerInfo.lock.writeLock().unlock();
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            System.exit(1);
         }
         return result;
     }
