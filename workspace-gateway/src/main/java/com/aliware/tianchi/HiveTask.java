@@ -32,8 +32,6 @@ public class HiveTask implements Runnable {
         inited = true;
     }
 
-    static int upCount = 0;
-    static int downCount = 0;
 
     @Override
     public void run() {
@@ -53,23 +51,23 @@ public class HiveTask implements Runnable {
                             if (rttAverageOld == 0D) {
                                 info.rttAverage = rttAverageNew;
                             } else if (rttAverageOld * 0.9 < rttAverageNew & rttAverageNew < rttAverageOld * 1.1) {
-                                info.maxRequestCoefficient += 0.05;
-                                upCount = 0;
-                                downCount = 0;
+                                info.maxRequestCoefficient += 0.03;
+                                info.upCount = 0;
+                                info.downCount = 0;
                             } else if (rttAverageNew < rttAverageOld * 0.9) {
-                                upCount += 1;
-                                downCount = 0;
+                                info.upCount += 1;
+                                info.downCount = 0;
                             } else if (rttAverageNew > rttAverageOld * 1.1) {
-                                upCount = 0;
-                                downCount += 1;
+                                info.upCount = 0;
+                                info.downCount += 1;
                             }
-                            if (upCount == 2) {
-                                upCount = 0;
+                            if (info.upCount == 2) {
+                                info.upCount = 0;
                                 info.maxRequestCoefficient += 0.1;
                                 info.rttAverage=rttAverageNew;
                             }
-                            if (downCount == 2) {
-                                downCount = 0;
+                            if (info.downCount == 2) {
+                                info.downCount = 0;
                                 info.maxRequestCoefficient -= 0.1;
                                 info.rttAverage=rttAverageNew;
                             }
@@ -86,7 +84,7 @@ public class HiveTask implements Runnable {
                 }
 
 
-                Thread.sleep(100);
+                Thread.sleep(150);
             }
         } catch (Exception e) {
             e.printStackTrace();
