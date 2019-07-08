@@ -51,10 +51,10 @@ public class HiveTask implements Runnable {
                             if (rttAverageOld == 0D) {
                                 info.rttAverage = rttAverageNew;
                             } else if (rttAverageOld * 0.92 < rttAverageNew & rttAverageNew < rttAverageOld * 1.08) {
-                                if (info.maxRequestCoefficient + 0.04 > 1) {
+                                if (info.maxRequestCoefficient + 0.02 > 1) {
                                     info.maxRequestCoefficient = 1;
                                 } else {
-                                    info.maxRequestCoefficient += 0.04;
+                                    info.maxRequestCoefficient += 0.02;
                                 }
                                 info.rttAverage = rttAverageNew;
 
