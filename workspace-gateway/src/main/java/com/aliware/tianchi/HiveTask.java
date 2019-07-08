@@ -42,7 +42,7 @@ public class HiveTask implements Runnable {
 
                 if (inited) {
                     for (HiveInvokerInfo info : infoList) {
-                        double rttAverageNew=0;
+                        double rttAverageNew = 0;
                         double rttAverageOld = info.rttAverage;
                         long rttTotalCount = info.rttTotalCount.get();
                         long rttTotalTime = info.rttTotalTime.get();
@@ -51,7 +51,12 @@ public class HiveTask implements Runnable {
                             if (rttAverageOld == 0D) {
                                 info.rttAverage = rttAverageNew;
                             } else if (rttAverageOld * 0.9 < rttAverageNew & rttAverageNew < rttAverageOld * 1.1) {
-                                info.maxRequestCoefficient += 0.03;
+                                if (info.maxRequestCoefficient + 0.03 > 1) {
+                                    info.maxRequestCoefficient = 1;
+                                } else {
+                                    info.maxRequestCoefficient += 0.03;
+                                }
+
                                 info.upCount = 0;
                                 info.downCount = 0;
                             } else if (rttAverageNew < rttAverageOld * 0.9) {
@@ -61,15 +66,23 @@ public class HiveTask implements Runnable {
                                 info.upCount = 0;
                                 info.downCount += 1;
                             }
-                            if (info.upCount == 2) {
+                            if (info.upCount == 1) {
                                 info.upCount = 0;
-                                info.maxRequestCoefficient += 0.1;
-                                info.rttAverage=rttAverageNew;
+                                if (info.maxRequestCoefficient + 0.1 > 1) {
+                                    info.maxRequestCoefficient = 1;
+                                } else {
+                                    info.maxRequestCoefficient += 0.1;
+                                }
+                                info.rttAverage = rttAverageNew;
                             }
-                            if (info.downCount == 2) {
+                            if (info.downCount == 1) {
                                 info.downCount = 0;
-                                info.maxRequestCoefficient -= 0.1;
-                                info.rttAverage=rttAverageNew;
+                                if (info.maxRequestCoefficient - 0.1 < 0.5) {
+                                    info.maxRequestCoefficient = 0.5;
+                                } else {
+                                    info.maxRequestCoefficient -= 0.1;
+                                }
+                                info.rttAverage = rttAverageNew;
                             }
                         }
                         System.out.println(rttAverageNew);
