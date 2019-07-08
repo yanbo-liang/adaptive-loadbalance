@@ -50,7 +50,7 @@ public class HiveTask implements Runnable {
                             rttAverageNew = (double) (rttTotalTime) / (double) (rttTotalCount);
                             if (rttAverageOld == 0D) {
                                 info.rttAverage = rttAverageNew;
-                            } else if (rttAverageOld * 0.9 < rttAverageNew & rttAverageNew < rttAverageOld * 1.1) {
+                            } else if (rttAverageOld * 0.92 < rttAverageNew & rttAverageNew < rttAverageOld * 1.08) {
                                 if (info.maxRequestCoefficient + 0.02 > 1) {
                                     info.maxRequestCoefficient = 1;
                                 } else {
@@ -60,19 +60,19 @@ public class HiveTask implements Runnable {
 
                                 info.upCount = 0;
                                 info.downCount = 0;
-                            } else if (rttAverageNew < rttAverageOld * 0.9) {
+                            } else if (rttAverageNew < rttAverageOld * 0.92) {
                                 info.upCount += 1;
                                 info.downCount = 0;
-                            } else if (rttAverageNew > rttAverageOld * 1.1) {
+                            } else if (rttAverageNew > rttAverageOld * 1.08) {
                                 info.upCount = 0;
                                 info.downCount += 1;
                             }
                             if (info.upCount == 1) {
                                 info.upCount = 0;
-                                if (info.maxRequestCoefficient + 0.05 > 1) {
+                                if (info.maxRequestCoefficient + 0.08 > 1) {
                                     info.maxRequestCoefficient = 1;
                                 } else {
-                                    info.maxRequestCoefficient += 0.05;
+                                    info.maxRequestCoefficient += 0.08;
                                 }
                                 info.rttAverage = rttAverageNew;
                             }
@@ -98,7 +98,7 @@ public class HiveTask implements Runnable {
                 }
 
 
-                Thread.sleep(150);
+                Thread.sleep(200);
             }
         } catch (Exception e) {
             e.printStackTrace();
