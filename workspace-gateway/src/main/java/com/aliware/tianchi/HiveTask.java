@@ -44,7 +44,7 @@ public class HiveTask implements Runnable {
 
                 if (inited) {
                     for (HiveInvokerInfo info : infoList) {
-                        double rttAverageNew;
+                        double rttAverageNew=0;
                         double rttAverageOld = info.rttAverage;
                         long rttTotalCount = info.rttTotalCount.get();
                         long rttTotalTime = info.rttTotalTime.get();
@@ -72,13 +72,15 @@ public class HiveTask implements Runnable {
                                 info.maxRequestCoefficient -= 0.1;
                             }
                         }
+                        System.out.println(rttAverageNew);
+                        System.out.println(info);
                         info.rttTotalCount.updateAndGet(x -> 0);
                         info.rttTotalTime.updateAndGet(x -> 0);
+
+
                     }
 
-                    for (HiveInvokerInfo invokerInfo : infoList) {
-                        System.out.println(invokerInfo);
-                    }
+
                 }
 
 
