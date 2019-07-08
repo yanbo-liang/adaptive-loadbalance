@@ -39,11 +39,12 @@ public class HiveInvokerInfo {
     public String toString() {
         return "HiveInvokerInfo{" +
                 "name='" + name + '\'' +
-                ", invoker=" + invoker +
+                ", maxRequestCoefficient=" + maxRequestCoefficient +
                 ", maxRequest=" + maxRequest +
                 ", pendingRequest=" + pendingRequest +
                 ", rttTotalTime=" + rttTotalTime +
                 ", rttTotalCount=" + rttTotalCount +
+                ", rttAverage=" + rttAverage +
                 ", weight=" + weight +
                 ", weightBound=" + weightBound +
                 '}';
