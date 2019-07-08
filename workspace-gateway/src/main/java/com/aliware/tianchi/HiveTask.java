@@ -105,12 +105,12 @@ public class HiveTask implements Runnable {
                     HiveInvokerInfo first = infoList.get(0);
                     double expectRtt = first.rttAverage * (1 + (1 - first.maxRequestCoefficient) / first.maxRequestCoefficient);
                     if (expectRtt < infoList.get(2).rttAverage) {
-                        first.weight *= 1.5;
+                        first.weight *= 2;
                     }
                     HiveInvokerInfo second = infoList.get(1);
                     double expectRttsecond = second.rttAverage * (1 + (1 - second.maxRequestCoefficient) / second.maxRequestCoefficient);
                     if (expectRttsecond < infoList.get(2).rttAverage) {
-                        second.weight *= 1.5;
+                        second.weight *= 2;
                     }
 //
 //
