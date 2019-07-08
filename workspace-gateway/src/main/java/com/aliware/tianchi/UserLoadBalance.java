@@ -68,28 +68,26 @@ public class UserLoadBalance implements LoadBalance {
             return randomInvoker;
         }
 
-//        double[] weightArray = infoList.stream().mapToDouble(x -> x.weight).toArray();
-//        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
+        double[] weightArray = infoList.stream().mapToDouble(x -> x.weight).toArray();
+        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
 
-        for (HiveInvokerInfo pickedInfo : infoList) {
-
-            if (pickedInfo.pendingRequest.get() < pickedInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
-                return pickedInfo.invoker;
+        if (pickedInfo.pendingRequest.get() < pickedInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
+            return pickedInfo.invoker;
+        }
+        for (int i = 0; i < invokers.size(); i++) {
+            HiveInvokerInfo hiveInvokerInfo = infoList.get(i);
+            if (hiveInvokerInfo == pickedInfo) {
+                continue;
             }
-            for (int i = 0; i < invokers.size(); i++) {
-                HiveInvokerInfo hiveInvokerInfo = infoList.get(i);
-                if (hiveInvokerInfo == pickedInfo) {
-                    continue;
-                }
-                if (hiveInvokerInfo.pendingRequest.get() < hiveInvokerInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
+            if (hiveInvokerInfo.pendingRequest.get() < hiveInvokerInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
 
-                    return hiveInvokerInfo.invoker;
+                return hiveInvokerInfo.invoker;
 
 
-                }
             }
         }
-        return randomInvoker;
+
+return randomInvoker;
 //        int[] weightArray = new int[sortedInfo.size()];
 //        int subWeight = sortedInfo.size();
 //        for (
