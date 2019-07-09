@@ -68,22 +68,24 @@ public class UserLoadBalance implements LoadBalance {
             return randomInvoker;
         }
 
-        double[] weightArray = infoList.stream().mapToDouble(x -> x.weight).toArray();
-        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
+//        double[] weightArray = infoList.stream().mapToDouble(x -> x.weight).toArray();
+//        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
 
-        if (pickedInfo.pendingRequest.get() < pickedInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
-            return pickedInfo.invoker;
-        }
-        for (int i = 0; i < invokers.size(); i++) {
-            HiveInvokerInfo hiveInvokerInfo = infoList.get(i);
-            if (hiveInvokerInfo == pickedInfo) {
-                continue;
+        for(HiveInvokerInfo pickedInfo:infoList) {
+            if (pickedInfo.pendingRequest.get() < pickedInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
+                return pickedInfo.invoker;
             }
-            if (hiveInvokerInfo.pendingRequest.get() < hiveInvokerInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
+            for (int i = 0; i < invokers.size(); i++) {
+                HiveInvokerInfo hiveInvokerInfo = infoList.get(i);
+                if (hiveInvokerInfo == pickedInfo) {
+                    continue;
+                }
+                if (hiveInvokerInfo.pendingRequest.get() < hiveInvokerInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
 
-                return hiveInvokerInfo.invoker;
+                    return hiveInvokerInfo.invoker;
 
 
+                }
             }
         }
 

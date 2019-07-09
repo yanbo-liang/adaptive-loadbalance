@@ -33,11 +33,9 @@ public class HiveTask implements Runnable {
         inited = true;
     }
 
-
     @Override
     public void run() {
         try {
-            Thread.sleep(100);
             while (true) {
                 init();
 
@@ -49,61 +47,106 @@ public class HiveTask implements Runnable {
                         long rttTotalTime = info.rttTotalTime.get();
                         if (rttTotalCount != 0) {
                             rttAverageNew = (double) (rttTotalTime) / (double) (rttTotalCount);
-                            if (rttAverageOld == 0D) {
-                                info.rttAverage = rttAverageNew;
-                            } else if (rttAverageOld * 0.95 < rttAverageNew & rttAverageNew < rttAverageOld * 1.05) {
-                                if (info.maxRequestCoefficient + 0.05 > 1) {
-                                    info.maxRequestCoefficient = 1;
-                                } else {
-                                    info.maxRequestCoefficient += 0.05;
-                                }
-                                info.rttAverage = rttAverageNew;
 
-                                info.upCount = 0;
-                                info.downCount = 0;
-                            } else if (rttAverageNew < rttAverageOld * 0.95) {
-                                info.upCount += 1;
-                                info.downCount = 0;
+                            info.rttAverage = rttAverageNew;
+                            info.maxRequestCoefficient = rttTotalCount / ((500 / info.rttAverage) * info.maxRequest);
 
-                            } else if (rttAverageNew > rttAverageOld * 1.05) {
-                                info.upCount = 0;
-                                info.downCount += 1;
-                            }
-                            if (info.upCount == 1) {
-                                info.upCount = 0;
-                                if (info.maxRequestCoefficient + 0.08 > 1) {
-                                    info.maxRequestCoefficient = 1;
-                                } else {
-                                    info.maxRequestCoefficient += 0.08;
-                                }
-                                info.rttAverage = rttAverageNew;
-//                                info.weight *= 1.1;
-                            }
-                            if (info.downCount == 1) {
-                                info.downCount = 0;
-                                if (info.maxRequestCoefficient - 0.1 < 0.5) {
-                                    info.maxRequestCoefficient = 0.5;
-                                } else {
-                                    info.maxRequestCoefficient -= 0.1;
-                                }
-                                info.rttAverage = rttAverageNew;
-//                                info.weight /= 1.1;
 
-                            }
                         }
-                        Date now = new Date( );
-                        SimpleDateFormat ft = new SimpleDateFormat ("hh:mm:ss");
-
-                        System.out.println(ft.format(now)+'-'+info);
                         info.rttTotalCount.updateAndGet(x -> 0);
                         info.rttTotalTime.updateAndGet(x -> 0);
-
-                        info.weight=info.weightBound;
-
                     }
-                    infoList = infoList.stream().sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
+                    boolean check = true;
+                    for (HiveInvokerInfo info : infoList) {
+                        if (info.rttAverage == 0D) {
+                            check = false;
+                            break;
+                        }
+                    }
+                    if (check) {
+                        infoList = infoList.stream().sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
+                    }
+
+                }
+                Thread.sleep(500);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
 
 
+//    @Override
+//    public void run() {
+//        try {
+//            Thread.sleep(100);
+//            while (true) {
+//                init();
+//
+//                if (inited) {
+//                    for (HiveInvokerInfo info : infoList) {
+//                        double rttAverageNew = 0;
+//                        double rttAverageOld = info.rttAverage;
+//                        long rttTotalCount = info.rttTotalCount.get();
+//                        long rttTotalTime = info.rttTotalTime.get();
+//                        if (rttTotalCount != 0) {
+//                            rttAverageNew = (double) (rttTotalTime) / (double) (rttTotalCount);
+//                            if (rttAverageOld == 0D) {
+//                                info.rttAverage = rttAverageNew;
+//                            } else if (rttAverageOld * 0.95 < rttAverageNew & rttAverageNew < rttAverageOld * 1.05) {
+//                                if (info.maxRequestCoefficient + 0.05 > 1) {
+//                                    info.maxRequestCoefficient = 1;
+//                                } else {
+//                                    info.maxRequestCoefficient += 0.05;
+//                                }
+//                                info.rttAverage = rttAverageNew;
+//
+//                                info.upCount = 0;
+//                                info.downCount = 0;
+//                            } else if (rttAverageNew < rttAverageOld * 0.95) {
+//                                info.upCount += 1;
+//                                info.downCount = 0;
+//
+//                            } else if (rttAverageNew > rttAverageOld * 1.05) {
+//                                info.upCount = 0;
+//                                info.downCount += 1;
+//                            }
+//                            if (info.upCount == 1) {
+//                                info.upCount = 0;
+//                                if (info.maxRequestCoefficient + 0.08 > 1) {
+//                                    info.maxRequestCoefficient = 1;
+//                                } else {
+//                                    info.maxRequestCoefficient += 0.08;
+//                                }
+//                                info.rttAverage = rttAverageNew;
+////                                info.weight *= 1.1;
+//                            }
+//                            if (info.downCount == 1) {
+//                                info.downCount = 0;
+//                                if (info.maxRequestCoefficient - 0.1 < 0.5) {
+//                                    info.maxRequestCoefficient = 0.5;
+//                                } else {
+//                                    info.maxRequestCoefficient -= 0.1;
+//                                }
+//                                info.rttAverage = rttAverageNew;
+////                                info.weight /= 1.1;
+//
+//                            }
+//                        }
+//                        Date now = new Date();
+//                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
+//
+//                        System.out.println(ft.format(now) + '-' + info);
+//                        info.rttTotalCount.updateAndGet(x -> 0);
+//                        info.rttTotalTime.updateAndGet(x -> 0);
+//
+//                        info.weight = info.weightBound;
+//
+//                    }
+//                    infoList = infoList.stream().sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
+//
+//                }
 //                    HiveInvokerInfo first = infoList.get(0);
 //                    double expectRtt = first.rttAverage * (1 + (1 - first.maxRequestCoefficient) / first.maxRequestCoefficient);
 //                    if (expectRtt < infoList.get(2).rttAverage) {
@@ -126,14 +169,12 @@ public class HiveTask implements Runnable {
 //                        info.weight += info.weight / total;
 //                    }
 
-                }
 
-
-                Thread.sleep(500);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//                Thread.sleep(500);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
 //        try {
 //            while (true) {
@@ -185,5 +226,5 @@ public class HiveTask implements Runnable {
 //                Exception e) {
 //            e.printStackTrace();
 //        }
-    }
-}
+//            }
+//        }

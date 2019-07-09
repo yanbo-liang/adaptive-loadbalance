@@ -12,7 +12,7 @@ public class HiveInvokerInfo {
     volatile String name;
     volatile Invoker invoker;
 
-    volatile double maxRequestCoefficient = 0.5;
+    volatile double maxRequestCoefficient = 1;
     volatile int maxRequest = 0;
     AtomicLong pendingRequest = new AtomicLong(0);
 
