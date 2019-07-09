@@ -1,5 +1,6 @@
 package com.aliware.tianchi;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -90,8 +91,10 @@ public class HiveTask implements Runnable {
 
                             }
                         }
-                        System.out.println(rttAverageNew);
-                        System.out.println(info);
+                        Date now = new Date( );
+                        SimpleDateFormat ft = new SimpleDateFormat ("hh:mm:ss");
+
+                        System.out.println(ft.format(now)+'-'+info);
                         info.rttTotalCount.updateAndGet(x -> 0);
                         info.rttTotalTime.updateAndGet(x -> 0);
 
