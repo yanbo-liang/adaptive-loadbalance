@@ -51,7 +51,7 @@ public class HiveTask implements Runnable {
                             rttAverageNew = (double) (rttTotalTime) / (double) (rttTotalCount);
                             if (rttAverageOld == 0D) {
                                 info.rttAverage = rttAverageNew;
-                            } else if (rttAverageOld * 0.92 < rttAverageNew & rttAverageNew < rttAverageOld * 1.08) {
+                            } else if (rttAverageOld * 0.95 < rttAverageNew & rttAverageNew < rttAverageOld * 1.05) {
                                 if (info.maxRequestCoefficient + 0.05 > 1) {
                                     info.maxRequestCoefficient = 1;
                                 } else {
@@ -61,11 +61,11 @@ public class HiveTask implements Runnable {
 
                                 info.upCount = 0;
                                 info.downCount = 0;
-                            } else if (rttAverageNew < rttAverageOld * 0.92) {
+                            } else if (rttAverageNew < rttAverageOld * 0.95) {
                                 info.upCount += 1;
                                 info.downCount = 0;
 
-                            } else if (rttAverageNew > rttAverageOld * 1.08) {
+                            } else if (rttAverageNew > rttAverageOld * 1.05) {
                                 info.upCount = 0;
                                 info.downCount += 1;
                             }
@@ -104,32 +104,32 @@ public class HiveTask implements Runnable {
                     infoList = infoList.stream().sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
 
 
-                    HiveInvokerInfo first = infoList.get(0);
-                    double expectRtt = first.rttAverage * (1 + (1 - first.maxRequestCoefficient) / first.maxRequestCoefficient);
-                    if (expectRtt < infoList.get(2).rttAverage) {
-                        first.weight *= 2;
-                    }
-                    HiveInvokerInfo second = infoList.get(1);
-                    double expectRttsecond = second.rttAverage * (1 + (1 - second.maxRequestCoefficient) / second.maxRequestCoefficient);
-                    if (expectRttsecond < infoList.get(2).rttAverage) {
-                        second.weight *= 2;
-                    }
+//                    HiveInvokerInfo first = infoList.get(0);
+//                    double expectRtt = first.rttAverage * (1 + (1 - first.maxRequestCoefficient) / first.maxRequestCoefficient);
+//                    if (expectRtt < infoList.get(2).rttAverage) {
+//                        first.weight *= 2;
+//                    }
+//                    HiveInvokerInfo second = infoList.get(1);
+//                    double expectRttsecond = second.rttAverage * (1 + (1 - second.maxRequestCoefficient) / second.maxRequestCoefficient);
+//                    if (expectRttsecond < infoList.get(2).rttAverage) {
+//                        second.weight *= 2;
+//                    }
 //
 //
 //
 //
-                    double total = 0;
-                    for (HiveInvokerInfo info : infoList) {
-                        total += info.weight;
-                    }
-                    for (HiveInvokerInfo info : infoList) {
-                        info.weight += info.weight / total;
-                    }
+//                    double total = 0;
+//                    for (HiveInvokerInfo info : infoList) {
+//                        total += info.weight;
+//                    }
+//                    for (HiveInvokerInfo info : infoList) {
+//                        info.weight += info.weight / total;
+//                    }
 
                 }
 
 
-                Thread.sleep(100);
+                Thread.sleep(500);
             }
         } catch (Exception e) {
             e.printStackTrace();
