@@ -56,6 +56,7 @@ public class HiveTask implements Runnable {
                         }
                         info.rttTotalCount.updateAndGet(x -> 0);
                         info.rttTotalTime.updateAndGet(x -> 0);
+                        System.out.println(info);
                     }
                     boolean check = true;
                     for (HiveInvokerInfo info : infoList) {
