@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class HiveTask implements Runnable {
 
     static boolean init = false;
-
+    static int count = 0;
 
     private boolean init() {
         if (init) {
@@ -41,6 +41,15 @@ public class HiveTask implements Runnable {
         try {
             while (true) {
                 if (init()) {
+                    count++;
+                    if (count == 5) {
+                        for (HiveInvokerInfo info : HiveCommon.infoList) {
+                            info.weight = info.weightBound;
+                        }
+                        count = 0;
+                        Thread.sleep(300);
+                        continue;
+                    }
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         long totalTime = info.totalTime.get();
                         long completedRequest = info.totalRequest.get();
