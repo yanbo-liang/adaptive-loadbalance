@@ -75,6 +75,7 @@ public class HiveTask implements Runnable {
                         info.totalTime.updateAndGet(x -> 0);
                         info.totalRequest.updateAndGet(x -> 0);
                     }
+                    System.out.println();
                 }
                 Thread.sleep(300);
             }
