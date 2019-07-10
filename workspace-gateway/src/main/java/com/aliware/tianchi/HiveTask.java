@@ -1,8 +1,10 @@
 package com.aliware.tianchi;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 public class HiveTask implements Runnable {
@@ -42,8 +44,7 @@ public class HiveTask implements Runnable {
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         long totalTime = info.totalTime.get();
                         long completedRequest = info.totalRequest.get();
-                        info.totalTime.updateAndGet(x -> 0);
-                        info.totalRequest.updateAndGet(x -> 0);
+
                         if (completedRequest != 0) {
                             info.rttAverage = ((double) totalTime) / completedRequest;
                         }
@@ -65,7 +66,14 @@ public class HiveTask implements Runnable {
                         } else {
                             info.weight = 0;
                         }
-                        System.out.println(info);
+
+                    }
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        Date now = new Date();
+                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
+                        System.out.println(ft.format(now) + '-' + info);
+                        info.totalTime.updateAndGet(x -> 0);
+                        info.totalRequest.updateAndGet(x -> 0);
                     }
                 }
                 Thread.sleep(300);
@@ -180,10 +188,7 @@ public class HiveTask implements Runnable {
 //
 //                            }
 //                        }
-//                        Date now = new Date();
-//                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
-//
-//                        System.out.println(ft.format(now) + '-' + info);
+
 //                        info.totalRequest.updateAndGet(x -> 0);
 //                        info.totalTime.updateAndGet(x -> 0);
 //
