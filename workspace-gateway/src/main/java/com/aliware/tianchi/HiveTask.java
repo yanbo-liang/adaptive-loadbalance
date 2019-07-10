@@ -1,82 +1,126 @@
 package com.aliware.tianchi;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 public class HiveTask implements Runnable {
-    static volatile List<HiveInvokerInfo> infoList;
 
-    static boolean inited = false;
+    static boolean init = false;
 
 
-    private void init() {
-        if (inited) {
-            return;
-        }
-        Collection<HiveInvokerInfo> hiveInvokerInfos = UserLoadBalance.infoMap.values();
-        for (HiveInvokerInfo info : hiveInvokerInfos) {
-            if (info.maxRequest == 0) {
-                return;
+    private boolean init() {
+        if (init) {
+            return true;
+        } else {
+            Collection<HiveInvokerInfo> hiveInvokerInfos = HiveCommon.infoMap.values();
+            for (HiveInvokerInfo info : hiveInvokerInfos) {
+                if (info.maxPendingRequest == 0) {
+                    return false;
+                }
             }
+            int totalMaxRequest = hiveInvokerInfos.stream().mapToInt(x -> x.maxPendingRequest).sum();
+
+            for (HiveInvokerInfo info : hiveInvokerInfos) {
+                info.weight = ((double) info.maxPendingRequest) / (double) totalMaxRequest;
+                info.weightBound = info.weight;
+            }
+
+            HiveCommon.infoList = new ArrayList<>(HiveCommon.infoMap.values());
+
+            init = true;
+            return true;
         }
-        int totalMaxRequest = hiveInvokerInfos.stream().mapToInt(x -> x.maxRequest).sum();
-
-        for (HiveInvokerInfo info : hiveInvokerInfos) {
-            info.weight = ((double) info.maxRequest) / (double) totalMaxRequest;
-            info.weightBound = info.weight;
-            System.out.println(info.toString());
-        }
-
-        infoList = new ArrayList<>(UserLoadBalance.infoMap.values());
-
-        inited = true;
     }
 
     @Override
     public void run() {
         try {
-            Thread.sleep(30000);
             while (true) {
-                init();
-
-                if (inited) {
-                    for (HiveInvokerInfo info : infoList) {
-                        double rttAverageNew = 0;
-                        double rttAverageOld = info.rttAverage;
-                        long rttTotalCount = info.rttTotalCount.get();
-                        long rttTotalTime = info.rttTotalTime.get();
-                        if (rttTotalCount != 0) {
-                            rttAverageNew = (double) (rttTotalTime) / (double) (rttTotalCount);
-
-                            info.rttAverage = rttAverageNew;
-                            info.maxRequestCoefficient = rttTotalCount / ((500 / info.rttAverage) * info.maxRequest);
-
-
+                if (init()) {
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        long totalTime = info.totalTime.get();
+                        long completedRequest = info.totalRequest.get();
+                        info.totalTime.updateAndGet(x -> 0);
+                        info.totalRequest.updateAndGet(x -> 0);
+                        if (completedRequest != 0) {
+                            info.rttAverage = ((double) totalTime) / completedRequest;
                         }
-                        info.rttTotalCount.updateAndGet(x -> 0);
-                        info.rttTotalTime.updateAndGet(x -> 0);
+                    }
+                    HiveCommon.infoList = HiveCommon.infoList.stream()
+                            .sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
+
+                    boolean done = false;
+                    int remain = 1024;
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        if (!done) {
+                            if (remain > info.maxPendingRequest) {
+                                info.weight = info.maxPendingRequest / ((double) 1024);
+                                remain -= info.maxPendingRequest;
+                            } else if (remain <= info.maxPendingRequest) {
+                                info.weight = remain / ((double) 1024);
+                                done = true;
+                            }
+                        } else {
+                            info.weight = 0;
+                        }
                         System.out.println(info);
                     }
-                    boolean check = true;
-                    for (HiveInvokerInfo info : infoList) {
-                        if (info.rttAverage == 0D) {
-                            check = false;
-                            break;
-                        }
-                    }
-                    if (check) {
-                        infoList = infoList.stream().sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
-                    }
-
                 }
-                Thread.sleep(500);
+                Thread.sleep(300);
             }
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             e.printStackTrace();
         }
     }
 }
+//}
+//    @Override
+//    public void run() {
+//        try {
+//            while (true) {
+//                System.out.println(HiveCommon.pendingRequestTotal.get());
+////                init();
+////
+////                if (inited) {
+////                    for (HiveInvokerInfo info : infoList) {
+////                        double rttAverageNew = 0;
+////                        double rttAverageOld = info.rttAverage;
+////                        long totalRequest = info.totalRequest.get();
+////                        long totalTime = info.totalTime.get();
+////                        if (totalRequest != 0) {
+////                            rttAverageNew = (double) (totalTime) / (double) (totalRequest);
+////
+////                            info.rttAverage = rttAverageNew;
+////                            info.maxRequestCoefficient = totalRequest / ((500 / info.rttAverage) * info.maxPendingRequest);
+////
+////
+////                        }
+////                        info.totalRequest.updateAndGet(x -> 0);
+////                        info.totalTime.updateAndGet(x -> 0);
+////                        System.out.println(info);
+////                    }
+////                    boolean check = true;
+////                    for (HiveInvokerInfo info : infoList) {
+////                        if (info.rttAverage == 0D) {
+////                            check = false;
+////                            break;
+////                        }
+////                    }
+////                    if (check) {
+////                        infoList = infoList.stream().sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
+////                    }
+////
+////                }
+//                Thread.sleep(10);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+//}
 
 
 //    @Override
@@ -90,10 +134,10 @@ public class HiveTask implements Runnable {
 //                    for (HiveInvokerInfo info : infoList) {
 //                        double rttAverageNew = 0;
 //                        double rttAverageOld = info.rttAverage;
-//                        long rttTotalCount = info.rttTotalCount.get();
-//                        long rttTotalTime = info.rttTotalTime.get();
-//                        if (rttTotalCount != 0) {
-//                            rttAverageNew = (double) (rttTotalTime) / (double) (rttTotalCount);
+//                        long totalRequest = info.totalRequest.get();
+//                        long totalTime = info.totalTime.get();
+//                        if (totalRequest != 0) {
+//                            rttAverageNew = (double) (totalTime) / (double) (totalRequest);
 //                            if (rttAverageOld == 0D) {
 //                                info.rttAverage = rttAverageNew;
 //                            } else if (rttAverageOld * 0.95 < rttAverageNew & rttAverageNew < rttAverageOld * 1.05) {
@@ -140,8 +184,8 @@ public class HiveTask implements Runnable {
 //                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
 //
 //                        System.out.println(ft.format(now) + '-' + info);
-//                        info.rttTotalCount.updateAndGet(x -> 0);
-//                        info.rttTotalTime.updateAndGet(x -> 0);
+//                        info.totalRequest.updateAndGet(x -> 0);
+//                        info.totalTime.updateAndGet(x -> 0);
 //
 //                        info.weight = info.weightBound;
 //
@@ -194,13 +238,13 @@ public class HiveTask implements Runnable {
 //                        Thread.sleep(15);
 //                        UserLoadBalance.stress = false;
 //                        HiveFilter.stress = false;
-//                        int rttTotalCount = hiveInvokerInfo.rttTotalCount.get();
-//                        if (rttTotalCount == 0) {
+//                        int totalRequest = hiveInvokerInfo.totalRequest.get();
+//                        if (totalRequest == 0) {
 //                            continue;
 //                        }
-//                        int average = hiveInvokerInfo.rttTotalTime.get() / hiveInvokerInfo.rttTotalCount.get();
-//                        hiveInvokerInfo.rttTotalTime.updateAndGet(x -> 0);
-//                        hiveInvokerInfo.rttTotalCount.updateAndGet(x -> 0);
+//                        int average = hiveInvokerInfo.totalTime.get() / hiveInvokerInfo.totalRequest.get();
+//                        hiveInvokerInfo.totalTime.updateAndGet(x -> 0);
+//                        hiveInvokerInfo.totalRequest.updateAndGet(x -> 0);
 //
 //                        if (j != 0) {
 //

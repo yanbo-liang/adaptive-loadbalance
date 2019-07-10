@@ -2,32 +2,23 @@ package com.aliware.tianchi;
 
 import org.apache.dubbo.rpc.Invoker;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class HiveInvokerInfo {
+    String name;
+    Invoker invoker;
 
-    volatile String name;
-    volatile Invoker invoker;
-
-    volatile double maxRequestCoefficient = 1;
-    volatile int maxRequest = 0;
+    //    volatile double maxRequestCoefficient = 1;
     AtomicLong pendingRequest = new AtomicLong(0);
+    volatile int maxPendingRequest = 0;
 
-    volatile AtomicLong rttTotalTime = new AtomicLong(0);
-    volatile AtomicLong rttTotalCount = new AtomicLong(0);
+
+    AtomicLong totalTime = new AtomicLong(0);
+    AtomicLong totalRequest = new AtomicLong(0);
     volatile double rttAverage = 0;
-    volatile int upCount = 0;
-    volatile int downCount = 0;
 
-
-//    volatile double stressCoefficient = 0.5;
-    volatile double weight=0;
+    volatile double weight = 0;
     volatile double weightBound = 0;
-//    long[] rttCache = new long[20];
-//    AtomicInteger rttCacheIndex = new AtomicInteger(-1);
 //    final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public HiveInvokerInfo(Invoker invoker) {
@@ -41,11 +32,10 @@ public class HiveInvokerInfo {
     public String toString() {
         return "HiveInvokerInfo{" +
                 "name='" + name + '\'' +
-                ", maxRequestCoefficient=" + maxRequestCoefficient +
-                ", maxRequest=" + maxRequest +
+                ", maxPendingRequest=" + maxPendingRequest +
                 ", pendingRequest=" + pendingRequest +
-                ", rttTotalTime=" + rttTotalTime +
-                ", rttTotalCount=" + rttTotalCount +
+                ", totalTime=" + totalTime +
+                ", totalRequest=" + totalRequest +
                 ", rttAverage=" + rttAverage +
                 ", weight=" + weight +
                 ", weightBound=" + weightBound +

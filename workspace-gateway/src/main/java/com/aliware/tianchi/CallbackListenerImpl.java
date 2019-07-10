@@ -18,9 +18,9 @@ public class CallbackListenerImpl implements CallbackListener {
         if (index != -1) {
             String name = msg.substring(0, index);
             int maxRequest = Integer.valueOf(msg.substring(index + 1));
-            UserLoadBalance.infoMap.forEach((k, v) -> {
+            HiveCommon.infoMap.forEach((k, v) -> {
                 if (v.name.equals(name)) {
-                    v.maxRequest = maxRequest;
+                    v.maxPendingRequest = maxRequest;
                 }
             });
         }

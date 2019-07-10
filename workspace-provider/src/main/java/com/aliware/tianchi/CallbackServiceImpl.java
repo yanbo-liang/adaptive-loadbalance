@@ -3,16 +3,12 @@ package com.aliware.tianchi;
 import org.apache.dubbo.common.Constants;
 import org.apache.dubbo.common.extension.ExtensionLoader;
 import org.apache.dubbo.common.store.DataStore;
-import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.listener.CallbackListener;
 import org.apache.dubbo.rpc.service.CallbackService;
-import org.apache.dubbo.rpc.support.RpcUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
 
 /**
  * @author daofeng.xjf
@@ -42,7 +38,7 @@ public class CallbackServiceImpl implements CallbackService {
                     }
                 }
             }
-        }, 0, 1000);
+        }, 0, 2000);
     }
 
     private Timer timer = new Timer();

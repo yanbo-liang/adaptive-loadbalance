@@ -3,26 +3,21 @@ package com.aliware.tianchi;
 import org.apache.dubbo.common.Constants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
-import org.springframework.util.ConcurrentReferenceHashMap;
-
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Activate(group = Constants.CONSUMER)
 public class HiveFilter implements Filter {
-    static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(2000, ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         try {
-            HiveInvokerInfo hiveInvokerInfo = UserLoadBalance.infoMap.get(invoker.getUrl());
+            HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
+
+                HiveCommon.pendingRequestTotal.incrementAndGet();
 
                 hiveInvokerInfo.pendingRequest.incrementAndGet();
 
-                rttMap.put(invocation, System.currentTimeMillis());
+                HiveCommon.rttMap.put(invocation, System.currentTimeMillis());
 
             }
             return invoker.invoke(invocation);
@@ -35,18 +30,23 @@ public class HiveFilter implements Filter {
     @Override
     public Result onResponse(Result result, Invoker<?> invoker, Invocation invocation) {
         try {
-            HiveInvokerInfo hiveInvokerInfo = UserLoadBalance.infoMap.get(invoker.getUrl());
+            HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
-
-                hiveInvokerInfo.pendingRequest.decrementAndGet();
-
-                Long start = rttMap.get(invocation);
+                Invocation a = invocation;
+                a.getArguments();
+                Long start = HiveCommon.rttMap.get(invocation);
                 if (start != null) {
                     long rtt = System.currentTimeMillis() - start;
 
-                    hiveInvokerInfo.rttTotalCount.incrementAndGet();
-                    hiveInvokerInfo.rttTotalTime.updateAndGet(x -> x + rtt);
+                    hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
 
+                    HiveCommon.pendingRequestTotal.decrementAndGet();
+
+                    hiveInvokerInfo.pendingRequest.decrementAndGet();
+
+                    hiveInvokerInfo.totalRequest.incrementAndGet();
+                }else{
+                    System.out.println("fuck");
                 }
             }
         } catch (Exception e) {

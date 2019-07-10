@@ -8,38 +8,62 @@ import org.apache.dubbo.rpc.cluster.LoadBalance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 public class UserLoadBalance implements LoadBalance {
     private static final AtomicBoolean inited = new AtomicBoolean(false);
-    static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(UserLoadBalance.class);
 
     static volatile HiveInvokerInfo stressInvokerInfo = null;
     static volatile boolean stress = false;
 
-    static ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
         init(invokers);
         Invoker<T> randomInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+        if (infoList == null) {
+            return randomInvoker;
+        }
+
+        double[] weightArray = infoList.stream().mapToDouble(x -> x.weight).toArray();
+
+        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
+
+        return pickedInfo.invoker;
+
+    }
+//        if (pickedInfo.pendingRequest.get() < pickedInfo.maxPendingRequest) {
+//            return pickedInfo.invoker;
+//        }
+//        for (int i = 0; i < invokers.size(); i++) {
+//            HiveInvokerInfo hiveInvokerInfo = infoList.get(i);
+//            if (hiveInvokerInfo == pickedInfo) {
+//                continue;
+//            }
+//            if (hiveInvokerInfo.pendingRequest.get() < hiveInvokerInfo.maxPendingRequest) {
+//
+//                return hiveInvokerInfo.invoker;
+//
+//
+//            }
+//        }
+
+
+//        return randomInvoker;
 
 //        Collection<HiveInvokerInfo> infos = infoMap.values();
 //        for (HiveInvokerInfo info : infos) {
-//            if (info.maxRequest == 0) {
+//            if (info.maxPendingRequest == 0) {
 //                return randomInvoker;
 //            }
 //        }
 //
 //        if (stress && stressInvokerInfo != null) {
-//            if (stressInvokerInfo.currentRequest.get() < stressInvokerInfo.maxRequest * stressInvokerInfo.stressCoefficient) {
+//            if (stressInvokerInfo.currentRequest.get() < stressInvokerInfo.maxPendingRequest * stressInvokerInfo.stressCoefficient) {
 //                return stressInvokerInfo.invoker;
 //            }
 //            else {
@@ -49,7 +73,7 @@ public class UserLoadBalance implements LoadBalance {
 //                    if (stressInvokerInfo.invoker.getUrl().equals(info.invoker.getUrl())) {
 //                        continue;
 //                    }
-//                    if (info.currentRequest.get() < info.maxRequest) {
+//                    if (info.currentRequest.get() < info.maxPendingRequest) {
 //                        return info.invoker;
 //                    }
 //                }
@@ -63,39 +87,14 @@ public class UserLoadBalance implements LoadBalance {
 ////            x.lock.readLock().unlock();
 //            return tmp;
 //        })).collect(Collectors.toList());
-        List<HiveInvokerInfo> infoList = HiveTask.infoList;
-        if (infoList == null) {
-            return randomInvoker;
-        }
-
-//        double[] weightArray = infoList.stream().mapToDouble(x -> x.weight).toArray();
-//        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
-
-        for(HiveInvokerInfo pickedInfo:infoList) {
-            if (pickedInfo.pendingRequest.get() < pickedInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
-                return pickedInfo.invoker;
-            }
-            for (int i = 0; i < invokers.size(); i++) {
-                HiveInvokerInfo hiveInvokerInfo = infoList.get(i);
-                if (hiveInvokerInfo == pickedInfo) {
-                    continue;
-                }
-                if (hiveInvokerInfo.pendingRequest.get() < hiveInvokerInfo.maxRequest * pickedInfo.maxRequestCoefficient) {
-
-                    return hiveInvokerInfo.invoker;
 
 
-                }
-            }
-        }
-
-return randomInvoker;
 //        int[] weightArray = new int[sortedInfo.size()];
 //        int subWeight = sortedInfo.size();
 //        for (
 //                int i = 0; i < sortedInfo.size(); i++) {
-////            weightArray[i] = (int) sortedInfo.get(i).maxRequest / 10 * (10 + subWeight - i - 1);
-//            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
+////            weightArray[i] = (int) sortedInfo.get(i).maxPendingRequest / 10 * (10 + subWeight - i - 1);
+//            weightArray[i] = (int) sortedInfo.get(i).maxPendingRequest * (subWeight - i);
 //
 ////            weightArray[i] = sortedInfo.size()-i;
 //        }
@@ -103,7 +102,7 @@ return randomInvoker;
 //        HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
 
 //        for (HiveInvokerInfo pickedInvoker : sortedInfo) {
-//        if (pickedInvoker.currentRequest.get() < pickedInvoker.maxRequest * pickedInvoker.stressCoefficient) {
+//        if (pickedInvoker.currentRequest.get() < pickedInvoker.maxPendingRequest * pickedInvoker.stressCoefficient) {
 //            return pickedInvoker.invoker;
 //        }
 //        for (
@@ -112,7 +111,7 @@ return randomInvoker;
 //            if (hiveInvokerInfo.invoker.getUrl().equals(pickedInvoker.invoker.getUrl())) {
 //                continue;
 //            }
-//            if (hiveInvokerInfo.currentRequest.get() < hiveInvokerInfo.maxRequest * hiveInvokerInfo.stressCoefficient) {
+//            if (hiveInvokerInfo.currentRequest.get() < hiveInvokerInfo.maxPendingRequest * hiveInvokerInfo.stressCoefficient) {
 //                return hiveInvokerInfo.invoker;
 //            }
 //        }
@@ -129,11 +128,11 @@ return randomInvoker;
 //        int[] weightArray = new int[sortedInfo.size()];
 //        int subWeight = sortedInfo.size();
 //        for (int i = 0; i < sortedInfo.size(); i++) {
-//            if (sortedInfo.get(i).maxRequest == -1) {
+//            if (sortedInfo.get(i).maxPendingRequest == -1) {
 //                return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
 //            }
 //
-//            weightArray[i] = (int) sortedInfo.get(i).maxRequest * (subWeight - i);
+//            weightArray[i] = (int) sortedInfo.get(i).maxPendingRequest * (subWeight - i);
 //
 ////            weightArray[i] = (subWeight - i);
 //            HiveInvokerInfo targetInfo = sortedInfo.get(i);
@@ -151,7 +150,7 @@ return randomInvoker;
 //        HiveInvokerInfo a = sortedInfo.get(index);
 //
 //
-//        if (a.currentRequest.get() < (long) (a.maxRequest)) {
+//        if (a.currentRequest.get() < (long) (a.maxPendingRequest)) {
 //            return a.invoker;
 //        }
 //        for (int i = 0; i < invokers.size(); i++) {
@@ -159,7 +158,7 @@ return randomInvoker;
 //            if (hiveInvokerInfo == a) {
 //                continue;
 //            }
-//            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxRequest)) {
+//            if (hiveInvokerInfo.currentRequest.get() < (long) (hiveInvokerInfo.maxPendingRequest)) {
 //
 //                return hiveInvokerInfo.invoker;
 //
@@ -168,16 +167,15 @@ return randomInvoker;
 //        }
 //
 
-    }
 
     private <T> void init(List<Invoker<T>> invokers) {
         if (!inited.get()) {
             if (inited.compareAndSet(false, true)) {
                 for (Invoker<T> invoker : invokers) {
-                    infoMap.put(invoker.getUrl(), new HiveInvokerInfo(invoker));
+                    HiveCommon.infoMap.put(invoker.getUrl(), new HiveInvokerInfo(invoker));
                 }
                 HiveTask task = new HiveTask();
-                executorService.execute(task);
+                HiveCommon.executorService.execute(task);
             }
         }
     }
@@ -191,7 +189,6 @@ return randomInvoker;
         }
 
         double random = ThreadLocalRandom.current().nextDouble(totalWeight);
-
 
         for (int i = 0; i < section.length; i++) {
             if (random < section[i]) {
