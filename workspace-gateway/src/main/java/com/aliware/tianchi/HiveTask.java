@@ -41,15 +41,21 @@ public class HiveTask implements Runnable {
         try {
             while (true) {
                 if (init()) {
-                    count++;
-                    if (count == 5) {
+//                    count++;
+//                    if (count == 31) {
                         for (HiveInvokerInfo info : HiveCommon.infoList) {
                             info.weight = info.weightBound;
+                            Date now = new Date();
+                            SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
+                            System.out.println(ft.format(now) + '-' + info);
+
                         }
+                        System.out.println("reset");
+
                         count = 0;
-                        Thread.sleep(300);
-                        continue;
-                    }
+                        Thread.sleep(1000);
+//                        continue;
+
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         long totalTime = info.totalTime.get();
                         long completedRequest = info.totalRequest.get();
@@ -86,7 +92,7 @@ public class HiveTask implements Runnable {
                     }
                     System.out.println();
                 }
-                Thread.sleep(300);
+                Thread.sleep(5000);
             }
         } catch (
                 Exception e) {
