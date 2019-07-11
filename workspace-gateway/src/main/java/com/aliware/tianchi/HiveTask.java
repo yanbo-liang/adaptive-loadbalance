@@ -40,15 +40,16 @@ public class HiveTask implements Runnable {
     public void run() {
         SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
         System.out.println("!!!!!!!start!!!!!1" + ft.format(new Date()));
+        long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (init()) {
+                if (init() && System.currentTimeMillis() > (start + (30 * 1000))) {
                     System.out.println("reset");
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         info.weight = info.weightBound;
                         info.totalTime.updateAndGet(x -> 0);
                         info.totalRequest.updateAndGet(x -> 0);
-                        info.rttAverage=0;
+                        info.rttAverage = 0;
                         System.out.println(ft.format(new Date()) + '-' + info);
                     }
 
@@ -97,7 +98,7 @@ public class HiveTask implements Runnable {
                         System.out.println(ft.format(new Date()) + '-' + info);
                     }
                 } else {
-                    Thread.sleep(10);
+                    Thread.sleep(1);
                 }
             }
         } catch (
