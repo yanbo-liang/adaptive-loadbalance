@@ -71,14 +71,14 @@ public class HiveTask implements Runnable {
                             .sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
 
                     boolean done = false;
-                    int remain = 1024;
+                    int remain = 1100;
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         if (!done) {
                             if (remain > info.maxPendingRequest) {
-                                info.weight = info.maxPendingRequest / ((double) 1024);
+                                info.weight = info.maxPendingRequest / ((double) 1100);
                                 remain -= info.maxPendingRequest;
                             } else if (remain <= info.maxPendingRequest) {
-                                info.weight = remain / ((double) 1024);
+                                info.weight = remain / ((double) 1100);
                                 done = true;
                             }
                         } else {
