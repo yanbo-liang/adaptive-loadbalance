@@ -38,6 +38,8 @@ public class HiveTask implements Runnable {
 
     @Override
     public void run() {
+        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
+        System.out.println("!!!!!!!start!!!!!1" + ft.format(new Date()));
         try {
             while (true) {
                 if (init()) {
@@ -46,7 +48,7 @@ public class HiveTask implements Runnable {
                         info.weight = info.weightBound;
                         info.totalTime.updateAndGet(x -> 0);
                         info.totalRequest.updateAndGet(x -> 0);
-                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
+                        info.rttAverage=0;
                         System.out.println(ft.format(new Date()) + '-' + info);
                     }
 
@@ -60,7 +62,6 @@ public class HiveTask implements Runnable {
                         if (completedRequest != 0) {
                             info.rttAverage = ((double) totalTime) / completedRequest;
                         }
-                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
                         System.out.println(ft.format(new Date()) + '-' + info);
                         info.totalTime.updateAndGet(x -> 0);
                         info.totalRequest.updateAndGet(x -> 0);
@@ -93,7 +94,6 @@ public class HiveTask implements Runnable {
                         if (completedRequest != 0) {
                             info.rttAverage = ((double) totalTime) / completedRequest;
                         }
-                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
                         System.out.println(ft.format(new Date()) + '-' + info);
                     }
                 } else {
