@@ -29,7 +29,10 @@ public class UserLoadBalance implements LoadBalance {
             return randomInvoker;
         }
 
-        double[] weightArray = infoList.stream().mapToDouble(x -> x.weight).toArray();
+        double[] weightArray = new double[infoList.size()];
+        for (int i = 0; i < weightArray.length; i++) {
+            weightArray[i] = infoList.get(i).weight;
+        }
 
         HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
 
