@@ -43,11 +43,11 @@ public class HiveTask implements Runnable {
                 if (init()) {
                     System.out.println("reset");
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
-                        System.out.println(ft.format(new Date()) + '-' + info);
                         info.weight = info.weightBound;
                         info.totalTime.updateAndGet(x -> 0);
                         info.totalRequest.updateAndGet(x -> 0);
+                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
+                        System.out.println(ft.format(new Date()) + '-' + info);
                     }
 
                     Thread.sleep(1000);
@@ -62,6 +62,8 @@ public class HiveTask implements Runnable {
                         }
                         SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
                         System.out.println(ft.format(new Date()) + '-' + info);
+                        info.totalTime.updateAndGet(x -> 0);
+                        info.totalRequest.updateAndGet(x -> 0);
                     }
                     HiveCommon.infoList = HiveCommon.infoList.stream()
                             .sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
@@ -85,6 +87,12 @@ public class HiveTask implements Runnable {
                     Thread.sleep(5000);
                     System.out.println("send result");
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        long totalTime = info.totalTime.get();
+                        long completedRequest = info.totalRequest.get();
+
+                        if (completedRequest != 0) {
+                            info.rttAverage = ((double) totalTime) / completedRequest;
+                        }
                         SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
                         System.out.println(ft.format(new Date()) + '-' + info);
                     }
