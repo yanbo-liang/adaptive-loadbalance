@@ -32,8 +32,6 @@ public class HiveFilter implements Filter {
         try {
             HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
-                Invocation a = invocation;
-                a.getArguments();
                 Long start = HiveCommon.rttMap.get(invocation);
                 if (start != null) {
                     long rtt = System.currentTimeMillis() - start;

@@ -39,23 +39,19 @@ public class HiveTask implements Runnable {
     @Override
     public void run() {
         try {
-            Thread.sleep(1000);
             while (true) {
                 if (init()) {
-//                    count++;
-//                    if (count == 31) {
-                        for (HiveInvokerInfo info : HiveCommon.infoList) {
-                            info.weight = info.weightBound;
-                            Date now = new Date();
-                            SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
-                            System.out.println(ft.format(now) + '-' + info);
+                    System.out.println("reset");
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
+                        System.out.println(ft.format(new Date()) + '-' + info);
+                        info.weight = info.weightBound;
+                        info.totalTime.updateAndGet(x -> 0);
+                        info.totalRequest.updateAndGet(x -> 0);
+                    }
 
-                        }
-                        System.out.println("reset");
-
-                        count = 0;
-                        Thread.sleep(1000);
-//                        continue;
+                    Thread.sleep(1000);
+                    System.out.println("reset result");
 
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         long totalTime = info.totalTime.get();
@@ -64,6 +60,8 @@ public class HiveTask implements Runnable {
                         if (completedRequest != 0) {
                             info.rttAverage = ((double) totalTime) / completedRequest;
                         }
+                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
+                        System.out.println(ft.format(new Date()) + '-' + info);
                     }
                     HiveCommon.infoList = HiveCommon.infoList.stream()
                             .sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
@@ -84,16 +82,15 @@ public class HiveTask implements Runnable {
                         }
 
                     }
+                    Thread.sleep(5000);
+                    System.out.println("send result");
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        Date now = new Date();
-                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
-                        System.out.println(ft.format(now) + '-' + info);
-                        info.totalTime.updateAndGet(x -> 0);
-                        info.totalRequest.updateAndGet(x -> 0);
+                        SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss SSS");
+                        System.out.println(ft.format(new Date()) + '-' + info);
                     }
-                    System.out.println();
+                } else {
+                    Thread.sleep(10);
                 }
-                Thread.sleep(5000);
             }
         } catch (
                 Exception e) {
