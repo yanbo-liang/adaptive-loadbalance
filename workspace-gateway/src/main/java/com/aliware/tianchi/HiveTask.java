@@ -126,6 +126,9 @@ public class HiveTask implements Runnable {
                     info.weight = info.weight + change / bad.size();
                 }
             }
+            System.out.println(good);
+            System.out.println(bad);
+
         }
     }
 
