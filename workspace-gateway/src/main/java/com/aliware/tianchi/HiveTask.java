@@ -37,7 +37,7 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (init() && System.currentTimeMillis() > (start + (30 * 1000)+1300)) {
+                if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 50)) {
                     clearWeightAndAverage();
                     clearTotal();
                     Thread.sleep(300);
@@ -74,9 +74,10 @@ public class HiveTask implements Runnable {
                     calculateProbingAverage(false, false);
                     log("even down");
 
-                    clearWeightAndAverage();
+                    clearWeight();
+                    mainCalculation();
                     clearTotal();
-                    Thread.sleep(4490);
+                    Thread.sleep(4500);
                     calculateAverage();
                     log("result");
 
@@ -90,6 +91,43 @@ public class HiveTask implements Runnable {
         }
     }
 
+    private void mainCalculation() {
+        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+        List<HiveInvokerInfo> good = new ArrayList<>();
+        List<HiveInvokerInfo> bad = new ArrayList<>();
+
+        for (HiveInvokerInfo info : infoList) {
+            if (info.rttAverageUpper < info.rttAverage * 1.15) {
+                good.add(info);
+            } else if (info.rttAverageDowner < info.rttAverage / 1.1) {
+                bad.add(info);
+            }
+        }
+        if (good.size() != 0 && bad.size() != 0) {
+            int goodsum = good.stream().mapToInt(x -> x.maxPendingRequest).sum();
+            int badsum = bad.stream().mapToInt(x -> x.maxPendingRequest).sum();
+            double change = 0;
+            if (goodsum < badsum) {
+                for (HiveInvokerInfo info : good) {
+                    double newweight = info.weight * 1.1;
+                    change += (newweight - info.weight);
+                    info.weight = newweight;
+                }
+                for (HiveInvokerInfo info : bad) {
+                    info.weight = info.weight - change / bad.size();
+                }
+            } else {
+                for (HiveInvokerInfo info : bad) {
+                    double newweight = info.weight / 1.1;
+                    change += info.weight - newweight;
+                    info.weight = newweight;
+                }
+                for (HiveInvokerInfo info : good) {
+                    info.weight = info.weight + change / bad.size();
+                }
+            }
+        }
+    }
 
     private double weightChangeSum(boolean odd, boolean up) {
         List<HiveInvokerInfo> infoList = HiveCommon.infoList;
