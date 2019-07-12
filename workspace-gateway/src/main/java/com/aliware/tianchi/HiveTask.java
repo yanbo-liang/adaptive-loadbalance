@@ -37,7 +37,7 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (init() && System.currentTimeMillis() > (start + (30 * 1000))) {
+                if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 50)) {
                     clearWeightAndAverage();
                     clearTotal();
                     Thread.sleep(200);
