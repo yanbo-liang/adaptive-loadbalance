@@ -48,34 +48,34 @@ public class HiveTask implements Runnable {
                     clearWeight();
                     weightChangeDistribute(false, false, weightChangeSum(true, true));
                     clearTotal();
-                    Thread.sleep(200);
+                    Thread.sleep(300);
                     calculateProbingAverage(true, true);
                     log("odd up");
 
                     clearWeight();
                     weightChangeDistribute(false, true, weightChangeSum(true, false));
                     clearTotal();
-                    Thread.sleep(200);
+                    Thread.sleep(300);
                     calculateProbingAverage(true, false);
                     log("odd down");
 
                     clearWeight();
                     weightChangeDistribute(true, false, weightChangeSum(false, true));
                     clearTotal();
-                    Thread.sleep(200);
+                    Thread.sleep(300);
                     calculateProbingAverage(false, true);
                     log("even up");
 
                     clearWeight();
                     weightChangeDistribute(true, true, weightChangeSum(false, false));
                     clearTotal();
-                    Thread.sleep(200);
+                    Thread.sleep(300);
                     calculateProbingAverage(false, false);
                     log("even down");
 
                     clearWeightAndAverage();
                     clearTotal();
-                    Thread.sleep(4890);
+                    Thread.sleep(4490);
                     calculateAverage();
                     log("result");
 
