@@ -37,7 +37,7 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (init() && System.currentTimeMillis() > (start + (30 * 1000)+800)) {
+                if (init() && System.currentTimeMillis() > (start + (30 * 1000)+1300)) {
                     clearWeightAndAverage();
                     clearTotal();
                     Thread.sleep(300);
@@ -145,8 +145,10 @@ public class HiveTask implements Runnable {
     private void calculateAverage() {
         List<HiveInvokerInfo> infoList = HiveCommon.infoList;
         for (HiveInvokerInfo info : infoList) {
+            info.lock.writeLock().lock();
             long totalTime = info.totalTime.get();
             long completedRequest = info.totalRequest.get();
+            info.lock.writeLock().unlock();
             if (completedRequest != 0) {
                 info.rttAverage = ((double) totalTime) / completedRequest;
             }
@@ -157,8 +159,10 @@ public class HiveTask implements Runnable {
         List<HiveInvokerInfo> infoList = HiveCommon.infoList;
         for (int i = odd ? 0 : 1; i < infoList.size(); i += 2) {
             HiveInvokerInfo info = infoList.get(i);
+            info.lock.writeLock().lock();
             long totalTime = info.totalTime.get();
             long completedRequest = info.totalRequest.get();
+            info.lock.writeLock().unlock();
             if (completedRequest != 0) {
                 if (up) {
                     info.rttAverageUpper = ((double) totalTime) / completedRequest;

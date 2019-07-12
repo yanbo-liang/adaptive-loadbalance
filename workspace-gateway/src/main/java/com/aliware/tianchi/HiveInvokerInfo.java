@@ -3,6 +3,8 @@ package com.aliware.tianchi;
 import org.apache.dubbo.rpc.Invoker;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class HiveInvokerInfo {
     String name;
@@ -21,6 +23,9 @@ public class HiveInvokerInfo {
 
     volatile double weight = 0;
     volatile double weightInitial = 0;
+
+     ReadWriteLock lock = new ReentrantReadWriteLock();
+
 
     public HiveInvokerInfo(Invoker invoker) {
         String host = invoker.getUrl().getHost();
@@ -45,6 +50,5 @@ public class HiveInvokerInfo {
                 '}';
     }
 //    volatile double maxRequestCoefficient = 1;
-    //    final ReadWriteLock lock = new ReentrantReadWriteLock();
 
 }
