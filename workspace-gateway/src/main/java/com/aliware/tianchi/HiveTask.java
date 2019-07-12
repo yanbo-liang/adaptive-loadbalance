@@ -44,24 +44,28 @@ public class HiveTask implements Runnable {
                     calculateAverage();
                     log("normal weight");
 
+                    clearWeight();
                     weightChangeDistribute(false, false, weightChangeSum(true, true));
                     clearTotal();
                     Thread.sleep(200);
                     calculateProbingAverage(true, true);
                     log("odd up");
 
+                    clearWeight();
                     weightChangeDistribute(false, true, weightChangeSum(true, false));
                     clearTotal();
                     Thread.sleep(200);
                     calculateProbingAverage(true, false);
                     log("odd down");
 
+                    clearWeight();
                     weightChangeDistribute(true, false, weightChangeSum(false, true));
                     clearTotal();
                     Thread.sleep(200);
                     calculateProbingAverage(false, true);
                     log("even up");
 
+                    clearWeight();
                     weightChangeDistribute(true, true, weightChangeSum(false, false));
                     clearTotal();
                     Thread.sleep(200);
@@ -168,6 +172,13 @@ public class HiveTask implements Runnable {
         for (HiveInvokerInfo info : infoList) {
             info.totalTime.updateAndGet(x -> 0);
             info.totalRequest.updateAndGet(x -> 0);
+        }
+    }
+
+    private void clearWeight() {
+        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+        for (HiveInvokerInfo info : infoList) {
+            info.weight = info.weightInitial;
         }
     }
 
