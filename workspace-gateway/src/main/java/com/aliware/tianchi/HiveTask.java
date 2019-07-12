@@ -37,10 +37,11 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 50)) {
+                if (init() && System.currentTimeMillis() > (start + (30 * 1000))) {
+                    Thread.sleep(10);
                     clearWeightAndAverage();
                     clearTotal();
-                    Thread.sleep(200);
+                    Thread.sleep(300);
                     calculateAverage();
                     log("normal weight");
 
@@ -74,7 +75,7 @@ public class HiveTask implements Runnable {
 
                     clearWeightAndAverage();
                     clearTotal();
-                    Thread.sleep(5000);
+                    Thread.sleep(4890);
                     calculateAverage();
                     log("result");
 
@@ -94,7 +95,7 @@ public class HiveTask implements Runnable {
         double totalChange = 0D;
         for (int i = odd ? 0 : 1; i < infoList.size(); i += 2) {
             HiveInvokerInfo info = infoList.get(i);
-            double newWeight = up ? info.weight * 1.1 : info.weight / 1.1;
+            double newWeight = up ? info.weight * 1.15 : info.weight / 1.15;
             totalChange += up ? newWeight - info.weight : info.weight - newWeight;
             info.weight = newWeight;
         }
