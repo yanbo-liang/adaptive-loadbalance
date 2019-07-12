@@ -4,6 +4,7 @@ import org.apache.dubbo.common.URL;
 import org.apache.dubbo.rpc.Invocation;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -17,6 +18,7 @@ public class HiveCommon {
     static final AtomicInteger pendingRequestTotal = new AtomicInteger(0);
     static volatile List<HiveInvokerInfo> infoList;
     static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    static final SimpleDateFormat format = new SimpleDateFormat("mm:ss:SSS");
 
 
 }
