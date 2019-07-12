@@ -114,7 +114,7 @@ public class HiveTask implements Runnable {
             total += info.weight;
         }
         for (HiveInvokerInfo info : infoList) {
-            info.weight += info.weight / total;
+            info.weight = info.weight / total;
         }
     }
 
