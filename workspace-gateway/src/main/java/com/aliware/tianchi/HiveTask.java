@@ -22,6 +22,7 @@ public class HiveTask implements Runnable {
             for (HiveInvokerInfo info : hiveInvokerInfos) {
                 info.weight = ((double) info.maxPendingRequest) / (double) totalMaxRequest;
                 info.weightInitial = info.weight;
+                info.currentWeight = info.weight;
             }
 
             HiveCommon.infoList = new ArrayList<>(HiveCommon.infoMap.values());
@@ -38,45 +39,60 @@ public class HiveTask implements Runnable {
         try {
             while (true) {
                 if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 50)) {
+                    UserLoadBalance.selectLock.writeLock().lock();
                     clearWeightAndAverage();
                     clearTotal();
+                    setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
                     Thread.sleep(300);
                     calculateAverage();
                     log("normal weight");
 
+                    UserLoadBalance.selectLock.writeLock().lock();
                     clearWeight();
                     weightChangeDistribute(false, false, weightChangeSum(true, true));
                     clearTotal();
+                    setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
                     Thread.sleep(300);
                     calculateProbingAverage(true, true);
                     log("odd up");
 
-
+                    UserLoadBalance.selectLock.writeLock().lock();
                     clearWeight();
                     weightChangeDistribute(true, false, weightChangeSum(false, true));
                     clearTotal();
+                    setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
                     Thread.sleep(300);
                     calculateProbingAverage(false, true);
                     log("even up");
 
+                    UserLoadBalance.selectLock.writeLock().lock();
                     clearWeight();
                     weightChangeDistribute(false, true, weightChangeSum(true, false));
                     clearTotal();
                     Thread.sleep(300);
+                    setCurrentWeight();
                     calculateProbingAverage(true, false);
                     log("odd down");
 
-
+                    UserLoadBalance.selectLock.writeLock().lock();
                     clearWeight();
                     weightChangeDistribute(true, true, weightChangeSum(false, false));
                     clearTotal();
+                    setCurrentWeight();
                     Thread.sleep(300);
+                    UserLoadBalance.selectLock.writeLock().unlock();
                     calculateProbingAverage(false, false);
                     log("even down");
 
+                    UserLoadBalance.selectLock.writeLock().lock();
                     clearWeight();
                     mainCalculation();
                     clearTotal();
+                    setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
                     Thread.sleep(4500);
                     calculateAverage();
                     log("result");
@@ -88,6 +104,13 @@ public class HiveTask implements Runnable {
         } catch (
                 Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void setCurrentWeight() {
+        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+        for (HiveInvokerInfo info : infoList) {
+            info.currentWeight=info.weight;
         }
     }
 

@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class UserLoadBalance implements LoadBalance {
     private static final AtomicBoolean inited = new AtomicBoolean(false);
@@ -18,6 +20,7 @@ public class UserLoadBalance implements LoadBalance {
 
     static volatile HiveInvokerInfo stressInvokerInfo = null;
     static volatile boolean stress = false;
+    static ReadWriteLock selectLock = new ReentrantReadWriteLock();
 
 
     @Override
@@ -28,17 +31,34 @@ public class UserLoadBalance implements LoadBalance {
         if (infoList == null) {
             return randomInvoker;
         }
-
-        double[] weightArray = new double[infoList.size()];
-        for (int i = 0; i < weightArray.length; i++) {
-            weightArray[i] = infoList.get(i).weight;
+        selectLock.writeLock().lock();
+        double maxCurrentWeight = -10D;
+        HiveInvokerInfo maxInfo = null;
+        for (HiveInvokerInfo info : infoList) {
+            if (maxCurrentWeight < info.currentWeight) {
+                maxCurrentWeight = info.currentWeight;
+                maxInfo = info;
+            }
         }
+        maxInfo.currentWeight = maxInfo.currentWeight - 1;
+        for (HiveInvokerInfo info : infoList) {
+            info.currentWeight = info.weight + info.currentWeight;
+        }
+        selectLock.writeLock().unlock();
 
-        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
-
-        return pickedInfo.invoker;
-
+        return maxInfo.invoker;
+//        double[] weightArray = new double[infoList.size()];
+//        for (int i = 0; i < weightArray.length; i++) {
+//            weightArray[i] = infoList.get(i).weight;
+//        }
+//
+//        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
+//
+//        return pickedInfo.invoker;
     }
+
+
+
 //        if (pickedInfo.pendingRequest.get() < pickedInfo.maxPendingRequest) {
 //            return pickedInfo.invoker;
 //        }
