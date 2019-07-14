@@ -31,10 +31,17 @@ public class HiveTask implements Runnable {
             return true;
         }
     }
+
     private void distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight) {
         double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
         for (HiveInvokerInfo info : infoList) {
-            info.weight = info.weight + (info.weight / weightSum) * distributedWeight;
+
+            double newWeight = info.weight + (info.weight / weightSum) * distributedWeight;
+            if (newWeight>info.weightInitial){
+                continue;
+            }
+            info.weight =newWeight;
+
         }
     }
 
@@ -48,11 +55,11 @@ public class HiveTask implements Runnable {
     private void a() {
         List<HiveInvokerInfo> infoList = HiveCommon.infoList;
         if (infoList == null) {
-            return ;
+            return;
         }
         double invokerAverage = 0;
         for (HiveInvokerInfo info : infoList) {
-            if (info.rttAverage==0){
+            if (info.rttAverage == 0) {
                 return;
             }
             invokerAverage += info.rttAverage * info.weight;
@@ -76,8 +83,10 @@ public class HiveTask implements Runnable {
             distributeWeightDown(aboveList, aboveWeight * 0.03);
             distributeWeightUp(belowList, aboveWeight * 0.03);
         }
+        weightNormalize();
         setCurrentWeight();
     }
+
     @Override
     public void run() {
         System.out.println("!!!!!!!!!!!!!!!!!!!!task start at " + HiveCommon.format.format(new Date()));
@@ -88,7 +97,7 @@ public class HiveTask implements Runnable {
                     UserLoadBalance.selectLock.writeLock().lock();
                     a();
                     UserLoadBalance.selectLock.writeLock().unlock();
-                                        Thread.sleep(200);
+                    Thread.sleep(200);
 
 //                if (init() && System.currentTimeMillis() > start) {
 //                    UserLoadBalance.selectLock.writeLock().lock();
