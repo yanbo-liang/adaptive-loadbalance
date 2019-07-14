@@ -61,7 +61,6 @@ public class HiveFilter implements Filter {
                     if (full) {
                         UserLoadBalance.selectLock.writeLock().lock();
                         a();
-                        setCurrentWeight();
                         UserLoadBalance.selectLock.writeLock().unlock();
                     }
 
@@ -129,6 +128,7 @@ public class HiveFilter implements Filter {
             distributeWeightDown(aboveList, aboveWeight * 0.05);
             distributeWeightUp(belowList, aboveWeight * 0.05);
         }
+        setCurrentWeight();
     }
 
     private void weightDistributeToFastest() {
