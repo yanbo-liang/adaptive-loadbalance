@@ -31,7 +31,7 @@ public class UserLoadBalance implements LoadBalance {
         if (infoList == null) {
             return randomInvoker;
         }
-//        selectLock.writeLock().lock();
+        selectLock.writeLock().lock();
         double maxCurrentWeight = -10D;
         HiveInvokerInfo maxInfo = null;
         for (HiveInvokerInfo info : infoList) {
@@ -44,7 +44,7 @@ public class UserLoadBalance implements LoadBalance {
         for (HiveInvokerInfo info : infoList) {
             info.currentWeight = info.weight + info.currentWeight;
         }
-//        selectLock.writeLock().unlock();
+        selectLock.writeLock().unlock();
 
         return maxInfo.invoker;
 

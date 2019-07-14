@@ -4,6 +4,9 @@ import org.apache.dubbo.common.Constants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Activate(group = Constants.CONSUMER)
 public class HiveFilter implements Filter {
 
@@ -40,7 +43,8 @@ public class HiveFilter implements Filter {
 //                    hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
 //                    hiveInvokerInfo.totalRequest.incrementAndGet();
 //                    hiveInvokerInfo.lock.readLock().unlock();
-//                    hiveInvokerInfo.lock.writeLock().lock();
+                    boolean full = false;
+                    hiveInvokerInfo.lock.writeLock().lock();
 
                     hiveInvokerInfo.totalTime += rtt;
                     hiveInvokerInfo.totalRequest += 1;
@@ -50,9 +54,15 @@ public class HiveFilter implements Filter {
                         hiveInvokerInfo.totalTime = 0;
                         hiveInvokerInfo.totalRequest = 0;
                         System.out.println(hiveInvokerInfo);
+                        full = true;
                     }
+                    hiveInvokerInfo.lock.writeLock().unlock();
 
-//                    hiveInvokerInfo.lock.writeLock().unlock();
+                    if (full) {
+                        UserLoadBalance.selectLock.writeLock().lock();
+                        a();
+                        UserLoadBalance.selectLock.writeLock().unlock();
+                    }
 
                     HiveCommon.pendingRequestTotal.decrementAndGet();
 
@@ -66,5 +76,67 @@ public class HiveFilter implements Filter {
             e.printStackTrace();
         }
         return result;
+    }
+
+    private void distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight) {
+        double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
+        for (HiveInvokerInfo info : infoList) {
+            info.weight = info.weight + (info.weight / weightSum) * distributedWeight;
+        }
+    }
+
+    private void distributeWeightDown(List<HiveInvokerInfo> infoList, double distributedWeight) {
+        double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
+        for (HiveInvokerInfo info : infoList) {
+            info.weight = info.weight - (info.weight / weightSum) * distributedWeight;
+        }
+    }
+
+    private void a() {
+        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+        if (infoList == null) {
+            return ;
+        }
+        double invokerAverage = 0;
+        for (HiveInvokerInfo info : infoList) {
+            invokerAverage += info.rttAverage * info.weight;
+        }
+        List<HiveInvokerInfo> belowList = new ArrayList<>();
+        List<HiveInvokerInfo> aboveList = new ArrayList<>();
+
+        for (HiveInvokerInfo info : infoList) {
+            if (info.rttAverage < invokerAverage) {
+                belowList.add(info);
+            } else {
+                aboveList.add(info);
+            }
+        }
+        double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
+        double aboveWeight = aboveList.stream().mapToDouble(x -> x.weight).sum();
+        if (belowWeight < aboveWeight) {
+            distributeWeightDown(belowList, belowWeight * 0.05);
+            distributeWeightUp(aboveList, belowWeight * 0.05);
+        } else {
+            distributeWeightDown(aboveList, aboveWeight * 0.05);
+            distributeWeightUp(belowList, aboveWeight * 0.05);
+        }
+    }
+
+    private void weightDistributeToFastest() {
+        boolean done = false;
+        int remain = 1024;
+        for (HiveInvokerInfo info : HiveCommon.infoList) {
+            if (!done) {
+                if (remain > info.maxPendingRequest) {
+                    info.weight = info.maxPendingRequest / ((double) 1024);
+                    remain -= info.maxPendingRequest;
+                } else if (remain <= info.maxPendingRequest) {
+                    info.weight = remain / ((double) 1024);
+                    done = true;
+                }
+            } else {
+                info.weight = 0;
+            }
+        }
     }
 }
