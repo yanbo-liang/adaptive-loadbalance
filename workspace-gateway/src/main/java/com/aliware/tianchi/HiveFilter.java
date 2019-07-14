@@ -32,6 +32,9 @@ public class HiveFilter implements Filter {
 
     @Override
     public Result onResponse(Result result, Invoker<?> invoker, Invocation invocation) {
+        if (result.hasException()){
+            return result;
+        }
         try {
             HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
