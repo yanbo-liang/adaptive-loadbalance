@@ -38,8 +38,8 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-//                if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 50)) {
-                    if (init() && System.currentTimeMillis() > start) {
+                if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 50)) {
+//                    if (init() && System.currentTimeMillis() > start) {
 
                         UserLoadBalance.selectLock.writeLock().lock();
                     clearWeightAndAverage();
