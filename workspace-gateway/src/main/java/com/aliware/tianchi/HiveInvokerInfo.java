@@ -14,8 +14,10 @@ public class HiveInvokerInfo {
     volatile int maxPendingRequest = 0;
 
 
-    AtomicLong totalTime = new AtomicLong(0);
-    AtomicLong totalRequest = new AtomicLong(0);
+    //    AtomicLong totalTime = new AtomicLong(0);
+//    AtomicLong totalRequest = new AtomicLong(0);
+    volatile long totalTime = 0;
+    volatile long totalRequest = 0;
 
     volatile double rttAverage = 0;
     double rttAverageUpper = 0;
@@ -23,8 +25,8 @@ public class HiveInvokerInfo {
 
     volatile double weight = 0;
     volatile double weightInitial = 0;
-    volatile double currentWeight=0;
-     ReadWriteLock lock = new ReentrantReadWriteLock();
+    volatile double currentWeight = 0;
+    ReadWriteLock lock = new ReentrantReadWriteLock();
 
 
     public HiveInvokerInfo(Invoker invoker) {

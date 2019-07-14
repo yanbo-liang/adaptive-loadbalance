@@ -36,17 +36,29 @@ public class HiveFilter implements Filter {
                 if (start != null) {
                     long rtt = System.currentTimeMillis() - start;
 
-                    hiveInvokerInfo.lock.readLock().lock();
-                    hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
-                    hiveInvokerInfo.totalRequest.incrementAndGet();
-                    hiveInvokerInfo.lock.readLock().unlock();
+//                    hiveInvokerInfo.lock.readLock().lock();
+//                    hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
+//                    hiveInvokerInfo.totalRequest.incrementAndGet();
+//                    hiveInvokerInfo.lock.readLock().unlock();
+                    hiveInvokerInfo.lock.writeLock().lock();
 
+                    hiveInvokerInfo.totalTime += rtt;
+                    hiveInvokerInfo.totalRequest += 1;
+
+                    if (hiveInvokerInfo.totalRequest == 500) {
+                        hiveInvokerInfo.rttAverage = ((double) hiveInvokerInfo.totalTime) / hiveInvokerInfo.totalRequest;
+                        hiveInvokerInfo.totalTime = 0;
+                        hiveInvokerInfo.totalRequest = 0;
+                        System.out.println(hiveInvokerInfo);
+                    }
+
+                    hiveInvokerInfo.lock.writeLock().unlock();
 
                     HiveCommon.pendingRequestTotal.decrementAndGet();
 
                     hiveInvokerInfo.pendingRequest.decrementAndGet();
 
-                }else{
+                } else {
                     System.out.println("fuck");
                 }
             }

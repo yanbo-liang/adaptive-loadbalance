@@ -40,15 +40,15 @@ public class HiveTask implements Runnable {
             while (true) {
                 if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 50)) {
 //                if (init() && System.currentTimeMillis() > start) {
-                    UserLoadBalance.selectLock.writeLock().lock();
-                    clearWeightAndAverage();
-                    clearTotal();
-                    setCurrentWeight();
-
-                    UserLoadBalance.selectLock.writeLock().unlock();
-                    Thread.sleep(300);
-                    calculateAverage();
-                    log("test");
+//                    UserLoadBalance.selectLock.writeLock().lock();
+//                    clearWeightAndAverage();
+//                    clearTotal();
+//                    setCurrentWeight();
+//
+//                    UserLoadBalance.selectLock.writeLock().unlock();
+//                    Thread.sleep(300);
+//                    calculateAverage();
+//                    log("test");
 
 //                        UserLoadBalance.selectLock.writeLock().lock();
 //                    clearWeightAndAverage();
@@ -217,45 +217,45 @@ public class HiveTask implements Runnable {
             }
         }
     }
-
-    private void calculateAverage() {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        for (HiveInvokerInfo info : infoList) {
-            info.lock.writeLock().lock();
-            long totalTime = info.totalTime.get();
-            long completedRequest = info.totalRequest.get();
-            info.lock.writeLock().unlock();
-            if (completedRequest != 0) {
-                info.rttAverage = ((double) totalTime) / completedRequest;
-            }
-        }
-    }
-
-    private void calculateProbingAverage(boolean odd, boolean up) {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        for (int i = odd ? 0 : 1; i < infoList.size(); i += 2) {
-            HiveInvokerInfo info = infoList.get(i);
-            info.lock.writeLock().lock();
-            long totalTime = info.totalTime.get();
-            long completedRequest = info.totalRequest.get();
-            info.lock.writeLock().unlock();
-            if (completedRequest != 0) {
-                if (up) {
-                    info.rttAverageUpper = ((double) totalTime) / completedRequest;
-                } else {
-                    info.rttAverageDowner = ((double) totalTime) / completedRequest;
-                }
-            }
-        }
-    }
-
-    private void clearTotal() {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        for (HiveInvokerInfo info : infoList) {
-            info.totalTime.updateAndGet(x -> 0);
-            info.totalRequest.updateAndGet(x -> 0);
-        }
-    }
+//
+//    private void calculateAverage() {
+//        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+//        for (HiveInvokerInfo info : infoList) {
+//            info.lock.writeLock().lock();
+//            long totalTime = info.totalTime.get();
+//            long completedRequest = info.totalRequest.get();
+//            info.lock.writeLock().unlock();
+//            if (completedRequest != 0) {
+//                info.rttAverage = ((double) totalTime) / completedRequest;
+//            }
+//        }
+//    }
+//
+//    private void calculateProbingAverage(boolean odd, boolean up) {
+//        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+//        for (int i = odd ? 0 : 1; i < infoList.size(); i += 2) {
+//            HiveInvokerInfo info = infoList.get(i);
+//            info.lock.writeLock().lock();
+//            long totalTime = info.totalTime.get();
+//            long completedRequest = info.totalRequest.get();
+//            info.lock.writeLock().unlock();
+//            if (completedRequest != 0) {
+//                if (up) {
+//                    info.rttAverageUpper = ((double) totalTime) / completedRequest;
+//                } else {
+//                    info.rttAverageDowner = ((double) totalTime) / completedRequest;
+//                }
+//            }
+//        }
+//    }
+//
+//    private void clearTotal() {
+//        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+//        for (HiveInvokerInfo info : infoList) {
+//            info.totalTime.updateAndGet(x -> 0);
+//            info.totalRequest.updateAndGet(x -> 0);
+//        }
+//    }
 
     private void clearWeight() {
         List<HiveInvokerInfo> infoList = HiveCommon.infoList;
