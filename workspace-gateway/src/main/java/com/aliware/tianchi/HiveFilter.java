@@ -40,7 +40,7 @@ public class HiveFilter implements Filter {
 //                    hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
 //                    hiveInvokerInfo.totalRequest.incrementAndGet();
 //                    hiveInvokerInfo.lock.readLock().unlock();
-                    hiveInvokerInfo.lock.writeLock().lock();
+//                    hiveInvokerInfo.lock.writeLock().lock();
 
                     hiveInvokerInfo.totalTime += rtt;
                     hiveInvokerInfo.totalRequest += 1;
@@ -52,7 +52,7 @@ public class HiveFilter implements Filter {
                         System.out.println(hiveInvokerInfo);
                     }
 
-                    hiveInvokerInfo.lock.writeLock().unlock();
+//                    hiveInvokerInfo.lock.writeLock().unlock();
 
                     HiveCommon.pendingRequestTotal.decrementAndGet();
 
