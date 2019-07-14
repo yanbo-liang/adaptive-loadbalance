@@ -31,14 +31,65 @@ public class HiveTask implements Runnable {
             return true;
         }
     }
+    private void distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight) {
+        double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
+        for (HiveInvokerInfo info : infoList) {
+            info.weight = info.weight + (info.weight / weightSum) * distributedWeight;
+        }
+    }
 
+    private void distributeWeightDown(List<HiveInvokerInfo> infoList, double distributedWeight) {
+        double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
+        for (HiveInvokerInfo info : infoList) {
+            info.weight = info.weight - (info.weight / weightSum) * distributedWeight;
+        }
+    }
+
+    private void a() {
+        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+        if (infoList == null) {
+            return ;
+        }
+        double invokerAverage = 0;
+        for (HiveInvokerInfo info : infoList) {
+            if (info.rttAverage==0){
+                return;
+            }
+            invokerAverage += info.rttAverage * info.weight;
+        }
+        List<HiveInvokerInfo> belowList = new ArrayList<>();
+        List<HiveInvokerInfo> aboveList = new ArrayList<>();
+
+        for (HiveInvokerInfo info : infoList) {
+            if (info.rttAverage < invokerAverage) {
+                belowList.add(info);
+            } else {
+                aboveList.add(info);
+            }
+        }
+        double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
+        double aboveWeight = aboveList.stream().mapToDouble(x -> x.weight).sum();
+        if (belowWeight < aboveWeight) {
+            distributeWeightDown(aboveList, belowWeight * 0.01);
+            distributeWeightUp(belowList, belowWeight * 0.01);
+        } else {
+            distributeWeightDown(aboveList, aboveWeight * 0.01);
+            distributeWeightUp(belowList, aboveWeight * 0.01);
+        }
+        setCurrentWeight();
+    }
     @Override
     public void run() {
         System.out.println("!!!!!!!!!!!!!!!!!!!!task start at " + HiveCommon.format.format(new Date()));
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 50)) {
+                if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 200)) {
+                    UserLoadBalance.selectLock.writeLock().lock();
+                    a();
+                    UserLoadBalance.selectLock.writeLock().unlock();
+                                        Thread.sleep(200);
+
 //                if (init() && System.currentTimeMillis() > start) {
 //                    UserLoadBalance.selectLock.writeLock().lock();
 //                    clearWeightAndAverage();

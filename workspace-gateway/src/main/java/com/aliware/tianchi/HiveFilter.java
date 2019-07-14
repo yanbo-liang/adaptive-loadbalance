@@ -61,11 +61,11 @@ public class HiveFilter implements Filter {
                     }
                     hiveInvokerInfo.lock.writeLock().unlock();
 
-                    if (full) {
-                        UserLoadBalance.selectLock.writeLock().lock();
-                        a();
-                        UserLoadBalance.selectLock.writeLock().unlock();
-                    }
+//                    if (full) {
+//                        UserLoadBalance.selectLock.writeLock().lock();
+//                        a();
+//                        UserLoadBalance.selectLock.writeLock().unlock();
+//                    }
 
                     HiveCommon.pendingRequestTotal.decrementAndGet();
 
