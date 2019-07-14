@@ -73,6 +73,7 @@ public class HiveTask implements Runnable {
                     weightChangeDistribute(false, true, weightChangeSum(true, false));
                     clearTotal();
                     Thread.sleep(300);
+                    UserLoadBalance.selectLock.writeLock().lock();
                     setCurrentWeight();
                     calculateProbingAverage(true, false);
                     log("odd down");
