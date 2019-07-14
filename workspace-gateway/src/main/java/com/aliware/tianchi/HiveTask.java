@@ -77,11 +77,11 @@ public class HiveTask implements Runnable {
         double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
         double aboveWeight = aboveList.stream().mapToDouble(x -> x.weight).sum();
         if (belowWeight < aboveWeight) {
-            distributeWeightDown(aboveList, belowWeight * 0.03);
-            distributeWeightUp(belowList, belowWeight * 0.03);
+            distributeWeightDown(aboveList, belowWeight * 0.1);
+            distributeWeightUp(belowList, belowWeight * 0.1);
         } else {
-            distributeWeightDown(aboveList, aboveWeight * 0.03);
-            distributeWeightUp(belowList, aboveWeight * 0.03);
+            distributeWeightDown(aboveList, aboveWeight * 0.1);
+            distributeWeightUp(belowList, aboveWeight * 0.1);
         }
         weightNormalize();
         setCurrentWeight();
