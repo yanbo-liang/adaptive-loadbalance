@@ -122,8 +122,8 @@ public class HiveFilter implements Filter {
         double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
         double aboveWeight = aboveList.stream().mapToDouble(x -> x.weight).sum();
         if (belowWeight < aboveWeight) {
-            distributeWeightDown(belowList, belowWeight * 0.05);
-            distributeWeightUp(aboveList, belowWeight * 0.05);
+            distributeWeightDown(aboveList, belowWeight * 0.05);
+            distributeWeightUp(belowList, belowWeight * 0.05);
         } else {
             distributeWeightDown(aboveList, aboveWeight * 0.05);
             distributeWeightUp(belowList, aboveWeight * 0.05);
