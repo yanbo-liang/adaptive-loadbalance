@@ -105,6 +105,9 @@ public class HiveFilter implements Filter {
         }
         double invokerAverage = 0;
         for (HiveInvokerInfo info : infoList) {
+            if (info.rttAverage==0){
+                return;
+            }
             invokerAverage += info.rttAverage * info.weight;
         }
         List<HiveInvokerInfo> belowList = new ArrayList<>();
