@@ -39,9 +39,9 @@ public class HiveTask implements Runnable {
             double newWeight = info.weight + (info.weight / weightSum) * distributedWeight;
             if (newWeight>info.weightInitial){
                 continue;
+            }else {
+                info.weight = newWeight;
             }
-            info.weight =newWeight;
-
         }
     }
 
