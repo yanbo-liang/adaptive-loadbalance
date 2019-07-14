@@ -61,6 +61,7 @@ public class HiveFilter implements Filter {
                     if (full) {
                         UserLoadBalance.selectLock.writeLock().lock();
                         a();
+                        setCurrentWeight();
                         UserLoadBalance.selectLock.writeLock().unlock();
                     }
 
@@ -77,7 +78,12 @@ public class HiveFilter implements Filter {
         }
         return result;
     }
-
+    private void setCurrentWeight() {
+        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+        for (HiveInvokerInfo info : infoList) {
+            info.currentWeight = info.weight;
+        }
+    }
     private void distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight) {
         double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
         for (HiveInvokerInfo info : infoList) {
