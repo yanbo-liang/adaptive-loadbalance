@@ -39,64 +39,64 @@ public class HiveTask implements Runnable {
         try {
             while (true) {
                 if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 50)) {
-//                    UserLoadBalance.selectLock.writeLock().lock();
-//                    clearWeightAndAverage();
-//                    clearTotal();
-//                    setCurrentWeight();
-//                    UserLoadBalance.selectLock.writeLock().unlock();
-//                    Thread.sleep(300);
-//                    calculateAverage();
-//                    log("normal weight");
-//
-//                    UserLoadBalance.selectLock.writeLock().lock();
-//                    clearWeight();
-//                    weightChangeDistribute(false, false, weightChangeSum(true, true));
-//                    clearTotal();
-//                    setCurrentWeight();
-//                    UserLoadBalance.selectLock.writeLock().unlock();
-//                    Thread.sleep(300);
-//                    calculateProbingAverage(true, true);
-//                    log("odd up");
-//
-//                    UserLoadBalance.selectLock.writeLock().lock();
-//                    clearWeight();
-//                    weightChangeDistribute(true, false, weightChangeSum(false, true));
-//                    clearTotal();
-//                    setCurrentWeight();
-//                    UserLoadBalance.selectLock.writeLock().unlock();
-//                    Thread.sleep(300);
-//                    calculateProbingAverage(false, true);
-//                    log("even up");
-//
-//                    UserLoadBalance.selectLock.writeLock().lock();
-//                    clearWeight();
-//                    weightChangeDistribute(false, true, weightChangeSum(true, false));
-//                    clearTotal();
-//                    UserLoadBalance.selectLock.writeLock().lock();
-//                    Thread.sleep(300);
-//                    setCurrentWeight();
-//                    calculateProbingAverage(true, false);
-//                    log("odd down");
-//
-//                    UserLoadBalance.selectLock.writeLock().lock();
-//                    clearWeight();
-//                    weightChangeDistribute(true, true, weightChangeSum(false, false));
-//                    clearTotal();
-//                    setCurrentWeight();
-//                    UserLoadBalance.selectLock.writeLock().unlock();
-//                    Thread.sleep(300);
-//                    calculateProbingAverage(false, false);
-//                    log("even down");
-//
-//                    UserLoadBalance.selectLock.writeLock().lock();
-//                    clearWeight();
-//                    mainCalculation();
-//                    clearTotal();
-//                    setCurrentWeight();
-//                    UserLoadBalance.selectLock.writeLock().unlock();
-//                    Thread.sleep(4500);
-//                    calculateAverage();
-//                    log("result");
+                    UserLoadBalance.selectLock.writeLock().lock();
+                    clearWeightAndAverage();
+                    clearTotal();
+                    setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
+                    Thread.sleep(300);
+                    calculateAverage();
+                    log("normal weight");
+
+                    UserLoadBalance.selectLock.writeLock().lock();
+                    clearWeight();
+                    weightChangeDistribute(false, false, weightChangeSum(true, true));
+                    clearTotal();
+                    setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
+                    Thread.sleep(300);
+                    calculateProbingAverage(true, true);
+                    log("odd up");
+
+                    UserLoadBalance.selectLock.writeLock().lock();
+                    clearWeight();
+                    weightChangeDistribute(true, false, weightChangeSum(false, true));
+                    clearTotal();
+                    setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
+                    Thread.sleep(300);
+                    calculateProbingAverage(false, true);
+                    log("even up");
+
+                    UserLoadBalance.selectLock.writeLock().lock();
+                    clearWeight();
+                    weightChangeDistribute(false, true, weightChangeSum(true, false));
+                    clearTotal();
+                    UserLoadBalance.selectLock.writeLock().lock();
+                    Thread.sleep(300);
+                    setCurrentWeight();
+                    calculateProbingAverage(true, false);
+                    log("odd down");
+
+                    UserLoadBalance.selectLock.writeLock().lock();
+                    clearWeight();
+                    weightChangeDistribute(true, true, weightChangeSum(false, false));
+                    clearTotal();
+                    setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
+                    Thread.sleep(300);
+                    calculateProbingAverage(false, false);
+                    log("even down");
+
+                    UserLoadBalance.selectLock.writeLock().lock();
+                    clearWeight();
+                    mainCalculation();
+                    clearTotal();
+                    setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
+                    Thread.sleep(4500);
+                    calculateAverage();
+                    log("result");
 
                 } else {
                     Thread.sleep(1);
