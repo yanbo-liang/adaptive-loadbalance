@@ -38,8 +38,10 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 50)) {
-                    UserLoadBalance.selectLock.writeLock().lock();
+//                if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 50)) {
+                    if (init() && System.currentTimeMillis() > start) {
+
+                        UserLoadBalance.selectLock.writeLock().lock();
                     clearWeightAndAverage();
                     clearTotal();
                     setCurrentWeight();
@@ -72,7 +74,7 @@ public class HiveTask implements Runnable {
                     clearWeight();
                     weightChangeDistribute(false, true, weightChangeSum(true, false));
                     clearTotal();
-                    UserLoadBalance.selectLock.writeLock().lock();
+                    UserLoadBalance.selectLock.writeLock().unlock();
                     Thread.sleep(300);
                     setCurrentWeight();
                     calculateProbingAverage(true, false);
