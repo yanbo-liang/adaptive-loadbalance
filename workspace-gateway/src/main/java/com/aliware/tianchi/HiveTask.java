@@ -72,8 +72,8 @@ public class HiveTask implements Runnable {
                     clearWeight();
                     weightChangeDistribute(false, true, weightChangeSum(true, false));
                     clearTotal();
-                    Thread.sleep(300);
                     UserLoadBalance.selectLock.writeLock().lock();
+                    Thread.sleep(300);
                     setCurrentWeight();
                     calculateProbingAverage(true, false);
                     log("odd down");
@@ -83,8 +83,8 @@ public class HiveTask implements Runnable {
                     weightChangeDistribute(true, true, weightChangeSum(false, false));
                     clearTotal();
                     setCurrentWeight();
-                    Thread.sleep(300);
                     UserLoadBalance.selectLock.writeLock().unlock();
+                    Thread.sleep(300);
                     calculateProbingAverage(false, false);
                     log("even down");
 
