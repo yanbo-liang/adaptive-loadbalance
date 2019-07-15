@@ -86,7 +86,7 @@ public class HiveCommon {
         if (belowWeight > aboveWeight) {
             weightChange = aboveWeight * 0.1;
         } else {
-            weightChange = belowWeight * 0.2;
+            weightChange = aboveWeight * 0.1;
         }
         System.out.println(weightedRttAverage + "---" + weightChange);
         HiveCommon.distributeWeightDown(aboveList, weightChange);
