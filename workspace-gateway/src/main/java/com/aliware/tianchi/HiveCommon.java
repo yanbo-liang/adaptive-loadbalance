@@ -46,11 +46,20 @@ public class HiveCommon {
             }
             if (initedByCallback.compareAndSet(false, true)) {
                 int totalPendingRequest = infoMap.values().stream().mapToInt(x -> x.maxPendingRequest).sum();
+                int small = Integer.MAX_VALUE;
+                HiveInvokerInfo tmp = null;
                 for (HiveInvokerInfo info : infoMap.values()) {
                     info.weightInitial = ((double) info.maxPendingRequest) / totalPendingRequest;
                     info.weight = info.weightInitial;
                     info.currentWeight = info.weight;
-                    info.weightTop=((double) info.maxPendingRequest) / 1024;
+                    info.weightTop = ((double) info.maxPendingRequest) / 1024;
+                    if (info.maxPendingRequest < small) {
+                        small = info.maxPendingRequest;
+                        tmp = info;
+                    }
+                }
+                if (tmp != null) {
+                    tmp.smallest = true;
                 }
                 infoList = new ArrayList<>(HiveCommon.infoMap.values());
                 inited = true;
@@ -58,7 +67,7 @@ public class HiveCommon {
         }
     }
 
-    static void a() {
+    static void weightCalculation() {
         double weightedRttAverage = 0;
         for (HiveInvokerInfo info : infoList) {
             if (info.rttAverage == 0) {
@@ -81,13 +90,13 @@ public class HiveCommon {
         double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
         double weightChange;
         if (belowWeight > aboveWeight) {
-            weightChange = aboveWeight * 0.1;
+            weightChange = aboveWeight * 0.2;
         } else {
             weightChange = belowWeight * 0.4;
         }
         System.out.println(weightedRttAverage + "---" + weightChange);
         HiveCommon.distributeWeightDown(aboveList, weightChange);
-        double remianWeight=HiveCommon.distributeWeightUp(belowList, weightChange);
+        double remianWeight = HiveCommon.distributeWeightUp(belowList, weightChange);
         HiveCommon.distributeWeightUp(aboveList, remianWeight);
 
         weightNormalize();
@@ -102,8 +111,8 @@ public class HiveCommon {
             double newWeight = info.weight + (info.weight / weightSum) * distributedWeight;
             if (newWeight < info.weightTop) {
                 info.weight = newWeight;
-            }else{
-                total+=newWeight-info.weight;
+            } else {
+                total += newWeight - info.weight;
             }
         }
         return total;
