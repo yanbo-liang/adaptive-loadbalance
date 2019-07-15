@@ -15,7 +15,7 @@ public class HiveTask implements Runnable {
                     UserLoadBalance.selectLock.writeLock().lock();
                     HiveCommon.a();
                     UserLoadBalance.selectLock.writeLock().unlock();
-                    Thread.sleep(150);
+                    Thread.sleep(300);
                 } else {
                     Thread.sleep(1);
                 }
