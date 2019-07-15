@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HiveCommon {
     static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
 //    static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(2000, ConcurrentReferenceHashMap.ReferenceType.SOFT);
-    static final Map<Invocation,Long> rttmap = Collections.synchronizedMap(new WeakHashMap<>());
+    static final Map<Invocation,Long> rttMap = Collections.synchronizedMap(new WeakHashMap<>());
     static final AtomicInteger pendingRequestTotal = new AtomicInteger(0);
     static volatile List<HiveInvokerInfo> infoList;
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
