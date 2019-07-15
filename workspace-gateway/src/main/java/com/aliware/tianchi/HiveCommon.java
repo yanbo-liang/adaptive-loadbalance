@@ -173,15 +173,15 @@ public class HiveCommon {
         System.out.println();
     }
 
-    static int pickByWeight(int[] weightArray) {
-        int[] section = new int[weightArray.length];
-        int totalWeight = 0;
+    static int pickByWeight(double[] weightArray) {
+        double[] section = new double[weightArray.length];
+        double totalWeight = 0;
         for (int i = 0; i < weightArray.length; i++) {
             totalWeight += weightArray[i];
             section[i] = totalWeight;
         }
 
-        int random = ThreadLocalRandom.current().nextInt(totalWeight);
+        double random = ThreadLocalRandom.current().nextDouble(totalWeight);
         for (int i = 0; i < section.length; i++) {
             if (random < section[i]) {
                 return i;
