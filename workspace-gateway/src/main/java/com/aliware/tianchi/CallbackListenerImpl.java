@@ -1,7 +1,11 @@
 package com.aliware.tianchi;
 
 
+import org.apache.dubbo.common.URL;
 import org.apache.dubbo.rpc.listener.CallbackListener;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author daofeng.xjf
@@ -18,12 +22,14 @@ public class CallbackListenerImpl implements CallbackListener {
         if (index != -1) {
             String name = msg.substring(0, index);
             int maxRequest = Integer.valueOf(msg.substring(index + 1));
-            HiveCommon.infoMap.forEach((k, v) -> {
-                if (v.name.equals(name)) {
-                    v.maxPendingRequest = maxRequest;
+            for (HiveInvokerInfo info : HiveCommon.infoMap.values()) {
+                if (info.name.equals(name)) {
+                    info.maxPendingRequest = maxRequest;
+                    break;
                 }
-            });
+            }
         }
+        HiveCommon.initCallBack();
 //        System.out.println("receive msg from server :" + msg);
     }
 }

@@ -4,98 +4,15 @@ import java.util.*;
 
 public class HiveTask implements Runnable {
 
-    static boolean init = false;
-    static int count = 0;
-
-    private boolean init() {
-        if (init) {
-            return true;
-        } else {
-            Collection<HiveInvokerInfo> hiveInvokerInfos = HiveCommon.infoMap.values();
-            for (HiveInvokerInfo info : hiveInvokerInfos) {
-                if (info.maxPendingRequest == 0) {
-                    return false;
-                }
-            }
-            int totalMaxRequest = hiveInvokerInfos.stream().mapToInt(x -> x.maxPendingRequest).sum();
-
-            for (HiveInvokerInfo info : hiveInvokerInfos) {
-                info.weight = ((double) info.maxPendingRequest) / (double) totalMaxRequest;
-                info.weightInitial = info.weight;
-                info.currentWeight = info.weight;
-            }
-
-            HiveCommon.infoList = new ArrayList<>(HiveCommon.infoMap.values());
-
-            init = true;
-            return true;
-        }
-    }
-
-    private void distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight) {
-        double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
-        for (HiveInvokerInfo info : infoList) {
-
-            double newWeight = info.weight + (info.weight / weightSum) * distributedWeight;
-            if (newWeight>info.weightInitial){
-                continue;
-            }else {
-                info.weight = newWeight;
-            }
-        }
-    }
-
-    private void distributeWeightDown(List<HiveInvokerInfo> infoList, double distributedWeight) {
-        double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
-        for (HiveInvokerInfo info : infoList) {
-            info.weight = info.weight - (info.weight / weightSum) * distributedWeight;
-        }
-    }
-
-    private void a() {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        if (infoList == null) {
-            return;
-        }
-        double invokerAverage = 0;
-        for (HiveInvokerInfo info : infoList) {
-            if (info.rttAverage == 0) {
-                return;
-            }
-            invokerAverage += info.rttAverage * info.weight;
-        }
-        List<HiveInvokerInfo> belowList = new ArrayList<>();
-        List<HiveInvokerInfo> aboveList = new ArrayList<>();
-
-        for (HiveInvokerInfo info : infoList) {
-            if (info.rttAverage < invokerAverage) {
-                belowList.add(info);
-            } else {
-                aboveList.add(info);
-            }
-        }
-        double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
-        double aboveWeight = aboveList.stream().mapToDouble(x -> x.weight).sum();
-        if (belowWeight < aboveWeight) {
-            distributeWeightDown(aboveList, belowWeight * 0.1);
-            distributeWeightUp(belowList, belowWeight * 0.1);
-        } else {
-            distributeWeightDown(aboveList, aboveWeight * 0.1);
-            distributeWeightUp(belowList, aboveWeight * 0.1);
-        }
-        weightNormalize();
-        setCurrentWeight();
-    }
-
     @Override
     public void run() {
         System.out.println("!!!!!!!!!!!!!!!!!!!!task start at " + HiveCommon.format.format(new Date()));
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (init() && System.currentTimeMillis() > (start + (30 * 1000) + 200)) {
+                if (HiveCommon.inited && System.currentTimeMillis() > (start + (30 * 1000) + 200)) {
                     UserLoadBalance.selectLock.writeLock().lock();
-                    a();
+                    HiveCommon.a();
                     UserLoadBalance.selectLock.writeLock().unlock();
                     Thread.sleep(400);
 
@@ -179,104 +96,9 @@ public class HiveTask implements Runnable {
         }
     }
 
-    private void setCurrentWeight() {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        for (HiveInvokerInfo info : infoList) {
-            info.currentWeight = info.weight;
-        }
-    }
 
-    private void mainCalculation() {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        List<HiveInvokerInfo> good = new ArrayList<>();
-        List<HiveInvokerInfo> bad = new ArrayList<>();
 
-        for (HiveInvokerInfo info : infoList) {
-            if (info.rttAverageUpper < info.rttAverage * 1.15) {
-                good.add(info);
-            } else if (info.rttAverageDowner < info.rttAverage / 1.1) {
-                bad.add(info);
-            }
-        }
-        if (good.size() != 0 && bad.size() != 0) {
-            int goodsum = good.stream().mapToInt(x -> x.maxPendingRequest).sum();
-            int badsum = bad.stream().mapToInt(x -> x.maxPendingRequest).sum();
-            double change = 0;
-            if (goodsum < badsum) {
-                for (HiveInvokerInfo info : good) {
-                    double newweight = info.weight * 1.1;
-                    change += (newweight - info.weight);
-                    info.weight = newweight;
-                }
-                for (HiveInvokerInfo info : bad) {
-                    info.weight = info.weight - change / bad.size();
-                }
-            } else {
-                for (HiveInvokerInfo info : bad) {
-                    double newweight = info.weight / 1.1;
-                    change += info.weight - newweight;
-                    info.weight = newweight;
-                }
-                for (HiveInvokerInfo info : good) {
-                    info.weight = info.weight + change / bad.size();
-                }
-            }
-            System.out.println(good);
-            System.out.println(bad);
 
-        }
-    }
-
-    private double weightChangeSum(boolean odd, boolean up) {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        double totalChange = 0D;
-        for (int i = odd ? 0 : 1; i < infoList.size(); i += 2) {
-            HiveInvokerInfo info = infoList.get(i);
-            double newWeight = up ? info.weight * 1.15 : info.weight / 1.15;
-            totalChange += up ? newWeight - info.weight : info.weight - newWeight;
-            info.weight = newWeight;
-        }
-        return totalChange;
-    }
-
-    private void weightChangeDistribute(boolean odd, boolean up, double totalChange) {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        for (int i = odd ? 0 : 1; i < infoList.size(); i += 2) {
-            HiveInvokerInfo info = infoList.get(i);
-            double change = totalChange / (double) (infoList.size() / 2);
-            info.weight = up ? info.weight + change : info.weight - change;
-        }
-        weightNormalize();
-    }
-
-    private void weightNormalize() {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        double total = 0;
-        for (HiveInvokerInfo info : infoList) {
-            total += info.weight;
-        }
-        for (HiveInvokerInfo info : infoList) {
-            info.weight = info.weight / total;
-        }
-    }
-
-    private void weightDistributeToFastest() {
-        boolean done = false;
-        int remain = 1024;
-        for (HiveInvokerInfo info : HiveCommon.infoList) {
-            if (!done) {
-                if (remain > info.maxPendingRequest) {
-                    info.weight = info.maxPendingRequest / ((double) 1024);
-                    remain -= info.maxPendingRequest;
-                } else if (remain <= info.maxPendingRequest) {
-                    info.weight = remain / ((double) 1024);
-                    done = true;
-                }
-            } else {
-                info.weight = 0;
-            }
-        }
-    }
 //
 //    private void calculateAverage() {
 //        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
@@ -317,29 +139,7 @@ public class HiveTask implements Runnable {
 //        }
 //    }
 
-    private void clearWeight() {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        for (HiveInvokerInfo info : infoList) {
-            info.weight = info.weightInitial;
-        }
-    }
 
-    private void clearWeightAndAverage() {
-        for (HiveInvokerInfo info : HiveCommon.infoList) {
-            info.weight = info.weightInitial;
-            info.rttAverage = 0;
-            info.rttAverageUpper = 0;
-            info.rttAverageDowner = 0;
-        }
-    }
-
-    private void log(String msg) {
-        System.out.println(msg);
-        for (HiveInvokerInfo info : HiveCommon.infoList) {
-            System.out.println(HiveCommon.format.format(new Date()) + '-' + info);
-        }
-        System.out.println();
-    }
 }
 
 //    @Override

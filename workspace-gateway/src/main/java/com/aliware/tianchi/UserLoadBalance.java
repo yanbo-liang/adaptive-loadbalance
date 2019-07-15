@@ -15,7 +15,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class UserLoadBalance implements LoadBalance {
-    private static final AtomicBoolean inited = new AtomicBoolean(false);
     private static final Logger logger = LoggerFactory.getLogger(UserLoadBalance.class);
 
     static volatile HiveInvokerInfo stressInvokerInfo = null;
@@ -25,7 +24,7 @@ public class UserLoadBalance implements LoadBalance {
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-        init(invokers);
+        HiveCommon.initLoadBalance(invokers);
         Invoker<T> randomInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
         List<HiveInvokerInfo> infoList = HiveCommon.infoList;
         if (infoList == null) {
@@ -57,7 +56,6 @@ public class UserLoadBalance implements LoadBalance {
 //
 //        return pickedInfo.invoker;
     }
-
 
 
 //        if (pickedInfo.pendingRequest.get() < pickedInfo.maxPendingRequest) {
@@ -191,18 +189,6 @@ public class UserLoadBalance implements LoadBalance {
 //        }
 //
 
-
-    private <T> void init(List<Invoker<T>> invokers) {
-        if (!inited.get()) {
-            if (inited.compareAndSet(false, true)) {
-                for (Invoker<T> invoker : invokers) {
-                    HiveCommon.infoMap.put(invoker.getUrl(), new HiveInvokerInfo(invoker));
-                }
-                HiveTask task = new HiveTask();
-                HiveCommon.executorService.execute(task);
-            }
-        }
-    }
 
     private int pickByWeight(double[] weightArray) {
         double[] section = new double[weightArray.length];
