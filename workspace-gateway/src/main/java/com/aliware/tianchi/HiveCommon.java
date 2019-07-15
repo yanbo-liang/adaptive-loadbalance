@@ -94,6 +94,12 @@ public class HiveCommon {
         } else {
             weightChange = belowWeight * 0.4;
         }
+        System.out.println(aboveList);
+
+        System.out.println(belowList);
+        System.out.println(aboveWeight);
+        System.out.println(belowWeight);
+
         System.out.println(weightedRttAverage + "---" + weightChange);
         HiveCommon.distributeWeightDown(aboveList, weightChange);
         double remianWeight = HiveCommon.distributeWeightUp(belowList, weightChange);
