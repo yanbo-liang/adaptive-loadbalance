@@ -89,21 +89,26 @@ public class HiveCommon {
         }
         System.out.println(weightedRttAverage + "---" + weightChange);
         HiveCommon.distributeWeightDown(aboveList, weightChange);
-        HiveCommon.distributeWeightUp(belowList, weightChange);
-
+        double remianWeight=HiveCommon.distributeWeightUp(belowList, weightChange);
+        HiveCommon.distributeWeightUp(aboveList, remianWeight);
 
         weightNormalize();
         setCurrentWeight();
     }
 
-    static void distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight) {
+
+    static double distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight) {
         double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
+        double total = 0;
         for (HiveInvokerInfo info : infoList) {
             double newWeight = info.weight + (info.weight / weightSum) * distributedWeight;
             if (newWeight < info.weightInitial) {
                 info.weight = newWeight;
+            }else{
+                total+=newWeight-info.weight;
             }
         }
+        return total;
     }
 
     static void distributeWeightDown(List<HiveInvokerInfo> infoList, double distributedWeight) {
