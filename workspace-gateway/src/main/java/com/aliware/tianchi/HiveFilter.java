@@ -29,11 +29,11 @@ public class HiveFilter implements Filter {
 
     @Override
     public Result onResponse(Result result, Invoker<?> invoker, Invocation invocation) {
-
+        long s = System.currentTimeMillis();
         try {
             HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
-                if (result.hasException()){
+                if (result.hasException()) {
 //                    HiveCommon.pendingRequestTotal.decrementAndGet();
 //
 //                    hiveInvokerInfo.pendingRequest.decrementAndGet();
@@ -49,7 +49,6 @@ public class HiveFilter implements Filter {
 //                    hiveInvokerInfo.totalRequest.incrementAndGet();
 //                    hiveInvokerInfo.lock.readLock().unlock();
                     hiveInvokerInfo.lock.writeLock().lock();
-
                     hiveInvokerInfo.totalTime += rtt;
                     hiveInvokerInfo.totalRequest += 1;
 
@@ -57,13 +56,9 @@ public class HiveFilter implements Filter {
                         hiveInvokerInfo.rttAverage = ((double) hiveInvokerInfo.totalTime) / hiveInvokerInfo.totalRequest;
                         hiveInvokerInfo.totalTime = 0;
                         hiveInvokerInfo.totalRequest = 0;
-                        if (HiveCommon.inited) {
 
-                            UserLoadBalance.selectLock.writeLock().lock();
-                            HiveCommon.a();
-                            UserLoadBalance.selectLock.writeLock().unlock();
-                        }
                     }
+
                     hiveInvokerInfo.lock.writeLock().unlock();
 
 
@@ -78,6 +73,7 @@ public class HiveFilter implements Filter {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println(System.currentTimeMillis()-s);
         return result;
     }
 

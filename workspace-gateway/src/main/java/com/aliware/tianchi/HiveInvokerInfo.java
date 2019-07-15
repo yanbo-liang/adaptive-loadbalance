@@ -38,21 +38,8 @@ public class HiveInvokerInfo {
         this.invoker = invoker;
     }
 
-    @Override
-    public String toString() {
-        return "{" +
-                "name='" + name + '\'' +
-                ", pendingRequest=" + pendingRequest +
-                ", maxPendingRequest=" + maxPendingRequest +
-                ", totalTime=" + totalTime +
-                ", totalRequest=" + totalRequest +
-                ", rttAverage=" + rttAverage +
-                ", rttAverageUpper=" + rttAverageUpper +
-                ", rttAverageDowner=" + rttAverageDowner +
-                ", weight=" + weight +
-                ", weightInitial=" + weightInitial +
-                '}';
-    }
+
+
 //    volatile double maxRequestCoefficient = 1;
 
 }

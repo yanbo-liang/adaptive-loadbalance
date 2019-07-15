@@ -26,6 +26,6 @@ public class CallbackListenerImpl implements CallbackListener {
             }
         }
         HiveCommon.initCallBack();
-//        System.out.println("receive msg from server :" + msg);
+        //System.out.println("receive msg from server :" + msg);
     }
 }
