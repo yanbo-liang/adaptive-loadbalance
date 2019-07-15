@@ -6,16 +6,15 @@ import org.apache.dubbo.rpc.Invoker;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HiveCommon {
     static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
-    static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(2000, ConcurrentReferenceHashMap.ReferenceType.SOFT);
+//    static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(2000, ConcurrentReferenceHashMap.ReferenceType.SOFT);
+    static final Map<Invocation,Long> rttmap = Collections.synchronizedMap(new WeakHashMap<>());
     static final AtomicInteger pendingRequestTotal = new AtomicInteger(0);
     static volatile List<HiveInvokerInfo> infoList;
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
