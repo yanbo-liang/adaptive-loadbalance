@@ -1,6 +1,6 @@
 package com.aliware.tianchi;
 
-import java.util.*;
+import java.util.Date;
 
 public class HiveTask implements Runnable {
 
@@ -10,11 +10,13 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (HiveCommon.inited && System.currentTimeMillis() > (start + (30 * 1000) + 200)) {
-                    UserLoadBalance.selectLock.writeLock().lock();
+//                if (HiveCommon.inited && System.currentTimeMillis() > (start + (30 * 1000) + 200)) {
+                if (HiveCommon.inited) {
+
+                UserLoadBalance.selectLock.writeLock().lock();
                     HiveCommon.a();
                     UserLoadBalance.selectLock.writeLock().unlock();
-                    Thread.sleep(400);
+                    Thread.sleep(150);
 
 //                if (init() && System.currentTimeMillis() > start) {
 //                    UserLoadBalance.selectLock.writeLock().lock();

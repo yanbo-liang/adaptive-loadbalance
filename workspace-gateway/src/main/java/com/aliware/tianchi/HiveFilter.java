@@ -4,9 +4,6 @@ import org.apache.dubbo.common.Constants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Activate(group = Constants.CONSUMER)
 public class HiveFilter implements Filter {
 
@@ -46,7 +43,6 @@ public class HiveFilter implements Filter {
 //                    hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
 //                    hiveInvokerInfo.totalRequest.incrementAndGet();
 //                    hiveInvokerInfo.lock.readLock().unlock();
-                    boolean full = false;
                     hiveInvokerInfo.lock.writeLock().lock();
 
                     hiveInvokerInfo.totalTime += rtt;
@@ -57,15 +53,10 @@ public class HiveFilter implements Filter {
                         hiveInvokerInfo.totalTime = 0;
                         hiveInvokerInfo.totalRequest = 0;
                         System.out.println(hiveInvokerInfo);
-                        full = true;
                     }
                     hiveInvokerInfo.lock.writeLock().unlock();
 
-//                    if (full) {
-//                        UserLoadBalance.selectLock.writeLock().lock();
-//                        a();
-//                        UserLoadBalance.selectLock.writeLock().unlock();
-//                    }
+
 
                     HiveCommon.pendingRequestTotal.decrementAndGet();
 
