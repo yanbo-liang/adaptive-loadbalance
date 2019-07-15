@@ -97,7 +97,7 @@ public class HiveTask implements Runnable {
                     UserLoadBalance.selectLock.writeLock().lock();
                     a();
                     UserLoadBalance.selectLock.writeLock().unlock();
-                    Thread.sleep(150);
+                    Thread.sleep(400);
 
 //                if (init() && System.currentTimeMillis() > start) {
 //                    UserLoadBalance.selectLock.writeLock().lock();
