@@ -23,6 +23,7 @@ public class UserLoadBalance implements LoadBalance {
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
+        long s = System.currentTimeMillis();
         HiveCommon.initLoadBalance(invokers);
         Invoker<T> randomInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
         List<HiveInvokerInfo> infoList = HiveCommon.infoList;
@@ -44,6 +45,7 @@ public class UserLoadBalance implements LoadBalance {
         }
         selectLock.writeLock().unlock();
 
+        System.out.println(System.currentTimeMillis()-s);
         return maxInfo.invoker;
 //
 //        double[] weightArray = new double[infoList.size()];
