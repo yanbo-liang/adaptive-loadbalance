@@ -38,7 +38,18 @@ public class HiveInvokerInfo {
         this.invoker = invoker;
     }
 
-
+    @Override
+    public String toString() {
+        return "HiveInvokerInfo{" +
+                "name='" + name + '\'' +
+                ", totalTime=" + totalTime +
+                ", totalRequest=" + totalRequest +
+                ", rttAverage=" + rttAverage +
+                ", weight=" + weight +
+                ", currentWeight=" + currentWeight +
+                ", weightTop=" + weightTop +
+                '}';
+    }
 
 //    volatile double maxRequestCoefficient = 1;
 
