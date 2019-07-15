@@ -12,9 +12,7 @@ public class HiveTask implements Runnable {
             while (true) {
 //                if (HiveCommon.inited && System.currentTimeMillis() > (start + (30 * 1000) + 200)) {
                 if (HiveCommon.inited) {
-                    UserLoadBalance.selectLock.writeLock().lock();
-                    HiveCommon.a();
-                    UserLoadBalance.selectLock.writeLock().unlock();
+
                     Thread.sleep(300);
                 } else {
                     Thread.sleep(1);

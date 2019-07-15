@@ -57,9 +57,12 @@ public class HiveFilter implements Filter {
                         hiveInvokerInfo.rttAverage = ((double) hiveInvokerInfo.totalTime) / hiveInvokerInfo.totalRequest;
                         hiveInvokerInfo.totalTime = 0;
                         hiveInvokerInfo.totalRequest = 0;
+
+                        UserLoadBalance.selectLock.writeLock().lock();
+                        HiveCommon.a();
+                        UserLoadBalance.selectLock.writeLock().unlock();
                     }
                     hiveInvokerInfo.lock.writeLock().unlock();
-
 
 
 //                    HiveCommon.pendingRequestTotal.decrementAndGet();
