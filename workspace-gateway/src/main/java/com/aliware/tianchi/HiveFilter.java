@@ -13,9 +13,9 @@ public class HiveFilter implements Filter {
             HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
 
-                HiveCommon.pendingRequestTotal.incrementAndGet();
+//                HiveCommon.pendingRequestTotal.incrementAndGet();
 
-                hiveInvokerInfo.pendingRequest.incrementAndGet();
+//                hiveInvokerInfo.pendingRequest.incrementAndGet();
 
                 HiveCommon.rttMap.put(invocation, System.currentTimeMillis());
 
@@ -34,9 +34,9 @@ public class HiveFilter implements Filter {
             HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
                 if (result.hasException()){
-                    HiveCommon.pendingRequestTotal.decrementAndGet();
-
-                    hiveInvokerInfo.pendingRequest.decrementAndGet();
+//                    HiveCommon.pendingRequestTotal.decrementAndGet();
+//
+//                    hiveInvokerInfo.pendingRequest.decrementAndGet();
                     return result;
                 }
 
@@ -62,9 +62,9 @@ public class HiveFilter implements Filter {
 
 
 
-                    HiveCommon.pendingRequestTotal.decrementAndGet();
+//                    HiveCommon.pendingRequestTotal.decrementAndGet();
 
-                    hiveInvokerInfo.pendingRequest.decrementAndGet();
+//                    hiveInvokerInfo.pendingRequest.decrementAndGet();
 
                 } else {
                     System.out.println("fuck");
