@@ -29,7 +29,6 @@ public class HiveFilter implements Filter {
 
     @Override
     public Result onResponse(Result result, Invoker<?> invoker, Invocation invocation) {
-        long s = System.currentTimeMillis();
         try {
             HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
@@ -73,7 +72,6 @@ public class HiveFilter implements Filter {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(System.currentTimeMillis()-s);
         return result;
     }
 
