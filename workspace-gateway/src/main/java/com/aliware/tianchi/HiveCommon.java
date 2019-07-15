@@ -87,7 +87,7 @@ public class HiveCommon {
         } else {
             weightChange = belowWeight * 0.1;
         }
-        System.out.println(weightedRttAverage+' '+weightChange);
+        System.out.println(weightedRttAverage + "---" + weightChange);
         HiveCommon.distributeWeightDown(aboveList, weightChange);
         HiveCommon.distributeWeightUp(belowList, weightChange);
 
@@ -153,7 +153,6 @@ public class HiveCommon {
         }
         System.out.println();
     }
-
 
 
 //    private void mainCalculation() {
