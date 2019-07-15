@@ -48,7 +48,7 @@ public class HiveFilter implements Filter {
 //                    hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
 //                    hiveInvokerInfo.totalRequest.incrementAndGet();
 //                    hiveInvokerInfo.lock.readLock().unlock();
-//                    hiveInvokerInfo.lock.writeLock().lock();
+                    hiveInvokerInfo.lock.writeLock().lock();
 
                     hiveInvokerInfo.totalTime += rtt;
                     hiveInvokerInfo.totalRequest += 1;
@@ -58,7 +58,7 @@ public class HiveFilter implements Filter {
                         hiveInvokerInfo.totalTime = 0;
                         hiveInvokerInfo.totalRequest = 0;
                     }
-//                    hiveInvokerInfo.lock.writeLock().unlock();
+                    hiveInvokerInfo.lock.writeLock().unlock();
 
 
 
