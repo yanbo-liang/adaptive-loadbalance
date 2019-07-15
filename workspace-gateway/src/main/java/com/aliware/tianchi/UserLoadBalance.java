@@ -29,31 +29,31 @@ public class UserLoadBalance implements LoadBalance {
         if (infoList == null) {
             return randomInvoker;
         }
-//        selectLock.writeLock().lock();
-//        double maxCurrentWeight = -10D;
-//        HiveInvokerInfo maxInfo = null;
-//        for (HiveInvokerInfo info : infoList) {
-//            if (maxCurrentWeight < info.currentWeight) {
-//                maxCurrentWeight = info.currentWeight;
-//                maxInfo = info;
-//            }
-//        }
-//        maxInfo.currentWeight = maxInfo.currentWeight - 1;
-//        for (HiveInvokerInfo info : infoList) {
-//            info.currentWeight = info.weight + info.currentWeight;
-//        }
-//        selectLock.writeLock().unlock();
-//
-//        return maxInfo.invoker;
-
-        double[] weightArray = new double[infoList.size()];
-        for (int i = 0; i < weightArray.length; i++) {
-            weightArray[i] = infoList.get(i).weight;
+        selectLock.writeLock().lock();
+        double maxCurrentWeight = -10D;
+        HiveInvokerInfo maxInfo = null;
+        for (HiveInvokerInfo info : infoList) {
+            if (maxCurrentWeight < info.currentWeight) {
+                maxCurrentWeight = info.currentWeight;
+                maxInfo = info;
+            }
         }
+        maxInfo.currentWeight = maxInfo.currentWeight - 1;
+        for (HiveInvokerInfo info : infoList) {
+            info.currentWeight = info.weight + info.currentWeight;
+        }
+        selectLock.writeLock().unlock();
 
-        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
-
-        return pickedInfo.invoker;
+        return maxInfo.invoker;
+//
+//        double[] weightArray = new double[infoList.size()];
+//        for (int i = 0; i < weightArray.length; i++) {
+//            weightArray[i] = infoList.get(i).weight;
+//        }
+//
+//        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
+//
+//        return pickedInfo.invoker;
     }
 
 
@@ -187,52 +187,4 @@ public class UserLoadBalance implements LoadBalance {
 //            }
 //        }
 //
-
-
-    private int pickByWeight(double[] weightArray) {
-        double[] section = new double[weightArray.length];
-        double totalWeight = 0;
-        for (int i = 0; i < weightArray.length; i++) {
-            totalWeight += weightArray[i];
-            section[i] = totalWeight;
-        }
-
-        double random = ThreadLocalRandom.current().nextDouble(totalWeight);
-
-        for (int i = 0; i < section.length; i++) {
-            if (random < section[i]) {
-//                System.out.println(random);
-//                System.out.println(Arrays.toString(weightArray));
-//                System.out.println(Arrays.toString(section));
-//                System.out.println(i);
-                return i;
-            }
-        }
-        return 0;
-    }
-
-//    private long averageRttCache(HiveInvokerInfo hiveInvokerInfo) {
-//        long total = 0;
-//        for (int i = 0; i < hiveInvokerInfo.rttCache.length; i++) {
-//            total += hiveInvokerInfo.rttCache[i];
-//        }
-//        return total / hiveInvokerInfo.rttCache.length;
-//    }
-
-//    private int pickByWeight(int[] weightArray) {
-//        int[] section = new int[weightArray.length];
-//        int totalWeight = 0;
-//        for (int i = 0; i < weightArray.length; i++) {
-//            totalWeight += weightArray[i];
-//            section[i] = totalWeight;
-//        }
-//
-//        int random = ThreadLocalRandom.current().nextInt(totalWeight);
-//        for (int i = 0; i < section.length; i++) {
-//            if (random < section[i]) {
-//                return i;
-//            }
-//        }
-//        return 0;
-//    }
 }

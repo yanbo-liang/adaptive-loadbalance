@@ -9,10 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -160,6 +157,22 @@ public class HiveCommon {
         System.out.println();
     }
 
+    static int pickByWeight(int[] weightArray) {
+        int[] section = new int[weightArray.length];
+        int totalWeight = 0;
+        for (int i = 0; i < weightArray.length; i++) {
+            totalWeight += weightArray[i];
+            section[i] = totalWeight;
+        }
+
+        int random = ThreadLocalRandom.current().nextInt(totalWeight);
+        for (int i = 0; i < section.length; i++) {
+            if (random < section[i]) {
+                return i;
+            }
+        }
+        return 0;
+    }
 
 //    private void mainCalculation() {
 //        List<HiveInvokerInfo> good = new ArrayList<>();
