@@ -29,12 +29,17 @@ public class HiveFilter implements Filter {
 
     @Override
     public Result onResponse(Result result, Invoker<?> invoker, Invocation invocation) {
-        if (result.hasException()){
-            return result;
-        }
+
         try {
             HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
+                if (result.hasException()){
+                    HiveCommon.pendingRequestTotal.decrementAndGet();
+
+                    hiveInvokerInfo.pendingRequest.decrementAndGet();
+                    return result;
+                }
+
                 Long start = HiveCommon.rttMap.get(invocation);
                 if (start != null) {
                     long rtt = System.currentTimeMillis() - start;
@@ -52,7 +57,6 @@ public class HiveFilter implements Filter {
                         hiveInvokerInfo.rttAverage = ((double) hiveInvokerInfo.totalTime) / hiveInvokerInfo.totalRequest;
                         hiveInvokerInfo.totalTime = 0;
                         hiveInvokerInfo.totalRequest = 0;
-                        System.out.println(hiveInvokerInfo);
                     }
                     hiveInvokerInfo.lock.writeLock().unlock();
 

@@ -12,12 +12,19 @@ public class HiveTask implements Runnable {
             while (true) {
 //                if (HiveCommon.inited && System.currentTimeMillis() > (start + (30 * 1000) + 200)) {
                 if (HiveCommon.inited) {
-
-                UserLoadBalance.selectLock.writeLock().lock();
+                    UserLoadBalance.selectLock.writeLock().lock();
                     HiveCommon.a();
                     UserLoadBalance.selectLock.writeLock().unlock();
                     Thread.sleep(150);
-
+                } else {
+                    Thread.sleep(1);
+                }
+            }
+        } catch (
+                Exception e) {
+            e.printStackTrace();
+        }
+    }
 //                if (init() && System.currentTimeMillis() > start) {
 //                    UserLoadBalance.selectLock.writeLock().lock();
 //                    clearWeightAndAverage();
@@ -87,18 +94,6 @@ public class HiveTask implements Runnable {
 //                    Thread.sleep(4500);
 //                    calculateAverage();
 //                    log("result");
-
-                } else {
-                    Thread.sleep(1);
-                }
-            }
-        } catch (
-                Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
 
 
 //
