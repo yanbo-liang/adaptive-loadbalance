@@ -23,30 +23,35 @@ public class UserLoadBalance implements LoadBalance {
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
-        long s = System.currentTimeMillis();
         HiveCommon.initLoadBalance(invokers);
-        Invoker<T> randomInvoker = invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        if (infoList == null) {
-            return randomInvoker;
-        }
-        selectLock.writeLock().lock();
-        double maxCurrentWeight = -10D;
-        HiveInvokerInfo maxInfo = null;
-        for (HiveInvokerInfo info : infoList) {
-            if (maxCurrentWeight < info.currentWeight) {
-                maxCurrentWeight = info.currentWeight;
-                maxInfo = info;
+        if (HiveCommon.inited) {
+            double maxCurrentWeight = -1000D;
+            HiveInvokerInfo maxInfo = null;
+
+            selectLock.readLock().lock();
+            for (HiveInvokerInfo info : HiveCommon.infoList) {
+                if (maxCurrentWeight < info.currentWeight) {
+                    maxCurrentWeight = info.currentWeight;
+                    maxInfo = info;
+                }
+            }
+            selectLock.readLock().unlock();
+
+            if (maxInfo != null) {
+
+                selectLock.writeLock().lock();
+                maxInfo.currentWeight = maxInfo.currentWeight - 1;
+                for (HiveInvokerInfo info : HiveCommon.infoList) {
+                    info.currentWeight = info.weight + info.currentWeight;
+                }
+                selectLock.writeLock().unlock();
+
+                return maxInfo.invoker;
             }
         }
-        maxInfo.currentWeight = maxInfo.currentWeight - 1;
-        for (HiveInvokerInfo info : infoList) {
-            info.currentWeight = info.weight + info.currentWeight;
-        }
-        selectLock.writeLock().unlock();
 
-        System.out.println(System.currentTimeMillis()-s);
-        return maxInfo.invoker;
+        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+    }
 //
 //        double[] weightArray = new double[infoList.size()];
 //        for (int i = 0; i < weightArray.length; i++) {
@@ -56,7 +61,6 @@ public class UserLoadBalance implements LoadBalance {
 //        HiveInvokerInfo pickedInfo = infoList.get(pickByWeight(weightArray));
 //
 //        return pickedInfo.invoker;
-    }
 
 
 //        if (pickedInfo.pendingRequest.get() < pickedInfo.maxPendingRequest) {
@@ -75,8 +79,6 @@ public class UserLoadBalance implements LoadBalance {
 //            }
 //        }
 
-
-//        return randomInvoker;
 
 //        Collection<HiveInvokerInfo> infos = infoMap.values();
 //        for (HiveInvokerInfo info : infos) {
