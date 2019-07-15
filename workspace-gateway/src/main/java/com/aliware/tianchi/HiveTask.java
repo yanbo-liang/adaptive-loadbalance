@@ -13,7 +13,8 @@ public class HiveTask implements Runnable {
 //                if (HiveCommon.inited && System.currentTimeMillis() > (start + (30 * 1000) + 200)) {
                 if (HiveCommon.inited) {
 
-                    Thread.sleep(300);
+                    System.out.println(new Date());
+                    Thread.sleep(1000);
                 } else {
                     Thread.sleep(1);
                 }
