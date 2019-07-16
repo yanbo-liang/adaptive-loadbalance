@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class HiveCommon {
     private static final Logger logger = LoggerFactory.getLogger(HiveCommon.class);
@@ -95,20 +96,60 @@ public class HiveCommon {
         double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
         double weightChange;
         if (belowWeight > aboveWeight) {
-            weightChange = aboveWeight * 0.02;
+            weightChange = aboveWeight * 0.04;
         } else {
-            weightChange = belowWeight * 0.04;
+            weightChange = belowWeight * 0.02;
         }
-        logger.info("{}-{}--{}", format.format(date),weightedRttAverage, weightChange);
+        logger.info("{}-{}--{}", format.format(date), weightedRttAverage, weightChange);
 
         HiveCommon.distributeWeightDown(aboveList, weightChange);
         double remianWeight = HiveCommon.distributeWeightUp(belowList, weightChange);
         HiveCommon.distributeWeightUp(aboveList, remianWeight);
 
+        weightCalculation1(infoList.stream().filter(x -> x.weight != x.weightTop).collect(Collectors.toList()));
         weightNormalize();
         setCurrentWeight();
     }
 
+    static void weightCalculation1(List<HiveInvokerInfo> list) {
+        if (list.size()==infoList.size()){
+            return;
+        }
+        double weightedRttAverage = 0;
+        for (HiveInvokerInfo info : list) {
+            if (info.rttAverage == 0) {
+                return;
+            }
+            weightedRttAverage += info.rttAverage * info.weight;
+        }
+        List<HiveInvokerInfo> belowList = new ArrayList<>();
+        List<HiveInvokerInfo> aboveList = new ArrayList<>();
+
+        Date date = new Date();
+
+        for (HiveInvokerInfo info : list) {
+            if (info.rttAverage > weightedRttAverage) {
+                aboveList.add(info);
+            } else {
+                belowList.add(info);
+            }
+            logger.info("{}-{}", format.format(date), info);
+        }
+        double aboveWeight = aboveList.stream().mapToDouble(x -> x.weight).sum();
+        double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
+        double weightChange;
+        if (belowWeight > aboveWeight) {
+            weightChange = aboveWeight * 0.04;
+        } else {
+            weightChange = belowWeight * 0.02;
+        }
+        logger.info("{}-{}--{}", format.format(date), weightedRttAverage, weightChange);
+
+        HiveCommon.distributeWeightDown(aboveList, weightChange);
+        double remianWeight = HiveCommon.distributeWeightUp(belowList, weightChange);
+        HiveCommon.distributeWeightUp(aboveList, remianWeight);
+
+    }
 
     static double distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight) {
         double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
