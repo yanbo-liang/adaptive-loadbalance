@@ -25,7 +25,7 @@ public class HiveTask implements Runnable {
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         double newWeight = info.totalRequest.get() / (double) total;
                         info.weightDifference = info.weight-newWeight;
-                        info.weight = newWeight;
+                        info.weight = info.weight-info.weightDifference;
                     }
                     HiveCommon.setCurrentWeight();
                     UserLoadBalance.selectLock.writeLock().unlock();
