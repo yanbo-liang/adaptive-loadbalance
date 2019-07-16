@@ -116,7 +116,6 @@ public class HiveCommon {
             return;
         }
         double totalWeight = list.stream().mapToDouble(x -> x.weight).sum();
-        System.out.println(totalWeight);
         double weightedRttAverage = 0;
         for (HiveInvokerInfo info : list) {
             if (info.rttAverage == 0) {
