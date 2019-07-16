@@ -41,12 +41,10 @@ public class HiveInvokerInfo {
 
     @Override
     public String toString() {
-        return "HiveInvokerInfo{" +
-                "name='" + name + '\'' +
+        return "name='" + name + '\'' +
                 ", rttAverage=" + rttAverage +
                 ", weight=" + weight +
-                ", weightTop=" + weightTop +
-                '}';
+                ", weightTop=" + weightTop;
     }
 
 //    volatile double maxRequestCoefficient = 1;
