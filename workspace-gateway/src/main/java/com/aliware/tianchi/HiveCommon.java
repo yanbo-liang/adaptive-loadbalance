@@ -89,9 +89,9 @@ public class HiveCommon {
         double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
         double weightChange;
         if (belowWeight > aboveWeight) {
-            weightChange = aboveWeight * 0.15;
+            weightChange = aboveWeight * 0.02;
         } else {
-            weightChange = belowWeight * 0.25;
+            weightChange = belowWeight * 0.04;
         }
         System.out.println(aboveList);
 

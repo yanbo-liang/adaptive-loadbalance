@@ -10,12 +10,16 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-//                if (HiveCommon.inited && System.currentTimeMillis() > (start + (30 * 1000) + 200)) {
-                if (HiveCommon.inited) {
+                if (HiveCommon.inited && System.currentTimeMillis() > (start + (30 * 1000) + 10)) {
+//                if (HiveCommon.inited) {
                     System.out.println(HiveCommon.format.format(new Date()));
 
 
-                    Thread.sleep(1000);
+                    Thread.sleep(6000);
+                    UserLoadBalance.selectLock.writeLock().lock();
+                    HiveCommon.clearWeight();
+                    HiveCommon.setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
                 } else {
                     Thread.sleep(1);
                 }
