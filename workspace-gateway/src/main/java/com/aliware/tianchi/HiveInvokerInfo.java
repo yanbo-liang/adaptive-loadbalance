@@ -42,7 +42,7 @@ volatile double weightDifference = 0;
                 ", totalRequest=" + totalRequest +
                 ", rttAverage=" + rttAverage +
                 ", weight=" + weight +
-                ", weightTop=" + weightTop +
+                ", weightDifference=" + weightDifference +
                 '}';
     }
 
