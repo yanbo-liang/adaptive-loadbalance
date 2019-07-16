@@ -36,10 +36,14 @@ public class HiveFilter implements Filter {
                 if (start != null) {
                     if (!result.hasException()) {
                         long rtt = System.currentTimeMillis() - start;
-                        hiveInvokerInfo.lock.readLock().lock();
+//                        hiveInvokerInfo.lock.readLock().lock();
+
+                        HiveCommon.lock.readLock().lock();
                         hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
                         hiveInvokerInfo.totalRequest.incrementAndGet();
-                        hiveInvokerInfo.lock.readLock().unlock();
+                        HiveCommon.lock.readLock().unlock();
+
+//                        hiveInvokerInfo.lock.readLock().unlock();
                     }
                     HiveCommon.pendingRequestTotal.decrementAndGet();
                     hiveInvokerInfo.pendingRequest.decrementAndGet();

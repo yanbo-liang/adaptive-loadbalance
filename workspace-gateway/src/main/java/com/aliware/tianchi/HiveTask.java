@@ -14,10 +14,13 @@ public class HiveTask implements Runnable {
 //                if (HiveCommon.inited) {
                     System.out.println(HiveCommon.format.format(new Date()));
 
+                    HiveCommon.lock.writeLock().lock();
                     HiveCommon.clearTotal();
                     Thread.sleep(300);
                     HiveCommon.calculateAverage();
                     HiveCommon.log("test");
+                    HiveCommon.lock.writeLock().unlock();
+
                 } else {
                     Thread.sleep(1);
                 }
