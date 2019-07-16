@@ -22,7 +22,7 @@ public class HiveInvokerInfo {
     volatile double weightInitial = 0;
     volatile double currentWeight = 0;
     volatile double weightTop = 0;
-
+volatile double weightDifference = 0;
     volatile boolean smallest = false;
     ReadWriteLock lock = new ReentrantReadWriteLock();
 

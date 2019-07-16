@@ -23,7 +23,9 @@ public class HiveTask implements Runnable {
                     UserLoadBalance.selectLock.writeLock().lock();
                     long total = HiveCommon.infoList.stream().mapToLong(x -> x.totalRequest.get()).sum();
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        info.weight = info.totalRequest.get() / (double) total;
+                        double newWeight = info.totalRequest.get() / (double) total
+                        info.weightDifference = info.weight-newWeight;
+                        info.weight = newWeight;
                     }
                     HiveCommon.setCurrentWeight();
                     UserLoadBalance.selectLock.writeLock().unlock();
