@@ -17,8 +17,6 @@ public class HiveInvokerInfo {
     AtomicLong totalRequest = new AtomicLong(0);
 
     volatile double rttAverage = 0;
-    double rttAverageUpper = 0;
-    double rttAverageDowner = 0;
 
     volatile double weight = 0;
     volatile double weightInitial = 0;
@@ -39,9 +37,13 @@ public class HiveInvokerInfo {
     @Override
     public String toString() {
         return "name='" + name + '\'' +
+                ", pendingRequest=" + pendingRequest +
+                ", totalTime=" + totalTime +
+                ", totalRequest=" + totalRequest +
                 ", rttAverage=" + rttAverage +
                 ", weight=" + weight +
-                ", weightTop=" + weightTop;
+                ", weightTop=" + weightTop +
+                '}';
     }
 
 //    volatile double maxRequestCoefficient = 1;
