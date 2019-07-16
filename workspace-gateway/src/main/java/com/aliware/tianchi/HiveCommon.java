@@ -112,15 +112,16 @@ public class HiveCommon {
     }
 
     static void weightCalculation1(List<HiveInvokerInfo> list) {
-        if (list.size()==infoList.size()){
+        if (list.size()==infoList.size()||list.size()==1){
             return;
         }
-        double weightedRttAverage = 0;
+        double totalWeight = list.stream().mapToDouble(x->x.weight).sum();
+            double weightedRttAverage = 0;
         for (HiveInvokerInfo info : list) {
             if (info.rttAverage == 0) {
                 return;
             }
-            weightedRttAverage += info.rttAverage * info.weight;
+            weightedRttAverage += info.rttAverage * (info.weight/totalWeight);
         }
         List<HiveInvokerInfo> belowList = new ArrayList<>();
         List<HiveInvokerInfo> aboveList = new ArrayList<>();
