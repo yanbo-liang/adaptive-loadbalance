@@ -1,6 +1,8 @@
 package com.aliware.tianchi;
 
+import java.util.Comparator;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 public class HiveTask implements Runnable {
 
@@ -8,6 +10,7 @@ public class HiveTask implements Runnable {
     public void run() {
         System.out.println("!!!!!!!!!!!!!!!!!!!!task start at " + HiveCommon.format.format(new Date()));
         long start = System.currentTimeMillis();
+        long lastTotal = 0;
         try {
             while (true) {
                 if (HiveCommon.inited && System.currentTimeMillis() > (start + (30 * 1000) + 10)) {
@@ -19,15 +22,18 @@ public class HiveTask implements Runnable {
                     HiveCommon.lock.writeLock().lock();
                     HiveCommon.calculateAverage();
                     HiveCommon.log("test");
-
                     UserLoadBalance.selectLock.writeLock().lock();
                     long total = HiveCommon.infoList.stream().mapToLong(x -> x.totalRequest.get()).sum();
-                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        double newWeight = info.totalRequest.get() / (double) total;
-                        info.weightDifference = info.weight-newWeight;
-                        info.weight = info.weight-info.weightDifference;
+                    System.out.println(total);
+
+                    HiveCommon.infoList = HiveCommon.infoList.stream().sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
+                    HiveInvokerInfo info = HiveCommon.infoList.get(0);
+                    if (total>lastTotal) {
+                        info.weight = info.weight * 1.1;
                     }
+                    lastTotal=total;
                     HiveCommon.setCurrentWeight();
+                    HiveCommon.weightNormalize();
                     UserLoadBalance.selectLock.writeLock().unlock();
 
                     HiveCommon.lock.writeLock().unlock();
