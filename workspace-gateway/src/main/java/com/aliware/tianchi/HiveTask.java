@@ -19,7 +19,17 @@ public class HiveTask implements Runnable {
                     HiveCommon.lock.writeLock().lock();
                     HiveCommon.calculateAverage();
                     HiveCommon.log("test");
+
+                    UserLoadBalance.selectLock.writeLock().lock();
+                    long total = HiveCommon.infoList.stream().mapToLong(x -> x.totalRequest.get()).sum();
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        info.weight = info.totalRequest.get() / (double) total;
+                    }
+                    HiveCommon.setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
+
                     HiveCommon.lock.writeLock().unlock();
+
 
                 } else {
                     Thread.sleep(1);
