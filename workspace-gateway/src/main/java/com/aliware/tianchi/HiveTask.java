@@ -15,7 +15,7 @@ public class HiveTask implements Runnable {
                     System.out.println(HiveCommon.format.format(new Date()));
 
                     HiveCommon.clearTotal();
-                    Thread.sleep(300);
+                    Thread.sleep(500);
                     HiveCommon.lock.writeLock().lock();
                     HiveCommon.calculateAverage();
                     HiveCommon.log("test");
