@@ -140,9 +140,9 @@ public class HiveCommon {
         double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
         double weightChange;
         if (belowWeight > aboveWeight) {
-            weightChange = belowWeight * 0.04;
+            weightChange = belowWeight * 0.03;
         } else {
-            weightChange = aboveWeight * 0.04;
+            weightChange = aboveWeight * 0.03;
         }
         logger.info("{}-{}--{}", format.format(date), weightedRttAverage, weightChange);
 
