@@ -190,6 +190,12 @@ public class HiveCommon {
         }
     }
 
+    static void calculateAverage() {
+        for (HiveInvokerInfo info : infoList) {
+            info.rttAverage = ((double) info.totalTime.get()) / info.totalRequest.get();
+        }
+    }
+
     static void clearTotal() {
         for (HiveInvokerInfo info : infoList) {
             info.totalTime.updateAndGet(x -> 0);
