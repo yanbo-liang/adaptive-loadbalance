@@ -51,7 +51,7 @@ public class HiveFilter implements Filter {
                     hiveInvokerInfo.totalTime += rtt;
                     hiveInvokerInfo.totalRequest += 1;
 
-                    if (hiveInvokerInfo.totalRequest == 350) {
+                    if (hiveInvokerInfo.totalRequest == 750) {
                         hiveInvokerInfo.rttAverage = ((double) hiveInvokerInfo.totalTime) / hiveInvokerInfo.totalRequest;
                         hiveInvokerInfo.totalTime = 0;
                         hiveInvokerInfo.totalRequest = 0;
