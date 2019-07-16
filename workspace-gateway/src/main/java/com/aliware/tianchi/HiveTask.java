@@ -14,12 +14,9 @@ public class HiveTask implements Runnable {
 //                if (HiveCommon.inited) {
                     System.out.println(HiveCommon.format.format(new Date()));
 
-
-                    Thread.sleep(6000);
-                    UserLoadBalance.selectLock.writeLock().lock();
-                    HiveCommon.clearWeight();
-                    HiveCommon.setCurrentWeight();
-                    UserLoadBalance.selectLock.writeLock().unlock();
+                    HiveCommon.clearTotal();
+                    Thread.sleep(300);
+                    HiveCommon.log("test");
                 } else {
                     Thread.sleep(1);
                 }
@@ -29,6 +26,8 @@ public class HiveTask implements Runnable {
             e.printStackTrace();
         }
     }
+
+
 //                if (init() && System.currentTimeMillis() > start) {
 //                    UserLoadBalance.selectLock.writeLock().lock();
 //                    clearWeightAndAverage();

@@ -13,12 +13,8 @@ public class HiveInvokerInfo {
     AtomicLong pendingRequest = new AtomicLong(0);
     volatile int maxPendingRequest = 0;
 
-    volatile long start = 0;
-    volatile long time = 0;
-    //    AtomicLong totalTime = new AtomicLong(0);
-//    AtomicLong totalRequest = new AtomicLong(0);
-    volatile long totalTime = 0;
-    volatile long totalRequest = 0;
+    AtomicLong totalTime = new AtomicLong(0);
+    AtomicLong totalRequest = new AtomicLong(0);
 
     volatile double rttAverage = 0;
     double rttAverageUpper = 0;
@@ -45,8 +41,7 @@ public class HiveInvokerInfo {
         return "name='" + name + '\'' +
                 ", rttAverage=" + rttAverage +
                 ", weight=" + weight +
-                ", weightTop=" + weightTop +
-                ", time=" + time;
+                ", weightTop=" + weightTop;
     }
 
 //    volatile double maxRequestCoefficient = 1;

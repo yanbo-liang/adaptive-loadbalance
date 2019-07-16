@@ -13,9 +13,9 @@ public class HiveFilter implements Filter {
             HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
 
-//                HiveCommon.pendingRequestTotal.incrementAndGet();
+                HiveCommon.pendingRequestTotal.incrementAndGet();
 
-//                hiveInvokerInfo.pendingRequest.incrementAndGet();
+                hiveInvokerInfo.pendingRequest.incrementAndGet();
 
                 HiveCommon.rttMap.put(invocation, System.currentTimeMillis());
 
@@ -32,49 +32,17 @@ public class HiveFilter implements Filter {
         try {
             HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
             if (hiveInvokerInfo != null) {
-                if (result.hasException()) {
-//                    HiveCommon.pendingRequestTotal.decrementAndGet();
-//
-//                    hiveInvokerInfo.pendingRequest.decrementAndGet();
-                    return result;
-                }
-
                 Long start = HiveCommon.rttMap.get(invocation);
                 if (start != null) {
-                    long rtt = System.currentTimeMillis() - start;
-
-                    if (hiveInvokerInfo.start==0){
-                        hiveInvokerInfo.start=System.currentTimeMillis();
+                    if (!result.hasException()) {
+                        long rtt = System.currentTimeMillis() - start;
+                        hiveInvokerInfo.lock.readLock().lock();
+                        hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
+                        hiveInvokerInfo.totalRequest.incrementAndGet();
+                        hiveInvokerInfo.lock.readLock().unlock();
                     }
-//                    hiveInvokerInfo.lock.readLock().lock();
-//                    hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
-//                    hiveInvokerInfo.totalRequest.incrementAndGet();
-//                    hiveInvokerInfo.lock.readLock().unlock();
-                    hiveInvokerInfo.lock.writeLock().lock();
-                    hiveInvokerInfo.totalTime += rtt;
-                    hiveInvokerInfo.totalRequest += 1;
-
-                    if (hiveInvokerInfo.totalRequest == 750) {
-                        hiveInvokerInfo.rttAverage = ((double) hiveInvokerInfo.totalTime) / hiveInvokerInfo.totalRequest;
-                        hiveInvokerInfo.totalTime = 0;
-                        hiveInvokerInfo.totalRequest = 0;
-
-                        hiveInvokerInfo.time=System.currentTimeMillis()-hiveInvokerInfo.start;
-                        hiveInvokerInfo.start=0;
-                        if (HiveCommon.inited ) {
-                            UserLoadBalance.selectLock.writeLock().lock();
-                            HiveCommon.weightCalculation();
-                            UserLoadBalance.selectLock.writeLock().unlock();
-                        }
-                    }
-
-                    hiveInvokerInfo.lock.writeLock().unlock();
-
-
-//                    HiveCommon.pendingRequestTotal.decrementAndGet();
-
-//                    hiveInvokerInfo.pendingRequest.decrementAndGet();
-
+                    HiveCommon.pendingRequestTotal.decrementAndGet();
+                    hiveInvokerInfo.pendingRequest.decrementAndGet();
                 } else {
                     System.out.println("fuck");
                 }
@@ -84,5 +52,4 @@ public class HiveFilter implements Filter {
         }
         return result;
     }
-
 }

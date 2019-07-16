@@ -185,14 +185,19 @@ public class HiveCommon {
     }
 
     static void setCurrentWeight() {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
         for (HiveInvokerInfo info : infoList) {
             info.currentWeight = info.weight;
         }
     }
 
+    static void clearTotal() {
+        for (HiveInvokerInfo info : infoList) {
+            info.totalTime.updateAndGet(x -> 0);
+            info.totalRequest.updateAndGet(x -> 0);
+        }
+    }
+
     static void clearWeight() {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
         for (HiveInvokerInfo info : infoList) {
             info.weight = info.weightInitial;
         }
