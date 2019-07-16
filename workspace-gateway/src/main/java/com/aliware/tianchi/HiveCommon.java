@@ -96,9 +96,9 @@ public class HiveCommon {
         double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
         double weightChange;
         if (belowWeight > aboveWeight) {
-            weightChange = aboveWeight * 0.04;
+            weightChange = belowWeight * 0.05;
         } else {
-            weightChange = belowWeight * 0.02;
+            weightChange = aboveWeight * 0.03;
         }
         logger.info("{}-{}--{}", format.format(date), weightedRttAverage, weightChange);
 
@@ -140,9 +140,9 @@ public class HiveCommon {
         double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
         double weightChange;
         if (belowWeight > aboveWeight) {
-            weightChange = aboveWeight * 0.05;
+            weightChange = belowWeight * 0.08;
         } else {
-            weightChange = belowWeight * 0.05;
+            weightChange = aboveWeight * 0.05;
         }
         logger.info("{}-{}--{}", format.format(date), weightedRttAverage, weightChange);
 
