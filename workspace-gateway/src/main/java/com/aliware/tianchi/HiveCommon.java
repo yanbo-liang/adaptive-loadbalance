@@ -3,6 +3,8 @@ package com.aliware.tianchi;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.text.SimpleDateFormat;
@@ -12,9 +14,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HiveCommon {
+    private static final Logger logger = LoggerFactory.getLogger(HiveCommon.class);
+
     static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
-//    static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(2000, ConcurrentReferenceHashMap.ReferenceType.SOFT);
-    static final Map<Invocation,Long> rttMap = Collections.synchronizedMap(new WeakHashMap<>());
+    //    static final ConcurrentMap<Invocation, Long> rttMap = new ConcurrentReferenceHashMap<>(2000, ConcurrentReferenceHashMap.ReferenceType.SOFT);
+    static final Map<Invocation, Long> rttMap = Collections.synchronizedMap(new WeakHashMap<>());
     static final AtomicInteger pendingRequestTotal = new AtomicInteger(0);
     static volatile List<HiveInvokerInfo> infoList;
     private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -77,13 +81,15 @@ public class HiveCommon {
         List<HiveInvokerInfo> belowList = new ArrayList<>();
         List<HiveInvokerInfo> aboveList = new ArrayList<>();
 
+        Date date = new Date();
+
         for (HiveInvokerInfo info : infoList) {
             if (info.rttAverage > weightedRttAverage) {
                 aboveList.add(info);
             } else {
                 belowList.add(info);
             }
-            System.out.println(info);
+            logger.info("{}-{}", format.format(date), info);
         }
         double aboveWeight = aboveList.stream().mapToDouble(x -> x.weight).sum();
         double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
@@ -93,13 +99,8 @@ public class HiveCommon {
         } else {
             weightChange = belowWeight * 0.04;
         }
-        System.out.println(aboveList);
+        logger.info("{}-{}--{}", format.format(date),weightedRttAverage, weightChange);
 
-        System.out.println(belowList);
-        System.out.println(aboveWeight);
-        System.out.println(belowWeight);
-
-        System.out.println(weightedRttAverage + "---" + weightChange);
         HiveCommon.distributeWeightDown(aboveList, weightChange);
         double remianWeight = HiveCommon.distributeWeightUp(belowList, weightChange);
         HiveCommon.distributeWeightUp(aboveList, remianWeight);
@@ -117,8 +118,8 @@ public class HiveCommon {
             if (newWeight < info.weightTop) {
                 info.weight = newWeight;
             } else {
-                total += newWeight - info.weight-(info.weightTop-info.weight);
-                info.weight=info.weightTop;
+                total += newWeight - info.weight - (info.weightTop - info.weight);
+                info.weight = info.weightTop;
             }
         }
         return total;
