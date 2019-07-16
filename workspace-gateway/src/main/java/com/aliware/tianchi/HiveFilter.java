@@ -43,6 +43,9 @@ public class HiveFilter implements Filter {
                 if (start != null) {
                     long rtt = System.currentTimeMillis() - start;
 
+                    if (hiveInvokerInfo.start==0){
+                        hiveInvokerInfo.start=System.currentTimeMillis();
+                    }
 //                    hiveInvokerInfo.lock.readLock().lock();
 //                    hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
 //                    hiveInvokerInfo.totalRequest.incrementAndGet();
@@ -56,6 +59,8 @@ public class HiveFilter implements Filter {
                         hiveInvokerInfo.totalTime = 0;
                         hiveInvokerInfo.totalRequest = 0;
 
+                        hiveInvokerInfo.time=System.currentTimeMillis()-hiveInvokerInfo.start;
+                        hiveInvokerInfo.start=0;
                         if (HiveCommon.inited ) {
                             UserLoadBalance.selectLock.writeLock().lock();
                             HiveCommon.weightCalculation();
