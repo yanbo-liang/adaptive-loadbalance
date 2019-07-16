@@ -56,7 +56,7 @@ public class HiveFilter implements Filter {
                         hiveInvokerInfo.totalTime = 0;
                         hiveInvokerInfo.totalRequest = 0;
 
-                        if (HiveCommon.inited && hiveInvokerInfo.smallest) {
+                        if (HiveCommon.inited ) {
                             UserLoadBalance.selectLock.writeLock().lock();
                             HiveCommon.weightCalculation();
                             UserLoadBalance.selectLock.writeLock().unlock();
