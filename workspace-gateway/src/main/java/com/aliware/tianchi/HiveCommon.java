@@ -207,8 +207,6 @@ public class HiveCommon {
         for (HiveInvokerInfo info : HiveCommon.infoList) {
             info.weight = info.weightInitial;
             info.rttAverage = 0;
-            info.rttAverageUpper = 0;
-            info.rttAverageDowner = 0;
         }
     }
 
