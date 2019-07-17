@@ -16,6 +16,7 @@ public class HiveInvokerInfo {
     AtomicLong totalTime = new AtomicLong(0);
     AtomicLong totalRequest = new AtomicLong(0);
 
+    volatile double throughPut = 0;
     volatile double rttAverage = 0;
     double rttAverageUpper = 0;
     double rttAverageDowner = 0;
@@ -42,15 +43,17 @@ public class HiveInvokerInfo {
     public String toString() {
         return
                 "name='" + name + '\'' +
-                ", totalRequest=" + totalRequest +
-                ", rttAverage=" + rttAverage +
-                ", weight=" + weight +
-                ", weightTop=" + weightTop +
-                ", sampleStartTime=" + sampleStartTime +
-                ", sampleEndTime=" + sampleEndTime +
-                '}';
+                        ", totalRequest=" + totalRequest +
+                        ", rttAverage=" + rttAverage +
+                        ", weight=" + weight +
+                        ", weightTop=" + weightTop +
+                        ", sampleStartTime=" + sampleStartTime +
+                        ", sampleEndTime=" + sampleEndTime +
+                        ", throughPut=" + throughPut +
+
+                        '}';
     }
 
 //    volatile double maxRequestCoefficient = 1;
 
-    }
+}

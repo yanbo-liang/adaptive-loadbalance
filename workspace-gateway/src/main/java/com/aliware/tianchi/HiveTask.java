@@ -32,6 +32,7 @@ public class HiveTask implements Runnable {
                     }
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         info.rttAverage = info.totalTime.get() / (double) info.totalRequest.get();
+                        info.throughPut = info.totalRequest.get() / info.weight;
                     }
                     HiveCommon.log("test");
 
@@ -51,10 +52,10 @@ public class HiveTask implements Runnable {
 
                             double newWeight = info.totalRequest.get() / (double) sum;
 
-                            if (newWeight>info.weight){
-                                info.weight*=1.03;
-                            }else{
-                                info.weight/=1.03;
+                            if (newWeight > info.weight) {
+                                info.weight *= 1.03;
+                            } else {
+                                info.weight /= 1.03;
                             }
                         }
                     }
