@@ -10,15 +10,11 @@ public class HiveInvokerInfo {
     String name;
     Invoker invoker;
 
-    AtomicLong pendingRequest = new AtomicLong(0);
     volatile int maxPendingRequest = 0;
+    AtomicLong pendingRequest = new AtomicLong(0);
 
-    volatile long start = 0;
-    volatile long time = 0;
-    //    AtomicLong totalTime = new AtomicLong(0);
-//    AtomicLong totalRequest = new AtomicLong(0);
-    volatile long totalTime = 0;
-    volatile long totalRequest = 0;
+    AtomicLong totalTime = new AtomicLong(0);
+    AtomicLong totalRequest = new AtomicLong(0);
 
     volatile double rttAverage = 0;
     double rttAverageUpper = 0;
@@ -32,6 +28,8 @@ public class HiveInvokerInfo {
     volatile boolean smallest = false;
     ReadWriteLock lock = new ReentrantReadWriteLock();
 
+    long sampleStartTime = 0;
+    long sampleEndTime = 0;
 
     public HiveInvokerInfo(Invoker invoker) {
         String host = invoker.getUrl().getHost();
@@ -45,10 +43,8 @@ public class HiveInvokerInfo {
         return "name='" + name + '\'' +
                 ", rttAverage=" + rttAverage +
                 ", weight=" + weight +
-                ", weightTop=" + weightTop +
-                ", time=" + time;
+                ", weightTop=" + weightTop;
     }
-
 //    volatile double maxRequestCoefficient = 1;
 
-}
+    }

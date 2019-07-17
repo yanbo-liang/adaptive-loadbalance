@@ -12,23 +12,46 @@ public class HiveTask implements Runnable {
             while (true) {
                 if (HiveCommon.inited && System.currentTimeMillis() > (start + (30 * 1000) + 10)) {
 //                if (HiveCommon.inited) {
-                    System.out.println(HiveCommon.format.format(new Date()));
 
 
-                    Thread.sleep(6000);
-                    UserLoadBalance.selectLock.writeLock().lock();
-                    HiveCommon.clearWeight();
-                    HiveCommon.setCurrentWeight();
-                    UserLoadBalance.selectLock.writeLock().unlock();
+                    long sampleStartTime = System.currentTimeMillis();
+                    long sampleEndTime = sampleStartTime + 100;
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        info.sampleStartTime = sampleStartTime;
+                        info.sampleEndTime = sampleEndTime;
+                    }
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        info.totalTime.updateAndGet(x -> 0);
+                        info.totalRequest.updateAndGet(x -> 0);
+                    }
+                    Thread.sleep(100);
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        info.rttAverage = info.totalTime.get() / (double) info.totalRequest.get();
+                    }
+                    HiveCommon.log("test");
+//                    UserLoadBalance.selectLock.writeLock().lock();
+//                    HiveCommon.weightCalculation();
+//                    UserLoadBalance.selectLock.writeLock().unlock();
+
+
+//                    System.out.println(HiveCommon.format.format(new Date()));
+//
+//
+//                    Thread.sleep(6000);
+//                    UserLoadBalance.selectLock.writeLock().lock();
+//                    HiveCommon.clearWeight();
+//                    HiveCommon.setCurrentWeight();
+//                    UserLoadBalance.selectLock.writeLock().unlock();
                 } else {
                     Thread.sleep(1);
                 }
             }
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
+
 //                if (init() && System.currentTimeMillis() > start) {
 //                    UserLoadBalance.selectLock.writeLock().lock();
 //                    clearWeightAndAverage();

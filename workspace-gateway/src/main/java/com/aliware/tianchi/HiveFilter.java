@@ -9,16 +9,16 @@ public class HiveFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        long start = System.currentTimeMillis();
         try {
-            HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
-            if (hiveInvokerInfo != null) {
+            HiveInvokerInfo info = HiveCommon.infoMap.get(invoker.getUrl());
+            if (info != null) {
 
-//                HiveCommon.pendingRequestTotal.incrementAndGet();
+                HiveCommon.pendingRequestTotal.incrementAndGet();
 
-//                hiveInvokerInfo.pendingRequest.incrementAndGet();
+                info.pendingRequest.incrementAndGet();
 
-                HiveCommon.rttMap.put(invocation, System.currentTimeMillis());
-
+                HiveCommon.rttMap.put(invocation, start);
             }
             return invoker.invoke(invocation);
         } catch (Exception e) {
@@ -29,60 +29,33 @@ public class HiveFilter implements Filter {
 
     @Override
     public Result onResponse(Result result, Invoker<?> invoker, Invocation invocation) {
+        long end = System.currentTimeMillis();
         try {
-            HiveInvokerInfo hiveInvokerInfo = HiveCommon.infoMap.get(invoker.getUrl());
-            if (hiveInvokerInfo != null) {
-                if (result.hasException()) {
-//                    HiveCommon.pendingRequestTotal.decrementAndGet();
-//
-//                    hiveInvokerInfo.pendingRequest.decrementAndGet();
-                    return result;
-                }
-
-                Long start = HiveCommon.rttMap.get(invocation);
-                if (start != null) {
-                    long rtt = System.currentTimeMillis() - start;
-
-                    if (hiveInvokerInfo.start==0){
-                        hiveInvokerInfo.start=System.currentTimeMillis();
-                    }
-//                    hiveInvokerInfo.lock.readLock().lock();
-//                    hiveInvokerInfo.totalTime.updateAndGet(x -> x + rtt);
-//                    hiveInvokerInfo.totalRequest.incrementAndGet();
-//                    hiveInvokerInfo.lock.readLock().unlock();
-                    hiveInvokerInfo.lock.writeLock().lock();
-                    hiveInvokerInfo.totalTime += rtt;
-                    hiveInvokerInfo.totalRequest += 1;
-
-                    if (hiveInvokerInfo.totalRequest == 750) {
-                        hiveInvokerInfo.rttAverage = ((double) hiveInvokerInfo.totalTime) / hiveInvokerInfo.totalRequest;
-                        hiveInvokerInfo.totalTime = 0;
-                        hiveInvokerInfo.totalRequest = 0;
-
-                        hiveInvokerInfo.time=System.currentTimeMillis()-hiveInvokerInfo.start;
-                        hiveInvokerInfo.start=0;
-                        if (HiveCommon.inited ) {
-                            UserLoadBalance.selectLock.writeLock().lock();
-                            HiveCommon.weightCalculation();
-                            UserLoadBalance.selectLock.writeLock().unlock();
+            HiveInvokerInfo info = HiveCommon.infoMap.get(invoker.getUrl());
+            if (info != null) {
+                if (!result.hasException()) {
+                    Long start = HiveCommon.rttMap.get(invocation);
+                    if (start != null) {
+                        if (info.sampleStartTime <= start && start <= info.sampleEndTime) {
+                            if (info.sampleStartTime <= end && end <= info.sampleEndTime) {
+                                long rtt = end - start;
+                                info.lock.readLock().lock();
+                                info.totalTime.updateAndGet(x -> x + rtt);
+                                info.totalRequest.incrementAndGet();
+                                info.lock.readLock().unlock();
+                            }
                         }
+                    } else {
+                        System.out.println("fuck");
                     }
-
-                    hiveInvokerInfo.lock.writeLock().unlock();
-
-
-//                    HiveCommon.pendingRequestTotal.decrementAndGet();
-
-//                    hiveInvokerInfo.pendingRequest.decrementAndGet();
-
-                } else {
-                    System.out.println("fuck");
                 }
+                HiveCommon.pendingRequestTotal.decrementAndGet();
+
+                info.pendingRequest.decrementAndGet();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return result;
     }
-
 }
