@@ -8,6 +8,8 @@ public class HiveTask implements Runnable {
     public void run() {
         System.out.println("!!!!!!!!!!!!!!!!!!!!task start at " + HiveCommon.format.format(new Date()));
         long start = System.currentTimeMillis();
+        ;
+        long lastSum = 0;
         try {
             while (true) {
                 if (HiveCommon.inited && System.currentTimeMillis() > (start + (30 * 1000) + 10)) {
@@ -24,19 +26,29 @@ public class HiveTask implements Runnable {
                         info.totalTime.updateAndGet(x -> 0);
                         info.totalRequest.updateAndGet(x -> 0);
                     }
-                    Thread.sleep(100);
+                    Thread.sleep(200);
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         info.rttAverage = info.totalTime.get() / (double) info.totalRequest.get();
                     }
                     HiveCommon.log("test");
-//                    UserLoadBalance.selectLock.writeLock().lock();
-//
-//                    long sum = HiveCommon.infoList.stream().mapToLong(x -> x.totalRequest.get()).sum();
-//                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-//                        info.weight = info.totalRequest.get() / (double) sum;
-//                    }
-//                    HiveCommon.setCurrentWeight();
-//                    UserLoadBalance.selectLock.writeLock().unlock();
+                    UserLoadBalance.selectLock.writeLock().lock();
+
+                    long sum = HiveCommon.infoList.stream().mapToLong(x -> x.totalRequest.get()).sum();
+                    if (lastSum == 0) {
+                        lastSum = sum;
+                    } else if (sum < lastSum * 0.3) {
+                        continue;
+                    }
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        if (info.totalRequest.get() != 0) {
+
+                            info.weight = info.totalRequest.get() / (double) sum;
+                        }
+                    }
+                    lastSum = sum;
+                    HiveCommon.weightNormalize();
+                    HiveCommon.setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().unlock();
                 } else {
                     Thread.sleep(1);
                 }
