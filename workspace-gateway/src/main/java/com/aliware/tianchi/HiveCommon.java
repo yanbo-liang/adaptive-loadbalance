@@ -100,8 +100,8 @@ public class HiveCommon {
                 if (info.weight + weightChange < info.weightTop) {
                     info.weight = info.weight + weightChange;
                 } else {
-                    info.weight = info.weightTop;
                     remain += weightChange - (info.weightTop - info.weight);
+                    info.weight = info.weightTop;
                 }
             }
         }
