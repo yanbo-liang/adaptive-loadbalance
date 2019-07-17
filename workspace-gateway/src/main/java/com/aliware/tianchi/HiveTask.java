@@ -1,6 +1,9 @@
 package com.aliware.tianchi;
 
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class HiveTask implements Runnable {
 
@@ -47,18 +50,11 @@ public class HiveTask implements Runnable {
                     }
                     UserLoadBalance.selectLock.writeLock().lock();
 
-                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        if (info.totalRequest.get() != 0) {
-
-                            double newWeight = info.totalRequest.get() / (double) sum;
-
-                            if (newWeight > info.weight) {
-                                info.weight *= 1.03;
-                            } else {
-                                info.weight /= 1.03;
-                            }
-                        }
-                    }
+                    List<HiveInvokerInfo> collect = HiveCommon.infoList.stream().sorted(Comparator.comparingDouble(x -> x.throughPut)).collect(Collectors.toList());
+                    HiveInvokerInfo info1 = collect.get(0);
+                    HiveInvokerInfo info2 = collect.get(2);
+                    info1.weight/=1.1;
+                    info2.weight*=1.1;
                     lastSum = sum;
                     HiveCommon.weightNormalize();
                     HiveCommon.setCurrentWeight();
