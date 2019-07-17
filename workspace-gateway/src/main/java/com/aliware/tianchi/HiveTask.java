@@ -15,7 +15,11 @@ public class HiveTask implements Runnable {
                     long currentTime = System.currentTimeMillis();
                     if (currentTime >= start + 6000) {
                         start = currentTime;
+                        UserLoadBalance.selectLock.writeLock().lock();
                         HiveCommon.clearWeight();
+                        HiveCommon.setCurrentWeight();
+                        UserLoadBalance.selectLock.writeLock().unlock();
+
                     }
                     long sampleStartTime = System.currentTimeMillis();
                     long sampleEndTime = sampleStartTime + 300;
