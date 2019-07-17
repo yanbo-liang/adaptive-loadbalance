@@ -52,9 +52,9 @@ public class HiveTask implements Runnable {
                             double newWeight = info.totalRequest.get() / (double) sum;
 
                             if (newWeight>info.weight){
-                                info.weight*=1.05;
+                                info.weight*=1.03;
                             }else{
-                                info.weight/=1.05;
+                                info.weight/=1.03;
                             }
                         }
                     }
