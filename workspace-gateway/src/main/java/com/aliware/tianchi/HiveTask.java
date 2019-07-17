@@ -28,6 +28,9 @@ public class HiveTask implements Runnable {
                     }
                     Thread.sleep(200);
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        info.lock.writeLock().lock();
+                    }
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
                         info.rttAverage = info.totalTime.get() / (double) info.totalRequest.get();
                     }
                     HiveCommon.log("test");
@@ -35,7 +38,10 @@ public class HiveTask implements Runnable {
                     long sum = HiveCommon.infoList.stream().mapToLong(x -> x.totalRequest.get()).sum();
                     if (lastSum == 0) {
                         lastSum = sum;
-                    } else if (sum < lastSum * 0.3) {
+                    } else if (sum < lastSum * 0.5) {
+                        for (HiveInvokerInfo info : HiveCommon.infoList) {
+                            info.lock.writeLock().unlock();
+                        }
                         continue;
                     }
                     UserLoadBalance.selectLock.writeLock().lock();
@@ -43,13 +49,23 @@ public class HiveTask implements Runnable {
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         if (info.totalRequest.get() != 0) {
 
-                            info.weight = info.totalRequest.get() / (double) sum;
+                            double newWeight = info.totalRequest.get() / (double) sum;
+
+                            if (newWeight>info.weight){
+                                info.weight/=1.05;
+                            }else{
+                                info.weight*=1.06;
+                            }
                         }
                     }
                     lastSum = sum;
                     HiveCommon.weightNormalize();
                     HiveCommon.setCurrentWeight();
                     UserLoadBalance.selectLock.writeLock().unlock();
+
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        info.lock.writeLock().unlock();
+                    }
                 } else {
                     Thread.sleep(1);
                 }
