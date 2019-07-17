@@ -17,7 +17,7 @@ public class HiveTask implements Runnable {
 
 
                     long sampleStartTime = System.currentTimeMillis();
-                    long sampleEndTime = sampleStartTime + 200;
+                    long sampleEndTime = sampleStartTime + 150;
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         info.sampleStartTime = sampleStartTime;
                         info.sampleEndTime = sampleEndTime;
@@ -26,7 +26,7 @@ public class HiveTask implements Runnable {
                         info.totalTime.updateAndGet(x -> 0);
                         info.totalRequest.updateAndGet(x -> 0);
                     }
-                    Thread.sleep(200);
+                    Thread.sleep(150);
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         info.lock.writeLock().lock();
                     }
@@ -52,9 +52,9 @@ public class HiveTask implements Runnable {
                             double newWeight = info.totalRequest.get() / (double) sum;
 
                             if (newWeight>info.weight){
-                                info.weight*=1.02;
+                                info.weight*=1.05;
                             }else{
-                                info.weight/=1.02;
+                                info.weight/=1.05;
                             }
                         }
                     }
