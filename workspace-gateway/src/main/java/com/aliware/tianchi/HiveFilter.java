@@ -14,11 +14,11 @@ public class HiveFilter implements Filter {
             HiveInvokerInfo info = HiveCommon.infoMap.get(invoker.getUrl());
             if (info != null) {
 
-                HiveCommon.pendingRequestTotal.incrementAndGet();
+//                HiveCommon.pendingRequestTotal.incrementAndGet();
 
-                info.pendingRequest.incrementAndGet();
+//                info.pendingRequest.incrementAndGet();
 
-                HiveCommon.rttMap.put(invocation, start);
+//                HiveCommon.rttMap.put(invocation, start);
             }
             return invoker.invoke(invocation);
         } catch (Exception e) {
@@ -34,20 +34,20 @@ public class HiveFilter implements Filter {
             HiveInvokerInfo info = HiveCommon.infoMap.get(invoker.getUrl());
             if (info != null) {
                 if (!result.hasException()) {
-                    Long start = HiveCommon.rttMap.get(invocation);
-                    if (start != null) {
-                        if (info.sampleStartTime <= start && start <= info.sampleEndTime) {
-                            if (info.sampleStartTime <= end && end <= info.sampleEndTime) {
-                                long rtt = end - start;
-                                info.lock.readLock().lock();
-                                info.totalTime.updateAndGet(x -> x + rtt);
+//                    Long start = HiveCommon.rttMap.get(invocation);
+//                    if (start != null) {
+//                        if (info.sampleStartTime <= start && start <= info.sampleEndTime) {
+//                            if (info.sampleStartTime <= end && end <= info.sampleEndTime) {
+//                                long rtt = end - start;
+//                                info.lock.readLock().lock();
+//                                info.totalTime.updateAndGet(x -> x + rtt);
                                 info.totalRequest.incrementAndGet();
-                                info.lock.readLock().unlock();
-                            }
-                        }
-                    } else {
-                        System.out.println("fuck");
-                    }
+//                                info.lock.readLock().unlock();
+//                            }
+//                        }
+//                    } else {
+//                        System.out.println("fuck");
+//                    }
                 }
                 HiveCommon.pendingRequestTotal.decrementAndGet();
 
