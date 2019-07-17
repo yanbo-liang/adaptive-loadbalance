@@ -67,11 +67,14 @@ public class HiveCommon {
         List<HiveInvokerInfo> badList = new ArrayList<>();
         Date date = new Date();
         for (HiveInvokerInfo info : infoList) {
-            if (info.throughPut > averageThroughput) {
+            if (info.throughPut > averageThroughput * 1.05) {
                 goodList.add(info);
-            } else {
+            } else if (info.throughPut < averageThroughput / 1.05) {
                 badList.add(info);
             }
+        }
+        if (goodList.size() == 0 || badList.size() == 0) {
+            return;
         }
         double goodListWeight = goodList.stream().mapToDouble(x -> x.weight).sum();
         double badListWeight = badList.stream().mapToDouble(x -> x.weight).sum();
