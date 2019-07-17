@@ -15,7 +15,7 @@ public class HiveTask implements Runnable {
 
 
                     long sampleStartTime = System.currentTimeMillis();
-                    long sampleEndTime = sampleStartTime + 100;
+                    long sampleEndTime = sampleStartTime + 200;
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         info.sampleStartTime = sampleStartTime;
                         info.sampleEndTime = sampleEndTime;
