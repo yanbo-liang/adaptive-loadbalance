@@ -29,14 +29,14 @@ public class HiveTask implements Runnable {
                         info.rttAverage = info.totalTime.get() / (double) info.totalRequest.get();
                     }
                     HiveCommon.log("test");
-                    UserLoadBalance.selectLock.writeLock().lock();
-
-                    long sum = HiveCommon.infoList.stream().mapToLong(x -> x.totalRequest.get()).sum();
-                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        info.weight = info.totalRequest.get() / (double) sum;
-                    }
-                    HiveCommon.setCurrentWeight();
-                    UserLoadBalance.selectLock.writeLock().unlock();
+//                    UserLoadBalance.selectLock.writeLock().lock();
+//
+//                    long sum = HiveCommon.infoList.stream().mapToLong(x -> x.totalRequest.get()).sum();
+//                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+//                        info.weight = info.totalRequest.get() / (double) sum;
+//                    }
+//                    HiveCommon.setCurrentWeight();
+//                    UserLoadBalance.selectLock.writeLock().unlock();
                 } else {
                     Thread.sleep(1);
                 }
