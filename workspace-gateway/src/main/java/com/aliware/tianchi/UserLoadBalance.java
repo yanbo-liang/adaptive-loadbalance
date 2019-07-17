@@ -25,39 +25,39 @@ public class UserLoadBalance implements LoadBalance {
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
         HiveCommon.initLoadBalance(invokers);
         if (HiveCommon.inited) {
-            double maxCurrentWeight = -1000D;
-            HiveInvokerInfo maxInfo = null;
-
-            selectLock.readLock().lock();
-            for (HiveInvokerInfo info : HiveCommon.infoList) {
-                if (maxCurrentWeight < info.currentWeight) {
-                    maxCurrentWeight = info.currentWeight;
-                    maxInfo = info;
-                }
-            }
-            selectLock.readLock().unlock();
-
-            if (maxInfo != null) {
-
-//                selectLock.writeLock().lock();
-                maxInfo.currentWeight = maxInfo.currentWeight - 1;
-                for (HiveInvokerInfo info : HiveCommon.infoList) {
-                    info.currentWeight = info.weight + info.currentWeight;
-                }
-//                selectLock.writeLock().unlock();
-
-                return maxInfo.invoker;
-            }
+//            double maxCurrentWeight = -1000D;
+//            HiveInvokerInfo maxInfo = null;
 //
-//            List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-//            double[] weightArray = new double[infoList.size()];
-//            for (int i = 0; i < weightArray.length; i++) {
-//                weightArray[i] = infoList.get(i).weight;
+//            selectLock.readLock().lock();
+//            for (HiveInvokerInfo info : HiveCommon.infoList) {
+//                if (maxCurrentWeight < info.currentWeight) {
+//                    maxCurrentWeight = info.currentWeight;
+//                    maxInfo = info;
+//                }
+//            }
+//            selectLock.readLock().unlock();
+//
+//            if (maxInfo != null) {
+//
+//                selectLock.writeLock().lock();
+//                maxInfo.currentWeight = maxInfo.currentWeight - 1;
+//                for (HiveInvokerInfo info : HiveCommon.infoList) {
+//                    info.currentWeight = info.weight + info.currentWeight;
+//                }
+//                selectLock.writeLock().unlock();
+//
+//                return maxInfo.invoker;
 //            }
 //
-//            HiveInvokerInfo pickedInfo = infoList.get(HiveCommon.pickByWeight(weightArray));
-//
-//            return pickedInfo.invoker;
+            List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+            double[] weightArray = new double[infoList.size()];
+            for (int i = 0; i < weightArray.length; i++) {
+                weightArray[i] = infoList.get(i).weight;
+            }
+
+            HiveInvokerInfo pickedInfo = infoList.get(HiveCommon.pickByWeight(weightArray));
+
+            return pickedInfo.invoker;
 
         }
 
