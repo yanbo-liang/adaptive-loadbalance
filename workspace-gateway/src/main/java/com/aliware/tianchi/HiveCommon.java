@@ -79,7 +79,7 @@ public class HiveCommon {
         if (goodListWeight > badListWeight) {
             weightChange = badListWeight * 0.1;
         } else {
-            weightChange = goodListWeight * 0.05;
+            weightChange = goodListWeight * 0.1;
         }
         logger.info("{}-{}--{}", format.format(date), averageThroughput, weightChange);
 
