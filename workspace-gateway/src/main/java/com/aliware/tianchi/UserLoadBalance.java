@@ -8,6 +8,7 @@ import org.apache.dubbo.rpc.cluster.LoadBalance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -20,50 +21,55 @@ public class UserLoadBalance implements LoadBalance {
     static volatile boolean stress = false;
     static ReadWriteLock selectLock = new ReentrantReadWriteLock();
 
+    static ThreadLocal<HiveSelectInfo> localInfo = new ThreadLocal<>();
+
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
         HiveCommon.initLoadBalance(invokers);
         if (HiveCommon.inited) {
-//            double maxCurrentWeight = -1000D;
-//            HiveInvokerInfo maxInfo = null;
-//
-//            selectLock.readLock().lock();
-//            for (HiveInvokerInfo info : HiveCommon.infoList) {
-//                if (maxCurrentWeight < info.currentWeight) {
-//                    maxCurrentWeight = info.currentWeight;
-//                    maxInfo = info;
-//                }
-//            }
-//            selectLock.readLock().unlock();
-//
-//            if (maxInfo != null) {
-//
-//                selectLock.writeLock().lock();
-//                maxInfo.currentWeight = maxInfo.currentWeight - 1;
-//                for (HiveInvokerInfo info : HiveCommon.infoList) {
-//                    info.currentWeight = info.weight + info.currentWeight;
-//                }
-//                selectLock.writeLock().unlock();
-//
-//                return maxInfo.invoker;
-//            }
-//
-            List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-            double[] weightArray = new double[infoList.size()];
-            for (int i = 0; i < weightArray.length; i++) {
-                weightArray[i] = infoList.get(i).weight;
+            HiveSelectInfo sinfo = localInfo.get();
+            if (sinfo == null) {
+                HiveSelectInfo hiveSelectInfo = new HiveSelectInfo();
+                hiveSelectInfo.weights = HiveCommon.infoList.stream().mapToDouble(x -> x.weight).toArray();
+                hiveSelectInfo.cWeights = Arrays.copyOf(hiveSelectInfo.weights, hiveSelectInfo.weights.length);
+                localInfo.set(hiveSelectInfo);
+                sinfo=hiveSelectInfo;
+            } else {
+                double[] newWeights = HiveCommon.infoList.stream().mapToDouble(x -> x.weight).toArray();
+                if (!Arrays.equals(sinfo.weights, newWeights)) {
+                    sinfo.weights = newWeights;
+                    sinfo.cWeights = Arrays.copyOf(sinfo.weights, sinfo.weights.length);
+                }
             }
+            double maxCurrentWeight = -1000D;
+            int index = 0;
+            for (int i = 0; i < sinfo.cWeights.length; i++) {
+                if (maxCurrentWeight < sinfo.cWeights[i]) {
+                    maxCurrentWeight = sinfo.cWeights[i];
+                    index = i;
+                }
+            }
+            sinfo.cWeights[index] -= 1;
+            for (int i = 0; i < sinfo.cWeights.length; i++) {
+                sinfo.cWeights[i] = sinfo.cWeights[i] + sinfo.weights[i];
+            }
+            return HiveCommon.infoList.get(index).invoker;
 
-            HiveInvokerInfo pickedInfo = infoList.get(HiveCommon.pickByWeight(weightArray));
-
-            return pickedInfo.invoker;
+//            List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+//            double[] weights = new double[infoList.size()];
+//            for (int i = 0; i < weights.length; i++) {
+//                weights[i] = infoList.get(i).weight;
+//            }
+//
+//            HiveInvokerInfo pickedInfo = infoList.get(HiveCommon.pickByWeight(weights));
+//
+//            return pickedInfo.invoker;
 
         }
 
         return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
-
 
 
 //        if (pickedInfo.pendingRequest.get() < pickedInfo.maxPendingRequest) {
@@ -117,17 +123,17 @@ public class UserLoadBalance implements LoadBalance {
 //        })).collect(Collectors.toList());
 
 
-//        int[] weightArray = new int[sortedInfo.size()];
+//        int[] weights = new int[sortedInfo.size()];
 //        int subWeight = sortedInfo.size();
 //        for (
 //                int i = 0; i < sortedInfo.size(); i++) {
-////            weightArray[i] = (int) sortedInfo.get(i).maxPendingRequest / 10 * (10 + subWeight - i - 1);
-//            weightArray[i] = (int) sortedInfo.get(i).maxPendingRequest * (subWeight - i);
+////            weights[i] = (int) sortedInfo.get(i).maxPendingRequest / 10 * (10 + subWeight - i - 1);
+//            weights[i] = (int) sortedInfo.get(i).maxPendingRequest * (subWeight - i);
 //
-////            weightArray[i] = sortedInfo.size()-i;
+////            weights[i] = sortedInfo.size()-i;
 //        }
 //
-//        HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weightArray));
+//        HiveInvokerInfo pickedInvoker = sortedInfo.get(pickByWeight(weights));
 
 //        for (HiveInvokerInfo pickedInvoker : sortedInfo) {
 //        if (pickedInvoker.currentRequest.get() < pickedInvoker.maxPendingRequest * pickedInvoker.stressCoefficient) {
@@ -153,28 +159,28 @@ public class UserLoadBalance implements LoadBalance {
 //        }
 //
 //
-//        int[] weightArray = new int[sortedInfo.size()];
+//        int[] weights = new int[sortedInfo.size()];
 //        int subWeight = sortedInfo.size();
 //        for (int i = 0; i < sortedInfo.size(); i++) {
 //            if (sortedInfo.get(i).maxPendingRequest == -1) {
 //                return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
 //            }
 //
-//            weightArray[i] = (int) sortedInfo.get(i).maxPendingRequest * (subWeight - i);
+//            weights[i] = (int) sortedInfo.get(i).maxPendingRequest * (subWeight - i);
 //
-////            weightArray[i] = (subWeight - i);
+////            weights[i] = (subWeight - i);
 //            HiveInvokerInfo targetInfo = sortedInfo.get(i);
 //            long l = averageRttCache(targetInfo);
 //            if (targetInfo.averageRttCache != -1) {
 //                if (l < targetInfo.averageRttCache * 1.1) {
-//                    weightArray[i] /=3;
+//                    weights[i] /=3;
 //                }
 //            }
 //            targetInfo.averageRttCache = l;
 //
 //        }
 //
-//        int index = pickByWeight(weightArray);
+//        int index = pickByWeight(weights);
 //        HiveInvokerInfo a = sortedInfo.get(index);
 //
 //
