@@ -31,7 +31,6 @@ public class HiveTask implements Runnable {
                         info.rttAverage = info.totalTime.get() / (double) info.totalRequest.get();
                     }
                     HiveCommon.log("test");
-                    UserLoadBalance.selectLock.writeLock().lock();
 
                     long sum = HiveCommon.infoList.stream().mapToLong(x -> x.totalRequest.get()).sum();
                     if (lastSum == 0) {
@@ -39,6 +38,8 @@ public class HiveTask implements Runnable {
                     } else if (sum < lastSum * 0.3) {
                         continue;
                     }
+                    UserLoadBalance.selectLock.writeLock().lock();
+
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         if (info.totalRequest.get() != 0) {
 
