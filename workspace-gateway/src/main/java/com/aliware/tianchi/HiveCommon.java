@@ -73,7 +73,7 @@ public class HiveCommon {
                 badList.add(info);
             }
         }
-        double goodListWeight = goodList.stream().mapToDouble(x -> x.weight).sum();
+        double goodListWeight = goodList.stream().filter(x -> x.weight != x.weightTop).mapToDouble(x -> x.weight).sum();
         double badListWeight = badList.stream().mapToDouble(x -> x.weight).sum();
         double weightChange;
         if (goodListWeight > badListWeight) {
@@ -83,75 +83,34 @@ public class HiveCommon {
         }
         logger.info("{}-{}--{}", format.format(date), averageThroughput, weightChange);
 
-        HiveCommon.distributeWeightDown(badList, weightChange);
-        double remianWeight = HiveCommon.distributeWeightUp(goodList, weightChange);
-        HiveCommon.distributeWeightUp(badList, remianWeight);
+        HiveCommon.distributeWeightDown(badList, weightChange, badListWeight);
+        double remianWeight = HiveCommon.distributeWeightUp(goodList, weightChange, goodListWeight);
+        HiveCommon.distributeWeightUp(badList, remianWeight, badListWeight);
 
-//        weightCalculation1(infoList.stream().filter(x -> x.weight != x.weightTop).collect(Collectors.toList()));
         weightNormalize();
         setCurrentWeight();
     }
 
-    static void weightCalculation1(List<HiveInvokerInfo> list) {
-        if (list.size() == infoList.size() || list.size() == 1) {
-            return;
-        }
-        double totalWeight = list.stream().mapToDouble(x -> x.weight).sum();
-        double weightedRttAverage = 0;
-        for (HiveInvokerInfo info : list) {
-            if (info.rttAverage == 0) {
-                return;
+    static double distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight, double weightSum) {
+        List<HiveInvokerInfo> sortedList = infoList.stream().sorted(Comparator.comparing(x -> x.throughPut, Comparator.reverseOrder())).collect(Collectors.toList());
+        double remain = 0;
+        for (HiveInvokerInfo info : sortedList) {
+            if (info.weight != info.weightTop) {
+                double weightChange = (info.weight / weightSum) * distributedWeight + remain;
+                if (info.weight + weightChange < info.weightTop) {
+                    info.weight = info.weight + weightChange;
+                } else {
+                    info.weight = info.weightTop;
+                    remain += weightChange - (info.weightTop - info.weight);
+                }
             }
-            weightedRttAverage += info.rttAverage * (info.weight / totalWeight);
         }
-        List<HiveInvokerInfo> belowList = new ArrayList<>();
-        List<HiveInvokerInfo> aboveList = new ArrayList<>();
-
-        Date date = new Date();
-
-        for (HiveInvokerInfo info : list) {
-            if (info.rttAverage > weightedRttAverage) {
-                aboveList.add(info);
-            } else {
-                belowList.add(info);
-            }
-            logger.info("{}-{}", format.format(date), info);
-        }
-        double aboveWeight = aboveList.stream().mapToDouble(x -> x.weight).sum();
-        double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
-        double weightChange;
-        if (belowWeight > aboveWeight) {
-            weightChange = belowWeight * 0.03;
-        } else {
-            weightChange = aboveWeight * 0.03;
-        }
-        logger.info("{}-{}--{}", format.format(date), weightedRttAverage, weightChange);
-
-        HiveCommon.distributeWeightDown(aboveList, weightChange);
-        double remianWeight = HiveCommon.distributeWeightUp(belowList, weightChange);
-        HiveCommon.distributeWeightUp(aboveList, remianWeight);
-
+        return remain;
     }
 
-    static double distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight) {
-        double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
-        double total = 0;
+    static void distributeWeightDown(List<HiveInvokerInfo> infoList, double distributedWeight, double weightSum) {
         for (HiveInvokerInfo info : infoList) {
-            double newWeight = info.weight + (info.weight / weightSum) * distributedWeight;
-            if (newWeight < info.weightTop) {
-                info.weight = newWeight;
-            } else {
-                total += newWeight - info.weight - (info.weightTop - info.weight);
-                info.weight = info.weightTop;
-            }
-        }
-        return total;
-    }
-
-    static void distributeWeightDown(List<HiveInvokerInfo> infoList, double distributedWeight) {
-        double weightSum = infoList.stream().mapToDouble(x -> x.weight).sum();
-        for (HiveInvokerInfo info : infoList) {
-            info.weight = info.weight - (info.weight / weightSum) * distributedWeight;
+            info.weight = info.weight - distributedWeight * (info.weight / weightSum);
         }
     }
 

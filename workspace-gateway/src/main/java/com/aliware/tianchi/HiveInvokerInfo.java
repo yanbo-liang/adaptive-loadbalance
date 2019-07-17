@@ -43,9 +43,11 @@ public class HiveInvokerInfo {
                 ", rttAverage=" + rttAverage +
                 ", weight=" + weight +
                 ", weightTop=" + weightTop +
-                ", sampleStartTime=" + sampleStartTime +
-                ", sampleEndTime=" + sampleEndTime +
                 ", throughPut=" + throughPut +
                 '}';
+    }
+
+    public double getThroughPut() {
+        return throughPut;
     }
 }
