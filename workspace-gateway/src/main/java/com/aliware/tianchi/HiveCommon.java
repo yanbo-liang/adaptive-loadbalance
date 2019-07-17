@@ -5,7 +5,6 @@ import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -50,20 +49,11 @@ public class HiveCommon {
             }
             if (initedByCallback.compareAndSet(false, true)) {
                 int totalPendingRequest = infoMap.values().stream().mapToInt(x -> x.maxPendingRequest).sum();
-                int small = Integer.MAX_VALUE;
-                HiveInvokerInfo tmp = null;
                 for (HiveInvokerInfo info : infoMap.values()) {
                     info.weightInitial = ((double) info.maxPendingRequest) / totalPendingRequest;
                     info.weight = info.weightInitial;
                     info.currentWeight = info.weight;
                     info.weightTop = ((double) info.maxPendingRequest) / 1024;
-                    if (info.maxPendingRequest < small) {
-                        small = info.maxPendingRequest;
-                        tmp = info;
-                    }
-                }
-                if (tmp != null) {
-                    tmp.smallest = true;
                 }
                 infoList = new ArrayList<>(HiveCommon.infoMap.values());
                 inited = true;
@@ -72,41 +62,32 @@ public class HiveCommon {
     }
 
     static void weightCalculation() {
-        double weightedRttAverage = 0;
-        for (HiveInvokerInfo info : infoList) {
-            if (info.rttAverage == 0) {
-                return;
-            }
-            weightedRttAverage += info.rttAverage * info.weight;
-        }
-        List<HiveInvokerInfo> belowList = new ArrayList<>();
-        List<HiveInvokerInfo> aboveList = new ArrayList<>();
-
+        double averageThroughput = HiveCommon.infoList.stream().mapToDouble(x -> x.throughPut).sum() / HiveCommon.infoList.size();
+        List<HiveInvokerInfo> goodList = new ArrayList<>();
+        List<HiveInvokerInfo> badList = new ArrayList<>();
         Date date = new Date();
-
         for (HiveInvokerInfo info : infoList) {
-            if (info.rttAverage > weightedRttAverage) {
-                aboveList.add(info);
+            if (info.throughPut > averageThroughput) {
+                goodList.add(info);
             } else {
-                belowList.add(info);
+                badList.add(info);
             }
-            logger.info("{}-{}", format.format(date), info);
         }
-        double aboveWeight = aboveList.stream().mapToDouble(x -> x.weight).sum();
-        double belowWeight = belowList.stream().mapToDouble(x -> x.weight).sum();
+        double goodListWeight = goodList.stream().mapToDouble(x -> x.weight).sum();
+        double badListWeight = badList.stream().mapToDouble(x -> x.weight).sum();
         double weightChange;
-        if (belowWeight > aboveWeight) {
-            weightChange = belowWeight * 0.04;
+        if (goodListWeight > badListWeight) {
+            weightChange = badListWeight * 0.1;
         } else {
-            weightChange = aboveWeight * 0.02;
+            weightChange = goodListWeight * 0.05;
         }
-        logger.info("{}-{}--{}", format.format(date), weightedRttAverage, weightChange);
+        logger.info("{}-{}--{}", format.format(date), averageThroughput, weightChange);
 
-        HiveCommon.distributeWeightDown(aboveList, weightChange);
-        double remianWeight = HiveCommon.distributeWeightUp(belowList, weightChange);
-        HiveCommon.distributeWeightUp(aboveList, remianWeight);
+        HiveCommon.distributeWeightDown(badList, weightChange);
+        double remianWeight = HiveCommon.distributeWeightUp(goodList, weightChange);
+        HiveCommon.distributeWeightUp(badList, remianWeight);
 
-        weightCalculation1(infoList.stream().filter(x -> x.weight != x.weightTop).collect(Collectors.toList()));
+//        weightCalculation1(infoList.stream().filter(x -> x.weight != x.weightTop).collect(Collectors.toList()));
         weightNormalize();
         setCurrentWeight();
     }
@@ -202,8 +183,6 @@ public class HiveCommon {
         for (HiveInvokerInfo info : HiveCommon.infoList) {
             info.weight = info.weightInitial;
             info.rttAverage = 0;
-            info.rttAverageUpper = 0;
-            info.rttAverageDowner = 0;
         }
     }
 

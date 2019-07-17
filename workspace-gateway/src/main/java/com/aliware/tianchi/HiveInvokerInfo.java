@@ -18,15 +18,12 @@ public class HiveInvokerInfo {
 
     volatile double throughPut = 0;
     volatile double rttAverage = 0;
-    double rttAverageUpper = 0;
-    double rttAverageDowner = 0;
 
     volatile double weight = 0;
     volatile double weightInitial = 0;
     volatile double currentWeight = 0;
     volatile double weightTop = 0;
 
-    volatile boolean smallest = false;
     ReadWriteLock lock = new ReentrantReadWriteLock();
 
     long sampleStartTime = 0;
@@ -41,19 +38,14 @@ public class HiveInvokerInfo {
 
     @Override
     public String toString() {
-        return
-                "name='" + name + '\'' +
-                        ", totalRequest=" + totalRequest +
-                        ", rttAverage=" + rttAverage +
-                        ", weight=" + weight +
-                        ", weightTop=" + weightTop +
-                        ", sampleStartTime=" + sampleStartTime +
-                        ", sampleEndTime=" + sampleEndTime +
-                        ", throughPut=" + throughPut +
-
-                        '}';
+        return "name='" + name + '\'' +
+                ", totalRequest=" + totalRequest +
+                ", rttAverage=" + rttAverage +
+                ", weight=" + weight +
+                ", weightTop=" + weightTop +
+                ", sampleStartTime=" + sampleStartTime +
+                ", sampleEndTime=" + sampleEndTime +
+                ", throughPut=" + throughPut +
+                '}';
     }
-
-//    volatile double maxRequestCoefficient = 1;
-
 }

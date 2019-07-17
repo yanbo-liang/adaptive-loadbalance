@@ -11,7 +11,6 @@ public class HiveTask implements Runnable {
     public void run() {
         System.out.println("!!!!!!!!!!!!!!!!!!!!task start at " + HiveCommon.format.format(new Date()));
         long start = System.currentTimeMillis();
-        long lastSum = 0;
         try {
             while (true) {
                 if (HiveCommon.inited) {
@@ -40,25 +39,9 @@ public class HiveTask implements Runnable {
                     }
                     HiveCommon.log("test");
 
-                    long sum = HiveCommon.infoList.stream().mapToLong(x -> x.totalRequest.get()).sum();
-                    if (lastSum == 0) {
-                        lastSum = sum;
-                    } else if (sum < lastSum * 0.5) {
-                        for (HiveInvokerInfo info : HiveCommon.infoList) {
-                            info.lock.writeLock().unlock();
-                        }
-                        continue;
-                    }
-                    UserLoadBalance.selectLock.writeLock().lock();
 
-                    List<HiveInvokerInfo> collect = HiveCommon.infoList.stream().sorted(Comparator.comparingDouble(x -> x.throughPut)).collect(Collectors.toList());
-                    HiveInvokerInfo info1 = collect.get(0);
-                    HiveInvokerInfo info2 = collect.get(2);
-                    info1.weight /= 1.05;
-                    info2.weight *= 1.05;
-                    lastSum = sum;
-                    HiveCommon.weightNormalize();
-                    HiveCommon.setCurrentWeight();
+                    UserLoadBalance.selectLock.writeLock().lock();
+                    HiveCommon.weightCalculation();
                     UserLoadBalance.selectLock.writeLock().unlock();
 
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
