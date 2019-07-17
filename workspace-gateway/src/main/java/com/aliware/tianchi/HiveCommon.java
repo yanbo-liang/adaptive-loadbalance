@@ -73,7 +73,7 @@ public class HiveCommon {
                 badList.add(info);
             }
         }
-        double goodListWeight = goodList.stream().filter(x -> x.weight != x.weightTop).mapToDouble(x -> x.weight).sum();
+        double goodListWeight = goodList.stream().mapToDouble(x -> x.weight).sum();
         double badListWeight = badList.stream().mapToDouble(x -> x.weight).sum();
         double weightChange;
         if (goodListWeight > badListWeight) {
@@ -95,14 +95,16 @@ public class HiveCommon {
         List<HiveInvokerInfo> sortedList = infoList.stream().sorted(Comparator.comparing(x -> x.throughPut, Comparator.reverseOrder())).collect(Collectors.toList());
         double remain = 0;
         for (HiveInvokerInfo info : sortedList) {
-            if (info.weight != info.weightTop) {
-                double weightChange = (info.weight / weightSum) * distributedWeight + remain;
-                if (info.weight + weightChange < info.weightTop) {
-                    info.weight = info.weight + weightChange;
-                } else {
-                    remain += weightChange - (info.weightTop - info.weight);
-                    info.weight = info.weightTop;
-                }
+            double weightChange = (info.weight / weightSum) * distributedWeight + remain;
+            if (info.weight == info.weightTop) {
+                remain += weightChange;
+                continue;
+            }
+            if (info.weight + weightChange < info.weightTop) {
+                info.weight = info.weight + weightChange;
+            } else {
+                remain += (weightChange - (info.weightTop - info.weight));
+                info.weight = info.weightTop;
             }
         }
         return remain;
