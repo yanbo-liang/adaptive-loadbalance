@@ -19,18 +19,33 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class CallbackServiceImpl implements CallbackService {
 
+    private final Map<String, CallbackListener> listeners = new ConcurrentHashMap<>();
+
     public CallbackServiceImpl() {
-        timer.schedule(new TimerTask() {
+        DataStore defaultExtension = ExtensionLoader.getExtensionLoader(DataStore.class).getDefaultExtension();
+        Map<String, Object> map = defaultExtension.get(Constants.EXECUTOR_SERVICE_COMPONENT_KEY);
+        Object port = new ArrayList<>(map.keySet()).get(0);
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) map.get(port);
+        int maximumPoolSize = threadPoolExecutor.getMaximumPoolSize();
+
+        new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
                 if (!listeners.isEmpty()) {
                     for (Map.Entry<String, CallbackListener> entry : listeners.entrySet()) {
                         try {
-                            DataStore defaultExtension = ExtensionLoader.getExtensionLoader(DataStore.class).getDefaultExtension();
-                            Map<String, Object> map = defaultExtension.get(Constants.EXECUTOR_SERVICE_COMPONENT_KEY);
-                            Object port = new ArrayList<>(map.keySet()).get(0);
-                            ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) map.get(port);
-                            entry.getValue().receiveServerMsg(System.getProperty("quota") + "-" + threadPoolExecutor.getMaximumPoolSize());
+                            Collection<Thread> values = TestServerFilter.threadMap.values();
+                            int count = 0;
+                            for (Thread t : values) {
+                                if (t.getState().equals(Thread.State.TIMED_WAITING)) {
+                                    count++;
+                                }
+                            }
+                            long totalTime = TestServerFilter.totalTime.get();
+                            long totalRequest = TestServerFilter.totalRequest.get();
+                            TestServerFilter.totalTime.updateAndGet(x->0);
+                            TestServerFilter.totalRequest.updateAndGet(x->0);
+                            entry.getValue().receiveServerMsg(System.getProperty("quota") + "-" + maximumPoolSize+"-"+count+"-"+totalTime+"-"+totalRequest);
                         } catch (Throwable t1) {
                             t1.printStackTrace();
                             listeners.remove(entry.getKey());
@@ -38,20 +53,12 @@ public class CallbackServiceImpl implements CallbackService {
                     }
                 }
             }
-        }, 0, 300);
+        }, 0, 100);
     }
 
-    private Timer timer = new Timer();
-
-    /**
-     * key: listener type
-     * value: callback listener
-     */
-    private final Map<String, CallbackListener> listeners = new ConcurrentHashMap<>();
 
     @Override
     public void addListener(String key, CallbackListener listener) {
         listeners.put(key, listener);
-        listener.receiveServerMsg(new Date().toString()); // send notification for change
     }
 }
