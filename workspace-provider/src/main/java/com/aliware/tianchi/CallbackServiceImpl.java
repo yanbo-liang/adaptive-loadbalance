@@ -48,7 +48,7 @@ public class CallbackServiceImpl implements CallbackService {
                             entry.getValue().receiveServerMsg(System.getProperty("quota") + "-" + maximumPoolSize+"-"+count+"-"+totalTime+"-"+totalRequest);
                         } catch (Throwable t1) {
                             t1.printStackTrace();
-                            listeners.remove(entry.getKey());
+//                            listeners.remove(entry.getKey());
                         }
                     }
                 }
