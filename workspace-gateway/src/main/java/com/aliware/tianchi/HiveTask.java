@@ -8,22 +8,22 @@ public class HiveTask implements Runnable {
 
     private void setToMaxWeight(int index) {
         HiveInvokerInfo maxWeightInfo = HiveCommon.infoList.get(index);
-        maxWeightInfo.weight = 1;
+//        maxWeightInfo.weight = 1;
 
-//        maxWeightInfo.weight = maxWeightInfo.weightMax;
-//        double remainWeight = 1 - maxWeightInfo.weight;
-//        double totalWeight = 0;
-//        for (int i = 0; i < HiveCommon.infoList.size(); i++) {
-//            if (i != index) {
-//                HiveInvokerInfo info = HiveCommon.infoList.get(i);
-//                totalWeight += info.weightMax;
-//            }
-//        }
+        maxWeightInfo.weight = maxWeightInfo.weightMax;
+        double remainWeight = 1 - maxWeightInfo.weight;
+        double totalWeight = 0;
         for (int i = 0; i < HiveCommon.infoList.size(); i++) {
             if (i != index) {
                 HiveInvokerInfo info = HiveCommon.infoList.get(i);
-//                info.weight = remainWeight * info.weightMax / totalWeight;
-                info.weight = 0;
+                totalWeight += info.weightMax;
+            }
+        }
+        for (int i = 0; i < HiveCommon.infoList.size(); i++) {
+            if (i != index) {
+                HiveInvokerInfo info = HiveCommon.infoList.get(i);
+                info.weight = remainWeight * info.weightMax / totalWeight;
+//                info.weight = 0;
             }
         }
     }
