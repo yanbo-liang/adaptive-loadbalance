@@ -18,7 +18,7 @@ public class CallbackListenerImpl implements CallbackListener {
         for (HiveInvokerInfo info : HiveCommon.infoMap.values()) {
             if (info.name.equals(split[0])) {
 //                info.maxPendingRequest = split[1];
-                System.out.println(Integer.valueOf(split[2])/Integer.valueOf(split[3]));
+                System.out.println(Integer.valueOf(split[3])/Integer.valueOf(split[4]));
                 break;
             }
         }
