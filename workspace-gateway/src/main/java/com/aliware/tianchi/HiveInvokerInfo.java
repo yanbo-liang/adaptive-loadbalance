@@ -31,6 +31,12 @@ public class HiveInvokerInfo {
         this.invoker = invoker;
     }
 
+    public void setMaxConcurrency(int maxConcurrency) {
+        if (maxConcurrency > this.maxConcurrency) {
+            this.maxConcurrency = maxConcurrency;
+        }
+    }
+
     @Override
     public String toString() {
         return "HiveInvokerInfo{" +

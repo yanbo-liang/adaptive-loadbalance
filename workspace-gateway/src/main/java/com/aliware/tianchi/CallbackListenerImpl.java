@@ -19,7 +19,9 @@ public class CallbackListenerImpl implements CallbackListener {
             if (info.name.equals(split[0])) {
                 HiveCommon.lock.readLock().lock();
                 info.maxPendingRequest = Integer.valueOf(split[1]);
+
                 info.maxConcurrency = Integer.valueOf(split[2]);
+
                 info.totalTime = Integer.valueOf(split[3]);
                 info.totalRequest = Integer.valueOf(split[4]);
                 if (info.totalRequest != 0) {
