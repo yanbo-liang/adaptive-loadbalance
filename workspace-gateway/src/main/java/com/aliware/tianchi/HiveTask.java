@@ -19,8 +19,12 @@ public class HiveTask implements Runnable {
                         HiveCommon.setCurrentWeight();
                     }
                     Thread.sleep(200);
+
+                    HiveCommon.lock.writeLock().lock();
+                    HiveCommon.log("start");
                     HiveCommon.weightCalculation();
-                    HiveCommon.log("test");
+                    HiveCommon.log("end");
+                    HiveCommon.lock.writeLock().unlock();
 
 
                 } else {

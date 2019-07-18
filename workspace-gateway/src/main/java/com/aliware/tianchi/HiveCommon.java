@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 public class HiveCommon {
@@ -27,6 +29,8 @@ public class HiveCommon {
     static volatile boolean inited = false;
     private static final AtomicBoolean initedByCallback = new AtomicBoolean(false);
     private static final AtomicBoolean initedByLoadBalance = new AtomicBoolean(false);
+
+    static ReadWriteLock lock = new ReentrantReadWriteLock();
 
     static <T> void initLoadBalance(List<Invoker<T>> invokers) {
         if (!initedByLoadBalance.get()) {
