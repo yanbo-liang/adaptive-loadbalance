@@ -232,9 +232,9 @@ public class HiveCommon {
         Date date = new Date();
         for (HiveInvokerInfo info : infoList) {
             if (info.rtt > rttAverage) {
-                goodList.add(info);
-            } else if (info.rtt < rttAverage) {
                 badList.add(info);
+            } else if (info.rtt < rttAverage) {
+                goodList.add(info);
             }
         }
 
