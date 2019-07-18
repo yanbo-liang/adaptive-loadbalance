@@ -226,7 +226,10 @@ public class HiveCommon {
 //    }
 
     static void weightCalculation() {
-        int rttAverage = infoList.stream().mapToInt(x -> x.rtt).sum() / infoList.size();
+        int rttAverage=0;
+        for (HiveInvokerInfo info : infoList) {
+           rttAverage+= info.rtt*info.weight;
+        }
         List<HiveInvokerInfo> goodList = new ArrayList<>();
         List<HiveInvokerInfo> badList = new ArrayList<>();
         Date date = new Date();
@@ -240,12 +243,12 @@ public class HiveCommon {
 
         double goodListWeight = goodList.stream().mapToDouble(x -> x.weight).sum();
         double badListWeight = badList.stream().mapToDouble(x -> x.weight).sum();
-        double weightChange=0.05;
-//        if (goodListWeight > badListWeight) {
-//            weightChange = badListWeight * 0.1;
-//        } else {
-//            weightChange = goodListWeight * 0.1;
-//        }
+        double weightChange;
+        if (goodListWeight > badListWeight) {
+            weightChange = badListWeight * 0.1;
+        } else {
+            weightChange = goodListWeight * 0.1;
+        }
         logger.info("{}-{}--{}", format.format(date), rttAverage, weightChange);
 
         HiveCommon.distributeWeightDown(badList, weightChange, badListWeight);
