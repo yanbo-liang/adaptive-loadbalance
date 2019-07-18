@@ -26,7 +26,6 @@ public class HiveInvokerInfo {
     volatile double currentWeight = 0;
     volatile double weightTop = 0;
 
-    ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public HiveInvokerInfo(Invoker invoker) {
         String host = invoker.getUrl().getHost();
@@ -35,5 +34,16 @@ public class HiveInvokerInfo {
         this.invoker = invoker;
     }
 
-
+    @Override
+    public String toString() {
+        return "HiveInvokerInfo{" +
+                "name='" + name + '\'' +
+                ", pendingRequest=" + pendingRequest +
+                ", rtt=" + rtt +
+                ", totalRequest=" + totalRequest +
+                ", maxConcurrency=" + maxConcurrency +
+                ", weight=" + weight +
+                ", weightTop=" + weightTop +
+                '}';
+    }
 }
