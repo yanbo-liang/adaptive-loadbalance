@@ -67,7 +67,7 @@ public class HiveCommon {
         double remain = 0;
         for (HiveInvokerInfo info : sortedList) {
             double weightChange = (info.weight / weightSum) * distributedWeight + remain;
-            if (info.weight == info.weightTop) {
+            if (info.weight >= info.weightTop) {
                 remain += weightChange;
                 continue;
             }
