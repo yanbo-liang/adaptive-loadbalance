@@ -240,12 +240,12 @@ public class HiveCommon {
 
         double goodListWeight = goodList.stream().mapToDouble(x -> x.weight).sum();
         double badListWeight = badList.stream().mapToDouble(x -> x.weight).sum();
-        double weightChange;
-        if (goodListWeight > badListWeight) {
-            weightChange = badListWeight * 0.1;
-        } else {
-            weightChange = goodListWeight * 0.1;
-        }
+        double weightChange=0.05;
+//        if (goodListWeight > badListWeight) {
+//            weightChange = badListWeight * 0.1;
+//        } else {
+//            weightChange = goodListWeight * 0.1;
+//        }
         logger.info("{}-{}--{}", format.format(date), rttAverage, weightChange);
 
         HiveCommon.distributeWeightDown(badList, weightChange, badListWeight);
