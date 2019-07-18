@@ -14,18 +14,16 @@ public class CallbackListenerImpl implements CallbackListener {
 
     @Override
     public void receiveServerMsg(String msg) {
-//        int index = msg.indexOf('-');
-//        if (index != -1) {
-//            String name = msg.substring(0, index);
-//            int maxRequest = Integer.valueOf(msg.substring(index + 1));
-//            for (HiveInvokerInfo info : HiveCommon.infoMap.values()) {
-//                if (info.name.equals(name)) {
-//                    info.maxPendingRequest = maxRequest;
-//                    break;
-//                }
-//            }
-//        }
-//        HiveCommon.initCallBack();
+        String[] split = msg.split("-");
+        for (HiveInvokerInfo info : HiveCommon.infoMap.values()) {
+            if (info.name.equals(split[0])) {
+//                info.maxPendingRequest = split[1];
+                System.out.println(Integer.valueOf(split[2])/Integer.valueOf(split[3]));
+                break;
+            }
+        }
+
+        HiveCommon.initCallBack();
         System.out.println("receive msg from server :" + msg);
     }
 }
