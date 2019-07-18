@@ -17,13 +17,16 @@ public class CallbackListenerImpl implements CallbackListener {
         String[] split = msg.split("-");
         for (HiveInvokerInfo info : HiveCommon.infoMap.values()) {
             if (info.name.equals(split[0])) {
-//                info.maxPendingRequest = split[1];
-                System.out.println(Integer.valueOf(split[3])/Integer.valueOf(split[4]));
+                info.maxPendingRequest = Integer.valueOf(split[1]);
+                info.maxConcurrency = Integer.valueOf(split[2]);
+                info.totalTime = Integer.valueOf(split[3]);
+                info.totalRequest = Integer.valueOf(split[4]);
+                info.rtt = info.totalTime / info.totalRequest;
                 break;
             }
         }
 
         HiveCommon.initCallBack();
-        System.out.println("receive msg from server :" + msg);
+//        System.out.println("receive msg from server :" + msg);
     }
 }

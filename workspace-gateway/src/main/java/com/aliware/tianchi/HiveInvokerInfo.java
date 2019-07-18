@@ -2,6 +2,7 @@ package com.aliware.tianchi;
 
 import org.apache.dubbo.rpc.Invoker;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -11,13 +12,14 @@ public class HiveInvokerInfo {
     Invoker invoker;
 
     volatile int maxPendingRequest = 0;
-    AtomicLong pendingRequest = new AtomicLong(0);
+    AtomicInteger pendingRequest = new AtomicInteger(0);
 
-    AtomicLong totalTime = new AtomicLong(0);
-    AtomicLong totalRequest = new AtomicLong(0);
+    volatile int rtt = 0;
 
-    volatile double throughPut = 0;
-    volatile double rttAverage = 0;
+    volatile int totalTime = 0;
+    volatile int totalRequest = 0;
+
+    volatile int maxConcurrency = 0;
 
     volatile double weight = 0;
     volatile double weightInitial = 0;
@@ -26,9 +28,6 @@ public class HiveInvokerInfo {
 
     ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    long sampleStartTime = 0;
-    long sampleEndTime = 0;
-
     public HiveInvokerInfo(Invoker invoker) {
         String host = invoker.getUrl().getHost();
         int start = host.indexOf('-');
@@ -36,18 +35,5 @@ public class HiveInvokerInfo {
         this.invoker = invoker;
     }
 
-    @Override
-    public String toString() {
-        return "name='" + name + '\'' +
-                ", totalRequest=" + totalRequest +
-                ", rttAverage=" + rttAverage +
-                ", weight=" + weight +
-                ", weightTop=" + weightTop +
-                ", throughPut=" + throughPut +
-                '}';
-    }
 
-    public double getThroughPut() {
-        return throughPut;
-    }
 }

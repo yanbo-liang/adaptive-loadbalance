@@ -43,9 +43,9 @@ public class CallbackServiceImpl implements CallbackService {
                             }
                             long totalTime = TestServerFilter.totalTime.get();
                             long totalRequest = TestServerFilter.totalRequest.get();
-                            TestServerFilter.totalTime.updateAndGet(x->0);
-                            TestServerFilter.totalRequest.updateAndGet(x->0);
-                            entry.getValue().receiveServerMsg(System.getProperty("quota") + "-" + maximumPoolSize+"-"+count+"-"+totalTime+"-"+totalRequest);
+                            TestServerFilter.totalTime.updateAndGet(x -> 0);
+                            TestServerFilter.totalRequest.updateAndGet(x -> 0);
+                            entry.getValue().receiveServerMsg(System.getProperty("quota") + "-" + maximumPoolSize + "-" + count + "-" + totalTime + "-" + totalRequest);
                         } catch (Throwable t1) {
                             t1.printStackTrace();
 //                            listeners.remove(entry.getKey());

@@ -15,40 +15,14 @@ public class HiveTask implements Runnable {
                     long currentTime = System.currentTimeMillis();
                     if (currentTime >= start + 6000) {
                         start = currentTime;
-                        UserLoadBalance.selectLock.writeLock().lock();
                         HiveCommon.clearWeight();
                         HiveCommon.setCurrentWeight();
-                        UserLoadBalance.selectLock.writeLock().unlock();
-
                     }
-                    long sampleStartTime = System.currentTimeMillis();
-                    long sampleEndTime = sampleStartTime + 300;
-                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        info.sampleStartTime = sampleStartTime;
-                        info.sampleEndTime = sampleEndTime;
-                    }
-                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        info.totalTime.updateAndGet(x -> 0);
-                        info.totalRequest.updateAndGet(x -> 0);
-                    }
-                    Thread.sleep(300);
-                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        info.lock.writeLock().lock();
-                    }
-                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        info.rttAverage = info.totalTime.get() / (double) info.totalRequest.get();
-                        info.throughPut = info.totalRequest.get() / info.weight;
-                    }
+                    Thread.sleep(200);
+                    HiveCommon.weightCalculation();
                     HiveCommon.log("test");
 
 
-                    UserLoadBalance.selectLock.writeLock().lock();
-                    HiveCommon.weightCalculation();
-                    UserLoadBalance.selectLock.writeLock().unlock();
-
-                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        info.lock.writeLock().unlock();
-                    }
                 } else {
                     Thread.sleep(1);
                 }
@@ -139,7 +113,7 @@ public class HiveTask implements Runnable {
 //            long completedRequest = info.totalRequest.get();
 //            info.lock.writeLock().unlock();
 //            if (completedRequest != 0) {
-//                info.rttAverage = ((double) totalTime) / completedRequest;
+//                info.rtt = ((double) totalTime) / completedRequest;
 //            }
 //        }
 //    }
@@ -183,20 +157,20 @@ public class HiveTask implements Runnable {
 //                if (inited) {
 //                    for (HiveInvokerInfo info : infoList) {
 //                        double rttAverageNew = 0;
-//                        double rttAverageOld = info.rttAverage;
+//                        double rttAverageOld = info.rtt;
 //                        long totalRequest = info.totalRequest.get();
 //                        long totalTime = info.totalTime.get();
 //                        if (totalRequest != 0) {
 //                            rttAverageNew = (double) (totalTime) / (double) (totalRequest);
 //                            if (rttAverageOld == 0D) {
-//                                info.rttAverage = rttAverageNew;
+//                                info.rtt = rttAverageNew;
 //                            } else if (rttAverageOld * 0.95 < rttAverageNew & rttAverageNew < rttAverageOld * 1.05) {
 //                                if (info.maxRequestCoefficient + 0.05 > 1) {
 //                                    info.maxRequestCoefficient = 1;
 //                                } else {
 //                                    info.maxRequestCoefficient += 0.05;
 //                                }
-//                                info.rttAverage = rttAverageNew;
+//                                info.rtt = rttAverageNew;
 //
 //                                info.upCount = 0;
 //                                info.downCount = 0;
@@ -215,7 +189,7 @@ public class HiveTask implements Runnable {
 //                                } else {
 //                                    info.maxRequestCoefficient += 0.08;
 //                                }
-//                                info.rttAverage = rttAverageNew;
+//                                info.rtt = rttAverageNew;
 ////                                info.weight *= 1.1;
 //                            }
 //                            if (info.downCount == 1) {
@@ -225,7 +199,7 @@ public class HiveTask implements Runnable {
 //                                } else {
 //                                    info.maxRequestCoefficient -= 0.1;
 //                                }
-//                                info.rttAverage = rttAverageNew;
+//                                info.rtt = rttAverageNew;
 ////                                info.weight /= 1.1;
 //
 //                            }
@@ -237,17 +211,17 @@ public class HiveTask implements Runnable {
 //                        info.weight = info.weightInitial;
 //
 //                    }
-//                    infoList = infoList.stream().sorted(Comparator.comparingDouble(x -> x.rttAverage)).collect(Collectors.toList());
+//                    infoList = infoList.stream().sorted(Comparator.comparingDouble(x -> x.rtt)).collect(Collectors.toList());
 //
 //                }
 //                    HiveInvokerInfo first = infoList.get(0);
-//                    double expectRtt = first.rttAverage * (1 + (1 - first.maxRequestCoefficient) / first.maxRequestCoefficient);
-//                    if (expectRtt < infoList.get(2).rttAverage) {
+//                    double expectRtt = first.rtt * (1 + (1 - first.maxRequestCoefficient) / first.maxRequestCoefficient);
+//                    if (expectRtt < infoList.get(2).rtt) {
 //                        first.weight *= 2;
 //                    }
 //                    HiveInvokerInfo second = infoList.get(1);
-//                    double expectRttsecond = second.rttAverage * (1 + (1 - second.maxRequestCoefficient) / second.maxRequestCoefficient);
-//                    if (expectRttsecond < infoList.get(2).rttAverage) {
+//                    double expectRttsecond = second.rtt * (1 + (1 - second.maxRequestCoefficient) / second.maxRequestCoefficient);
+//                    if (expectRttsecond < infoList.get(2).rtt) {
 //                        second.weight *= 2;
 //                    }
 //
