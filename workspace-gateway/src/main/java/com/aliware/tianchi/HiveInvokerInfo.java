@@ -3,9 +3,6 @@ package com.aliware.tianchi;
 import org.apache.dubbo.rpc.Invoker;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class HiveInvokerInfo {
     String name;
@@ -24,7 +21,7 @@ public class HiveInvokerInfo {
     volatile double weight = 0;
     volatile double weightInitial = 0;
     volatile double currentWeight = 0;
-    volatile double weightTop = 0;
+    volatile double weightMax = 0;
 
 
     public HiveInvokerInfo(Invoker invoker) {
@@ -43,7 +40,7 @@ public class HiveInvokerInfo {
                 ", totalRequest=" + totalRequest +
                 ", maxConcurrency=" + maxConcurrency +
                 ", weight=" + weight +
-                ", weightTop=" + weightTop +
+                ", weightMax=" + weightMax +
                 '}';
     }
 }

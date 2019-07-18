@@ -57,7 +57,7 @@ public class HiveCommon {
                     info.weightInitial = ((double) info.maxPendingRequest) / totalPendingRequest;
                     info.weight = info.weightInitial;
                     info.currentWeight = info.weight;
-                    info.weightTop = ((double) info.maxPendingRequest) / 1024;
+                    info.weightMax = ((double) info.maxPendingRequest) / 1024;
                 }
                 infoList = new ArrayList<>(HiveCommon.infoMap.values());
                 inited = true;
@@ -71,15 +71,15 @@ public class HiveCommon {
         double remain = 0;
         for (HiveInvokerInfo info : sortedList) {
             double weightChange = (info.weight / weightSum) * distributedWeight + remain;
-            if (info.weight >= info.weightTop) {
+            if (info.weight >= info.weightMax) {
                 remain += weightChange;
                 continue;
             }
-            if (info.weight + weightChange < info.weightTop) {
+            if (info.weight + weightChange < info.weightMax) {
                 info.weight = info.weight + weightChange;
             } else {
-                remain += (weightChange - (info.weightTop - info.weight));
-                info.weight = info.weightTop;
+                remain += (weightChange - (info.weightMax - info.weight));
+                info.weight = info.weightMax;
             }
         }
         return remain;

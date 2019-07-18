@@ -1,9 +1,29 @@
 package com.aliware.tianchi;
 
 import java.util.Date;
+import java.util.List;
 
 
 public class HiveTask implements Runnable {
+
+    private void setToMaxWeight(int index) {
+        HiveInvokerInfo maxWeightInfo = HiveCommon.infoList.get(index);
+        maxWeightInfo.weight = maxWeightInfo.weightMax;
+        double remainWeight = 1 - maxWeightInfo.weight;
+        double totalWeight = 0;
+        for (int i = 0; i < HiveCommon.infoList.size(); i++) {
+            if (i != index) {
+                HiveInvokerInfo info = HiveCommon.infoList.get(i);
+                totalWeight += info.weightMax;
+            }
+        }
+        for (int i = 0; i < HiveCommon.infoList.size(); i++) {
+            if (i != index) {
+                HiveInvokerInfo info = HiveCommon.infoList.get(i);
+                info.weight = remainWeight * info.weightMax / totalWeight;
+            }
+        }
+    }
 
     @Override
     public void run() {
@@ -11,20 +31,25 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (HiveCommon.inited) {
-                    long currentTime = System.currentTimeMillis();
-                    if (currentTime >= start + 6000) {
-                        start = currentTime;
-                        HiveCommon.clearWeight();
-                        HiveCommon.setCurrentWeight();
+                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000) {
+                    for (int i = 0; i < HiveCommon.infoList.size(); i++) {
+                        setToMaxWeight(i);
+                        HiveCommon.log("max");
+                        Thread.sleep(300);
                     }
-                    Thread.sleep(200);
-
-                    HiveCommon.lock.writeLock().lock();
-                    HiveCommon.log("start");
-                    HiveCommon.weightCalculation();
-                    HiveCommon.log("end");
-                    HiveCommon.lock.writeLock().unlock();
+//                    long currentTime = System.currentTimeMillis();
+//                    if (currentTime >= start + 6000) {
+//                        start = currentTime;
+//                        HiveCommon.clearWeight();
+//                        HiveCommon.setCurrentWeight();
+//                    }
+                    Thread.sleep(5100);
+//
+//                    HiveCommon.lock.writeLock().lock();
+//                    HiveCommon.log("start");
+//                    HiveCommon.weightCalculation();
+//                    HiveCommon.log("end");
+//                    HiveCommon.lock.writeLock().unlock();
 
 
                 } else {
