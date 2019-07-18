@@ -37,8 +37,9 @@ public class HiveTask implements Runnable {
                 if (HiveCommon.inited && System.currentTimeMillis() > start + 30000) {
                     for (int i = 0; i < HiveCommon.infoList.size(); i++) {
                         setToMaxWeight(i);
-                        HiveCommon.log("max");
                         Thread.sleep(300);
+                        HiveCommon.log("max");
+
                     }
 //                    long currentTime = System.currentTimeMillis();
 //                    if (currentTime >= start + 6000) {
