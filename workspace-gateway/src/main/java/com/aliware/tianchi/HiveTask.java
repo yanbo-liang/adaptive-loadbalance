@@ -53,16 +53,20 @@ public class HiveTask implements Runnable {
                             info1.rtt = info1.totalTime / info1.totalRequest;
                         }
 
-                        int total = 0;
-                        for (HiveInvokerInfo info : HiveCommon.infoList) {
-                            total += info.maxConcurrency;
-                        }
-                        for (HiveInvokerInfo info : HiveCommon.infoList) {
-                            info.weight = info.maxConcurrency / (double) total;
-                        }
+
                         HiveCommon.log("max");
 
                     }
+
+                    int total = 0;
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        total += info.maxConcurrency;
+                    }
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+                        info.weight = info.maxConcurrency / (double) total;
+                    }
+                    HiveCommon.log("weight");
+
 //                    long currentTime = System.currentTimeMillis();
 //                    if (currentTime >= start + 6000) {
 //                        start = currentTime;
