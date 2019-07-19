@@ -55,6 +55,7 @@ public class HiveInvokerInfo {
                 "name='" + name + '\'' +
                 ", pendingRequest=" + pendingRequest +
                 ", rtt=" + rtt +
+                ", totalTime=" + totalTime +
                 ", totalRequest=" + totalRequest +
                 ", maxConcurrency=" + maxConcurrency +
                 ", weight=" + weight +
