@@ -58,7 +58,7 @@ public class HiveCommon {
                     info.weightInitial = ((double) info.maxPendingRequest) / totalPendingRequest;
                     info.weight = info.weightInitial;
                     info.currentWeight = info.weight;
-                    info.weightMax = ((double) info.maxPendingRequest) / 900;
+                    info.weightMax = ((double) info.maxPendingRequest) / 1024;
                 }
                 infoList = new ArrayList<>(HiveCommon.infoMap.values());
                 inited = true;
