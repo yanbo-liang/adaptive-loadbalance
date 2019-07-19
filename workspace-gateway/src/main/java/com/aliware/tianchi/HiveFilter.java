@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 
 @Activate(group = Constants.CONSUMER)
 public class HiveFilter implements Filter {
-    static final ConcurrentMap<Invocation,Long> rttMap = new ConcurrentReferenceHashMap<>(2000,ConcurrentReferenceHashMap.ReferenceType.SOFT);
+    static final ConcurrentMap<Invocation,Long> rttMap = new ConcurrentReferenceHashMap<>(2000,ConcurrentReferenceHashMap.ReferenceType.WEAK);
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
