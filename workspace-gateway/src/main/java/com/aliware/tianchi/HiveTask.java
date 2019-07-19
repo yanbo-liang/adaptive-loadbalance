@@ -52,7 +52,6 @@ public class HiveTask implements Runnable {
                         if (info1.totalRequest != 0) {
                             info1.rtt = info1.totalTime / info1.totalRequest;
                         }
-                        HiveCommon.log("max");
 
                         int total = 0;
                         for (HiveInvokerInfo info : HiveCommon.infoList) {
@@ -61,6 +60,8 @@ public class HiveTask implements Runnable {
                         for (HiveInvokerInfo info : HiveCommon.infoList) {
                             info.weight = info.maxConcurrency / (double) total;
                         }
+                        HiveCommon.log("max");
+
                     }
 //                    long currentTime = System.currentTimeMillis();
 //                    if (currentTime >= start + 6000) {
