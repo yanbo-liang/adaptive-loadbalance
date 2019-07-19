@@ -31,6 +31,18 @@ public class HiveInvokerInfo {
         this.invoker = invoker;
     }
 
+    public void setTotalTime(int totalTime) {
+        if (totalTime > this.totalTime) {
+            this.totalTime = totalTime;
+        }
+    }
+
+    public void setTotalRequest(int totalRequest) {
+        if (totalRequest > this.totalRequest) {
+            this.totalRequest = totalRequest;
+        }
+    }
+
     public void setMaxConcurrency(int maxConcurrency) {
         if (maxConcurrency > this.maxConcurrency) {
             this.maxConcurrency = maxConcurrency;

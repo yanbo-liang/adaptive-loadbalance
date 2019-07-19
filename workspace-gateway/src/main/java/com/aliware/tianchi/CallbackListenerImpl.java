@@ -21,9 +21,9 @@ public class CallbackListenerImpl implements CallbackListener {
                 info.maxPendingRequest = Integer.valueOf(split[1]);
 
                 info.setMaxConcurrency(Integer.valueOf(split[2]));
+                info.setTotalTime(Integer.valueOf(split[3]));
+                info.setTotalRequest(Integer.valueOf(split[4]));
 
-                info.totalTime = Integer.valueOf(split[3]);
-                info.totalRequest = Integer.valueOf(split[4]);
                 if (info.totalRequest != 0) {
                     info.rtt = info.totalTime / info.totalRequest;
                 }

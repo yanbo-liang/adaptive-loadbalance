@@ -38,6 +38,9 @@ public class HiveTask implements Runnable {
 
                     for (int i = 0; i < HiveCommon.infoList.size(); i++) {
                         HiveCommon.infoList.get(i).maxConcurrency = 0;
+                        HiveCommon.infoList.get(i).totalTime = 0;
+                        HiveCommon.infoList.get(i).totalRequest = 0;
+
                         setToMaxWeight(i);
                         Thread.sleep(300);
                         HiveCommon.log("max");
