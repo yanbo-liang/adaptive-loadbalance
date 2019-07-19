@@ -43,11 +43,11 @@ public class HiveTask implements Runnable {
 
                         setToMaxWeight(i);
                         Thread.sleep(400);
-                        for (HiveInvokerInfo info : HiveCommon.infoList) {
-                            info.rtt = info.tTime.get() / info.tRequest.get();
-                            info.tTime.updateAndGet(x->0);
-                            info.tRequest.updateAndGet(x->0);
-                        }
+                        HiveInvokerInfo info1 = HiveCommon.infoList.get(i);
+                            info1.rtt = info1.tTime.get() / info1.tRequest.get();
+                            info1.tTime.updateAndGet(x->0);
+                            info1.tRequest.updateAndGet(x->0);
+
 
                         HiveCommon.log("max");
 
