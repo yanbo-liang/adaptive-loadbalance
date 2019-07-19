@@ -40,13 +40,14 @@ public class HiveTask implements Runnable {
                         HiveCommon.infoList.get(i).maxConcurrency = 0;
                         HiveCommon.infoList.get(i).totalTime = 0;
                         HiveCommon.infoList.get(i).totalRequest = 0;
+                        HiveInvokerInfo info1 = HiveCommon.infoList.get(i);
 
+                        info1.tTime.updateAndGet(x->0);
+                        info1.tRequest.updateAndGet(x->0);
                         setToMaxWeight(i);
                         Thread.sleep(400);
-                        HiveInvokerInfo info1 = HiveCommon.infoList.get(i);
                             info1.rtt = info1.tTime.get() / info1.tRequest.get();
-                            info1.tTime.updateAndGet(x->0);
-                            info1.tRequest.updateAndGet(x->0);
+
 
 
                         HiveCommon.log("max");
