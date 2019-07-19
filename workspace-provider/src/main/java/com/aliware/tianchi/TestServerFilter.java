@@ -8,7 +8,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author daofeng.xjf
@@ -25,9 +30,22 @@ public class TestServerFilter implements Filter {
     static final AtomicLong totalRequest = new AtomicLong(0);
 
     static final Map<Long, Thread> threadMap = new ConcurrentHashMap<>();
+    static final AtomicBoolean inited = new AtomicBoolean(false);
+    static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    void init() {
+        if (!inited.get()) {
+            if (inited.compareAndSet(false, true)) {
+                TestTask task = new TestTask();
+                executorService.execute(task);
+            }
+        }
+
+    }
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        init();
         try {
             threadMap.put(Thread.currentThread().getId(), Thread.currentThread());
             rttMap.put(invocation, System.currentTimeMillis());
