@@ -3,9 +3,13 @@ package com.aliware.tianchi;
 import org.apache.dubbo.common.Constants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.*;
+import org.springframework.util.ConcurrentReferenceHashMap;
+
+import java.util.concurrent.ConcurrentMap;
 
 @Activate(group = Constants.CONSUMER)
 public class HiveFilter implements Filter {
+    static final ConcurrentMap<Invocation,Long> rttMap = new ConcurrentReferenceHashMap<>();
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {

@@ -62,7 +62,7 @@ public class TestServerFilter implements Filter {
         Long start = rttMap.get(invocation);
         if (start == null) {
             System.out.println("bug! should not happen");
-        } else {
+        } else if (!result.hasException()){
             long rtt = System.currentTimeMillis() - start;
             totalTime.updateAndGet(x -> x + rtt);
             totalRequest.incrementAndGet();

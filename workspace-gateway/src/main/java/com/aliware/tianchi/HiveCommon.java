@@ -1,9 +1,11 @@
 package com.aliware.tianchi;
 
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -16,7 +18,6 @@ import java.util.stream.Collectors;
 
 public class HiveCommon {
     static final Logger logger = LoggerFactory.getLogger(HiveCommon.class);
-
     static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
     static volatile List<HiveInvokerInfo> infoList;
 
