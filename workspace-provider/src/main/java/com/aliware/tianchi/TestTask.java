@@ -9,7 +9,7 @@ public class TestTask implements Runnable {
     public void run() {
         try {
             while (true) {
-                Thread.sleep(2000);
+                Thread.sleep(200);
                 TestServerFilter.totalTime.updateAndGet(x -> 0);
                 TestServerFilter.totalRequest.updateAndGet(x -> 0);
 

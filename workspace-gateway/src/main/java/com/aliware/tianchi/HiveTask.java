@@ -42,7 +42,7 @@ public class HiveTask implements Runnable {
                         HiveCommon.infoList.get(i).totalRequest = 0;
 
                         setToMaxWeight(i);
-                        Thread.sleep(300);
+                        Thread.sleep(400);
                         HiveCommon.log("max");
 
                     }
