@@ -10,7 +10,7 @@ public class HiveTask implements Runnable {
         HiveInvokerInfo maxWeightInfo = HiveCommon.infoList.get(index);
 //        maxWeightInfo.weight = 1;
 
-        maxWeightInfo.weight = maxWeightInfo.weightMax*1.2;
+        maxWeightInfo.weight = maxWeightInfo.weightMax * 1.2;
         double remainWeight = 1 - maxWeightInfo.weight;
         double totalWeight = 0;
         for (int i = 0; i < HiveCommon.infoList.size(); i++) {
@@ -42,8 +42,8 @@ public class HiveTask implements Runnable {
                         HiveCommon.infoList.get(i).totalRequest = 0;
                         HiveInvokerInfo info1 = HiveCommon.infoList.get(i);
 
-                        info1.tTime.updateAndGet(x->0);
-                        info1.tRequest.updateAndGet(x->0);
+                        info1.tTime.updateAndGet(x -> 0);
+                        info1.tRequest.updateAndGet(x -> 0);
                         setToMaxWeight(i);
                         Thread.sleep(400);
 //                        if (info1.tRequest.get()!=0) {
@@ -52,10 +52,15 @@ public class HiveTask implements Runnable {
                         if (info1.totalRequest != 0) {
                             info1.rtt = info1.totalTime / info1.totalRequest;
                         }
-
-
                         HiveCommon.log("max");
 
+                        int total = 0;
+                        for (HiveInvokerInfo info : HiveCommon.infoList) {
+                            total += info.maxConcurrency;
+                        }
+                        for (HiveInvokerInfo info : HiveCommon.infoList) {
+                            info.weight = info.weightMax / (double) total;
+                        }
                     }
 //                    long currentTime = System.currentTimeMillis();
 //                    if (currentTime >= start + 6000) {
@@ -63,7 +68,7 @@ public class HiveTask implements Runnable {
 //                        HiveCommon.clearWeight();
 //                        HiveCommon.setCurrentWeight();
 //                    }
-                    Thread.sleep(5100);
+                    Thread.sleep(4800);
 //
 //                    HiveCommon.lock.writeLock().lock();
 //                    HiveCommon.log("start");
