@@ -24,7 +24,9 @@ public class CallbackListenerImpl implements CallbackListener {
                 info.setTotalTime(Integer.valueOf(split[3]));
                 info.setTotalRequest(Integer.valueOf(split[4]));
 
-
+//                if (info.totalRequest != 0) {
+//                    info.rtt = info.totalTime / info.totalRequest;
+//                }
                 HiveCommon.lock.readLock().unlock();
 
                 break;
