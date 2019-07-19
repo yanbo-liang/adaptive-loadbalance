@@ -34,7 +34,7 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000+100) {
+                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000 + 100) {
 
                     for (int i = 0; i < HiveCommon.infoList.size(); i++) {
                         HiveCommon.infoList.get(i).maxConcurrency = 0;
@@ -43,6 +43,12 @@ public class HiveTask implements Runnable {
 
                         setToMaxWeight(i);
                         Thread.sleep(400);
+                        for (HiveInvokerInfo info : HiveCommon.infoList) {
+                            info.rtt = info.tTime.get() / info.tRequest.get();
+                            info.tTime.updateAndGet(x->0);
+                            info.tRequest.updateAndGet(x->0);
+                        }
+
                         HiveCommon.log("max");
 
                     }

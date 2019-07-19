@@ -13,6 +13,9 @@ public class HiveInvokerInfo {
 
     volatile int rtt = 0;
 
+    AtomicInteger tTime = new AtomicInteger(0);
+    AtomicInteger tRequest = new AtomicInteger(0);
+
     volatile int totalTime = 0;
     volatile int totalRequest = 0;
 
