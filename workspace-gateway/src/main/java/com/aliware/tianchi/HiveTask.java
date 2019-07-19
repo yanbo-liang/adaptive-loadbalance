@@ -1,7 +1,9 @@
 package com.aliware.tianchi;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class HiveTask implements Runnable {
@@ -44,8 +46,10 @@ public class HiveTask implements Runnable {
 
                         info1.tTime.updateAndGet(x -> 0);
                         info1.tRequest.updateAndGet(x -> 0);
+                        UserLoadBalance.send = false;
+
                         setToMaxWeight(i);
-                        Thread.sleep(200);
+                        Thread.sleep(400);
 //                        if (info1.tRequest.get()!=0) {
 //                            info1.rtt = info1.tTime.get() / info1.tRequest.get();
 //                        }
@@ -58,13 +62,15 @@ public class HiveTask implements Runnable {
 
                     }
 
-                    int total = 0;
-                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        total += info.maxConcurrency;
-                    }
-                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-                        info.weight = info.maxConcurrency / (double) total;
-                    }
+                    HiveCommon.infoList = HiveCommon.infoList.stream().sorted(Comparator.comparingInt(x -> x.rtt)).collect(Collectors.toList());
+                    UserLoadBalance.send = true;
+//                    int total = 0;
+//                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+//                        total += info.maxConcurrency;
+//                    }
+//                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+//                        info.weight = info.maxConcurrency / (double) total;
+//                    }
                     HiveCommon.log("weight");
 
 //                    long currentTime = System.currentTimeMillis();

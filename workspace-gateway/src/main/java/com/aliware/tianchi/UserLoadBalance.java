@@ -23,18 +23,26 @@ public class UserLoadBalance implements LoadBalance {
 
     static ThreadLocal<HiveSelectInfo> localInfo = new ThreadLocal<>();
 
+    volatile static boolean send = false;
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
         HiveCommon.initLoadBalance(invokers);
         if (HiveCommon.inited) {
+            if (send) {
+                for (HiveInvokerInfo info : HiveCommon.infoList) {
+                    if (info.pendingRequest.get() < info.maxConcurrency) {
+                        return info.invoker;
+                    }
+                }
+            }
             HiveSelectInfo sinfo = localInfo.get();
             if (sinfo == null) {
                 HiveSelectInfo hiveSelectInfo = new HiveSelectInfo();
                 hiveSelectInfo.weights = HiveCommon.infoList.stream().mapToDouble(x -> x.weight).toArray();
                 hiveSelectInfo.cWeights = Arrays.copyOf(hiveSelectInfo.weights, hiveSelectInfo.weights.length);
                 localInfo.set(hiveSelectInfo);
-                sinfo=hiveSelectInfo;
+                sinfo = hiveSelectInfo;
             } else {
                 double[] newWeights = HiveCommon.infoList.stream().mapToDouble(x -> x.weight).toArray();
                 if (!Arrays.equals(sinfo.weights, newWeights)) {
