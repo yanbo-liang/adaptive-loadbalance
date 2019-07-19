@@ -49,7 +49,7 @@ public class HiveTask implements Runnable {
                         UserLoadBalance.send = false;
 
                         setToMaxWeight(i);
-                        Thread.sleep(300);
+                        Thread.sleep(200);
 //                        if (info1.tRequest.get()!=0) {
 //                            info1.rtt = info1.tTime.get() / info1.tRequest.get();
 //                        }
@@ -79,7 +79,7 @@ public class HiveTask implements Runnable {
 //                        HiveCommon.clearWeight();
 //                        HiveCommon.setCurrentWeight();
 //                    }
-                    Thread.sleep(5100);
+                    Thread.sleep(5400);
 //
 //                    HiveCommon.lock.writeLock().lock();
 //                    HiveCommon.log("start");
