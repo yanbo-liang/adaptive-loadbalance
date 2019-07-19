@@ -79,7 +79,7 @@ public class HiveTask implements Runnable {
 //                        HiveCommon.clearWeight();
 //                        HiveCommon.setCurrentWeight();
 //                    }
-                    Thread.sleep(4800);
+                    Thread.sleep(5100);
 //
 //                    HiveCommon.lock.writeLock().lock();
 //                    HiveCommon.log("start");
