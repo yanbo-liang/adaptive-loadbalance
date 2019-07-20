@@ -37,13 +37,13 @@ public class CallbackServiceImpl implements CallbackService {
                             Collection<Thread> values = TestServerFilter.threadMap.values();
                             int count = 0;
                             for (Thread t : values) {
-                                if (t.getState().equals(Thread.State.TIMED_WAITING)) {
+                                if (t.getState().equals(Thread.State.WAITING)) {
                                     count++;
                                 }
                             }
                             long totalTime = TestServerFilter.totalTime.get();
                             long totalRequest = TestServerFilter.totalRequest.get();
-                            entry.getValue().receiveServerMsg(System.getProperty("quota") + "-" + maximumPoolSize + "-" + count + "-" + totalTime + "-" + totalRequest);
+                            entry.getValue().receiveServerMsg(System.getProperty("quota") + "-" + maximumPoolSize + "-" + (maximumPoolSize-count) + "-" + totalTime + "-" + totalRequest);
                         } catch (Throwable t1) {
                             t1.printStackTrace();
 //                            listeners.remove(entry.getKey());
