@@ -12,7 +12,7 @@ public class HiveTask implements Runnable {
         HiveInvokerInfo maxWeightInfo = HiveCommon.infoList.get(index);
 //        maxWeightInfo.weight = 1;
 
-        maxWeightInfo.weight = maxWeightInfo.weightMax ;
+        maxWeightInfo.weight = maxWeightInfo.weightMax;
         double remainWeight = 1 - maxWeightInfo.weight;
         double totalWeight = 0;
         for (int i = 0; i < HiveCommon.infoList.size(); i++) {
@@ -36,7 +36,7 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000 + 100) {
+                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000 + 20) {
 
                     for (int i = 0; i < HiveCommon.infoList.size(); i++) {
                         HiveCommon.infoList.get(i).maxConcurrency = 0;
@@ -48,7 +48,8 @@ public class HiveTask implements Runnable {
                         info1.tRequest.updateAndGet(x -> 0);
                         UserLoadBalance.send = false;
 
-                        setToMaxWeight(i);
+//                        setToMaxWeight(i);
+                        UserLoadBalance.stressInfo = info1;
                         Thread.sleep(200);
 //                        if (info1.tRequest.get()!=0) {
 //                            info1.rtt = info1.tTime.get() / info1.tRequest.get();

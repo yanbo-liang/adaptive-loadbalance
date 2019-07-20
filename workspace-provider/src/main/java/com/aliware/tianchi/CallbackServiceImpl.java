@@ -27,6 +27,7 @@ public class CallbackServiceImpl implements CallbackService {
         Object port = new ArrayList<>(map.keySet()).get(0);
         ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) map.get(port);
         int maximumPoolSize = threadPoolExecutor.getMaximumPoolSize();
+
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {

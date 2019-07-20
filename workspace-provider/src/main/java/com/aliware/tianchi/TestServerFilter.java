@@ -64,7 +64,6 @@ public class TestServerFilter implements Filter {
             System.out.println("bug! should not happen");
         } else if (!result.hasException()){
             long rtt = System.currentTimeMillis() - start;
-            System.out.println(rtt);
             totalTime.updateAndGet(x -> x + rtt);
             totalRequest.incrementAndGet();
         }

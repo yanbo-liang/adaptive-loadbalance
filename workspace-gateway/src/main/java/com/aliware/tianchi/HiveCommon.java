@@ -21,7 +21,7 @@ public class HiveCommon {
     static final ConcurrentMap<URL, HiveInvokerInfo> infoMap = new ConcurrentHashMap<>();
     static volatile List<HiveInvokerInfo> infoList;
 
-    static final AtomicInteger pendingRequestTotal = new AtomicInteger(0);
+//    static final AtomicInteger pendingRequestTotal = new AtomicInteger(0);
 
     static final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -31,7 +31,6 @@ public class HiveCommon {
     private static final AtomicBoolean initedByCallback = new AtomicBoolean(false);
     private static final AtomicBoolean initedByLoadBalance = new AtomicBoolean(false);
 
-    static ReadWriteLock lock = new ReentrantReadWriteLock();
 
     static <T> void initLoadBalance(List<Invoker<T>> invokers) {
         if (!initedByLoadBalance.get()) {
@@ -58,7 +57,7 @@ public class HiveCommon {
                     info.weightInitial = ((double) info.maxPendingRequest) / totalPendingRequest;
                     info.weight = info.weightInitial;
                     info.currentWeight = info.weight;
-                    info.weightMax = ((double) info.maxPendingRequest) / 1024;
+//                    info.weightMax = ((double) info.maxPendingRequest) / 1024;
                 }
                 infoList = new ArrayList<>(HiveCommon.infoMap.values());
                 inited = true;
@@ -131,22 +130,22 @@ public class HiveCommon {
         System.out.println();
     }
 
-    static int pickByWeight(double[] weightArray) {
-        double[] section = new double[weightArray.length];
-        double totalWeight = 0;
-        for (int i = 0; i < weightArray.length; i++) {
-            totalWeight += weightArray[i];
-            section[i] = totalWeight;
-        }
-
-        double random = ThreadLocalRandom.current().nextDouble(totalWeight);
-        for (int i = 0; i < section.length; i++) {
-            if (random < section[i]) {
-                return i;
-            }
-        }
-        return 0;
-    }
+//    static int pickByWeight(double[] weightArray) {
+//        double[] section = new double[weightArray.length];
+//        double totalWeight = 0;
+//        for (int i = 0; i < weightArray.length; i++) {
+//            totalWeight += weightArray[i];
+//            section[i] = totalWeight;
+//        }
+//
+//        double random = ThreadLocalRandom.current().nextDouble(totalWeight);
+//        for (int i = 0; i < section.length; i++) {
+//            if (random < section[i]) {
+//                return i;
+//            }
+//        }
+//        return 0;
+//    }
 
 //    private void mainCalculation() {
 //        List<HiveInvokerInfo> good = new ArrayList<>();
@@ -230,37 +229,37 @@ public class HiveCommon {
 //        }
 //    }
 
-    static void weightCalculation() {
-        int rttAverage=0;
-        for (HiveInvokerInfo info : infoList) {
-           rttAverage+= info.rtt*info.weight;
-        }
-        List<HiveInvokerInfo> goodList = new ArrayList<>();
-        List<HiveInvokerInfo> badList = new ArrayList<>();
-        Date date = new Date();
-        for (HiveInvokerInfo info : infoList) {
-            if (info.rtt > rttAverage) {
-                badList.add(info);
-            } else if (info.rtt < rttAverage) {
-                goodList.add(info);
-            }
-        }
-
-        double goodListWeight = goodList.stream().mapToDouble(x -> x.weight).sum();
-        double badListWeight = badList.stream().mapToDouble(x -> x.weight).sum();
-        double weightChange;
-        if (goodListWeight > badListWeight) {
-            weightChange = badListWeight * 0.1;
-        } else {
-            weightChange = goodListWeight * 0.1;
-        }
-        logger.info("{}-{}--{}", format.format(date), rttAverage, weightChange);
-
-        HiveCommon.distributeWeightDown(badList, weightChange, badListWeight);
-        double remianWeight = HiveCommon.distributeWeightUp(goodList, weightChange, goodListWeight);
-        HiveCommon.distributeWeightUp(badList, remianWeight, badListWeight);
-
-        weightNormalize();
-        setCurrentWeight();
-    }
+//    static void weightCalculation() {
+//        int rttAverage=0;
+//        for (HiveInvokerInfo info : infoList) {
+//           rttAverage+= info.rtt*info.weight;
+//        }
+//        List<HiveInvokerInfo> goodList = new ArrayList<>();
+//        List<HiveInvokerInfo> badList = new ArrayList<>();
+//        Date date = new Date();
+//        for (HiveInvokerInfo info : infoList) {
+//            if (info.rtt > rttAverage) {
+//                badList.add(info);
+//            } else if (info.rtt < rttAverage) {
+//                goodList.add(info);
+//            }
+//        }
+//
+//        double goodListWeight = goodList.stream().mapToDouble(x -> x.weight).sum();
+//        double badListWeight = badList.stream().mapToDouble(x -> x.weight).sum();
+//        double weightChange;
+//        if (goodListWeight > badListWeight) {
+//            weightChange = badListWeight * 0.1;
+//        } else {
+//            weightChange = goodListWeight * 0.1;
+//        }
+//        logger.info("{}-{}--{}", format.format(date), rttAverage, weightChange);
+//
+//        HiveCommon.distributeWeightDown(badList, weightChange, badListWeight);
+//        double remianWeight = HiveCommon.distributeWeightUp(goodList, weightChange, goodListWeight);
+//        HiveCommon.distributeWeightUp(badList, remianWeight, badListWeight);
+//
+//        weightNormalize();
+//        setCurrentWeight();
+//    }
 }

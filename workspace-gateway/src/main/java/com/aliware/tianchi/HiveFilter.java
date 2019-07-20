@@ -17,7 +17,7 @@ public class HiveFilter implements Filter {
             HiveInvokerInfo info = HiveCommon.infoMap.get(invoker.getUrl());
             if (info != null) {
 
-                HiveCommon.pendingRequestTotal.incrementAndGet();
+//                HiveCommon.pendingRequestTotal.incrementAndGet();
 
                 info.pendingRequest.incrementAndGet();
 
@@ -44,7 +44,7 @@ public class HiveFilter implements Filter {
 //                        info.tRequest.incrementAndGet();
 //                    }
                 }
-                HiveCommon.pendingRequestTotal.decrementAndGet();
+//                HiveCommon.pendingRequestTotal.decrementAndGet();
 
                 info.pendingRequest.decrementAndGet();
             }
