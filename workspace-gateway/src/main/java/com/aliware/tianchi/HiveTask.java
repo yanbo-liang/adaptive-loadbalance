@@ -46,10 +46,11 @@ public class HiveTask implements Runnable {
 
                         info1.tTime.updateAndGet(x -> 0);
                         info1.tRequest.updateAndGet(x -> 0);
+                        UserLoadBalance.stressInfo = info1;
+
                         UserLoadBalance.send = false;
 
 //                        setToMaxWeight(i);
-                        UserLoadBalance.stressInfo = info1;
                         Thread.sleep(200);
 //                        if (info1.tRequest.get()!=0) {
 //                            info1.rtt = info1.tTime.get() / info1.tRequest.get();
