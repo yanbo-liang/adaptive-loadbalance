@@ -36,7 +36,7 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000 + 20) {
+                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000 + 50) {
 
                     for (int i = 0; i < HiveCommon.infoList.size(); i++) {
                         HiveCommon.infoList.get(i).maxConcurrency = 0;
