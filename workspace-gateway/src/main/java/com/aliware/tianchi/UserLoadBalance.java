@@ -38,12 +38,12 @@ public class UserLoadBalance implements LoadBalance {
                 }
             }
             if (stressInfo != null) {
-                if (stressInfo.pendingRequest.get() < stressInfo.maxPendingRequest) {
+                if (stressInfo.pendingRequest.get() < stressInfo.maxPendingRequest*0.95) {
                     return stressInfo.invoker;
                 } else {
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         if (info != stressInfo) {
-                            if (info.pendingRequest.get() < info.maxPendingRequest) {
+                            if (info.pendingRequest.get() < info.maxPendingRequest*0.95) {
                                 return info.invoker;
                             }
                         }
