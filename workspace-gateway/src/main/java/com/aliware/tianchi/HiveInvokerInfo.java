@@ -19,8 +19,9 @@ public class HiveInvokerInfo {
 
     volatile double weight = 0;
     volatile double weightInitial = 0;
-    volatile double currentWeight = 0;
+//    volatile double currentWeight = 0;
 
+    volatile boolean stressed = false;
 
     public HiveInvokerInfo(Invoker invoker) {
         String host = invoker.getUrl().getHost();

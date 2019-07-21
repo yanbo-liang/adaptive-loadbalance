@@ -10,10 +10,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -58,7 +55,6 @@ public class HiveCommon {
                 for (HiveInvokerInfo info : infoMap.values()) {
                     info.weightInitial = ((double) info.maxPendingRequest) / totalPendingRequest;
                     info.weight = info.weightInitial;
-                    info.currentWeight = info.weight;
                 }
                 infoList = new ArrayList<>(HiveCommon.infoMap.values());
                 inited = true;
@@ -67,10 +63,27 @@ public class HiveCommon {
     }
 
     static void log(String msg) {
-        System.out.println(msg);
+        logger.info(msg);
         for (HiveInvokerInfo info : HiveCommon.infoList) {
             logger.info(HiveCommon.format.format(new Date()) + '-' + info);
         }
+    }
+
+    static int pickByWeight(double[] weightArray) {
+        double[] section = new double[weightArray.length];
+        double totalWeight = 0;
+        for (int i = 0; i < weightArray.length; i++) {
+            totalWeight += weightArray[i];
+            section[i] = totalWeight;
+        }
+
+        double random = ThreadLocalRandom.current().nextDouble(totalWeight);
+        for (int i = 0; i < section.length; i++) {
+            if (random < section[i]) {
+                return i;
+            }
+        }
+        return 0;
     }
 }
 
@@ -131,23 +144,6 @@ public class HiveCommon {
 //        }
 //    }
 //
-//    static int pickByWeight(double[] weightArray) {
-//        double[] section = new double[weightArray.length];
-//        double totalWeight = 0;
-//        for (int i = 0; i < weightArray.length; i++) {
-//            totalWeight += weightArray[i];
-//            section[i] = totalWeight;
-//        }
-//
-//        double random = ThreadLocalRandom.current().nextDouble(totalWeight);
-//        for (int i = 0; i < section.length; i++) {
-//            if (random < section[i]) {
-//                return i;
-//            }
-//        }
-//        return 0;
-//    }
-
 //    private void mainCalculation() {
 //        List<HiveInvokerInfo> good = new ArrayList<>();
 //        List<HiveInvokerInfo> bad = new ArrayList<>();

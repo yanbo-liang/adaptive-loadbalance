@@ -14,16 +14,20 @@ public class HiveTask implements Runnable {
                 if (HiveCommon.inited) {
 
                     UserLoadBalance.stress = true;
-                    for (HiveInvokerInfo info:HiveCommon.infoList) {
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
                         info.maxConcurrency = 0;
                         info.totalTime = 0;
                         info.totalRequest = 0;
+                        info.stressed=false;
+                    }
+                    for (HiveInvokerInfo info : HiveCommon.infoList) {
                         UserLoadBalance.stressInfo = info;
 
 
                         Thread.sleep(HiveCommon.stressTime);
 
 
+                        info.stressed=true;
                         if (info.totalRequest != 0) {
                             info.rtt = info.totalTime / info.totalRequest;
                         }
@@ -31,10 +35,12 @@ public class HiveTask implements Runnable {
                     }
                     UserLoadBalance.stress = false;
 
+                    UserLoadBalance.send=true;
                     HiveCommon.infoList = HiveCommon.infoList.stream().sorted(Comparator.comparingInt(x -> x.rtt)).collect(Collectors.toList());
 
                     HiveCommon.log("weight");
                     Thread.sleep(6000 - HiveCommon.stressTime * HiveCommon.infoList.size());
+                    UserLoadBalance.send=false;
                 } else {
                     Thread.sleep(1);
                 }

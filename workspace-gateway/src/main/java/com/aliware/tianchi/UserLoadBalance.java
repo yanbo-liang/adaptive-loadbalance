@@ -18,6 +18,8 @@ public class UserLoadBalance implements LoadBalance {
 //    static ReadWriteLock selectLock = new ReentrantReadWriteLock();
 
     static volatile boolean stress = false;
+    static volatile boolean send = false;
+
     volatile static HiveInvokerInfo stressInfo;
 
     @Override
@@ -25,22 +27,30 @@ public class UserLoadBalance implements LoadBalance {
         HiveCommon.initLoadBalance(invokers);
         if (HiveCommon.inited) {
             if (stress && stressInfo != null) {
-                if (stressInfo.pendingRequest.get() < stressInfo.maxPendingRequest * 0.95) {
+                if (stressInfo.pendingRequest.get() < stressInfo.maxPendingRequest) {
                     return stressInfo.invoker;
                 } else {
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         if (info != stressInfo) {
-                            if (info.pendingRequest.get() < info.maxPendingRequest * 0.95) {
-                                return info.invoker;
+                            if (info.stressed) {
+                                if (info.pendingRequest.get() < info.maxConcurrency) {
+                                    return info.invoker;
+                                }
+                            } else {
+                                if (info.pendingRequest.get() < info.maxPendingRequest) {
+                                    return info.invoker;
+                                }
                             }
                         }
                     }
                 }
             }
 
-            for (HiveInvokerInfo info : HiveCommon.infoList) {
-                if (info.pendingRequest.get() <= info.maxConcurrency) {
-                    return info.invoker;
+            if (send) {
+                for (HiveInvokerInfo info : HiveCommon.infoList) {
+                    if (info.pendingRequest.get() < info.maxConcurrency) {
+                        return info.invoker;
+                    }
                 }
             }
         }
