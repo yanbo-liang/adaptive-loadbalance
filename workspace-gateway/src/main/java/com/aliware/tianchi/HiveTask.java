@@ -11,8 +11,8 @@ public class HiveTask implements Runnable {
         long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (HiveCommon.inited) {
-
+                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000 + 5) {
+                    start = System.currentTimeMillis();
                     UserLoadBalance.stress = true;
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         info.maxConcurrency = 0;
