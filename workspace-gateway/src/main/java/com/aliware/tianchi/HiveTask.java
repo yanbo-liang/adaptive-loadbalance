@@ -12,7 +12,7 @@ public class HiveTask implements Runnable {
         try {
             while (true) {
                 if (HiveCommon.inited && System.currentTimeMillis() > start + 30000 + 5) {
-                    start = System.currentTimeMillis();
+                    long periodStart = System.currentTimeMillis();
                     UserLoadBalance.stress = true;
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         info.maxConcurrency = 0;
@@ -39,8 +39,7 @@ public class HiveTask implements Runnable {
                     HiveCommon.infoList = HiveCommon.infoList.stream().sorted(Comparator.comparingInt(x -> x.rtt)).collect(Collectors.toList());
 
                     HiveCommon.log("weight");
-                    Thread.sleep(6000 - (System.currentTimeMillis() - start));
-                    start = System.currentTimeMillis();
+                    Thread.sleep(6000 - (System.currentTimeMillis() - periodStart));
                     UserLoadBalance.send = false;
                 } else {
                     Thread.sleep(1);
