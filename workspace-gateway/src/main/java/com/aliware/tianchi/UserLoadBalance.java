@@ -14,15 +14,11 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class UserLoadBalance implements LoadBalance {
-    private static final Logger logger = LoggerFactory.getLogger(UserLoadBalance.class);
-
-    static volatile boolean stress = false;
-    static ReadWriteLock selectLock = new ReentrantReadWriteLock();
-
-    static ThreadLocal<HiveSelectInfo> localInfo = new ThreadLocal<>();
+//    static ThreadLocal<HiveSelectInfo> localInfo = new ThreadLocal<>();
+//    static volatile boolean stress = false;
+//    static ReadWriteLock selectLock = new ReentrantReadWriteLock();
 
     volatile static boolean send = false;
-
     volatile static HiveInvokerInfo stressInfo;
 
     @Override
@@ -37,18 +33,22 @@ public class UserLoadBalance implements LoadBalance {
                 }
             }
             if (stressInfo != null) {
-                if (stressInfo.pendingRequest.get() < stressInfo.maxPendingRequest*0.95) {
+                if (stressInfo.pendingRequest.get() < stressInfo.maxPendingRequest * 0.95) {
                     return stressInfo.invoker;
                 } else {
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         if (info != stressInfo) {
-                            if (info.pendingRequest.get() < info.maxPendingRequest*0.95) {
+                            if (info.pendingRequest.get() < info.maxPendingRequest * 0.95) {
                                 return info.invoker;
                             }
                         }
                     }
                 }
             }
+        }
+        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
+    }
+}
 //
 //            HiveSelectInfo sinfo = localInfo.get();
 //            if (sinfo == null) {
@@ -87,11 +87,6 @@ public class UserLoadBalance implements LoadBalance {
 //            HiveInvokerInfo pickedInfo = infoList.get(HiveCommon.pickByWeight(weights));
 //
 //            return pickedInfo.invoker;
-
-        }
-
-        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
-    }
 
 
 //        if (pickedInfo.pendingRequest.get() < pickedInfo.maxPendingRequest) {
@@ -222,4 +217,3 @@ public class UserLoadBalance implements LoadBalance {
 //            }
 //        }
 //
-}

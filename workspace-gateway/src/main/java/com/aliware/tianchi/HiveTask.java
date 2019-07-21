@@ -7,35 +7,13 @@ import java.util.stream.Collectors;
 
 public class HiveTask implements Runnable {
 
-    private void setToMaxWeight(int index) {
-        HiveInvokerInfo maxWeightInfo = HiveCommon.infoList.get(index);
-//        maxWeightInfo.weight = 1;
-
-        maxWeightInfo.weight = maxWeightInfo.weightMax;
-        double remainWeight = 1 - maxWeightInfo.weight;
-        double totalWeight = 0;
-        for (int i = 0; i < HiveCommon.infoList.size(); i++) {
-            if (i != index) {
-                HiveInvokerInfo info = HiveCommon.infoList.get(i);
-                totalWeight += info.weightMax;
-            }
-        }
-        for (int i = 0; i < HiveCommon.infoList.size(); i++) {
-            if (i != index) {
-                HiveInvokerInfo info = HiveCommon.infoList.get(i);
-                info.weight = remainWeight * info.weightMax / totalWeight;
-//                info.weight = 0;
-            }
-        }
-    }
-
     @Override
     public void run() {
-        System.out.println("!!!!!!!!!!!!!!!!!!!!task start at " + HiveCommon.format.format(new Date()));
-        long start = System.currentTimeMillis();
+//        long start = System.currentTimeMillis();
         try {
             while (true) {
-                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000 + 50) {
+//                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000 + 50) {
+                if (HiveCommon.inited) {
 
                     for (int i = 0; i < HiveCommon.infoList.size(); i++) {
                         HiveCommon.infoList.get(i).maxConcurrency = 0;
@@ -43,52 +21,22 @@ public class HiveTask implements Runnable {
                         HiveCommon.infoList.get(i).totalRequest = 0;
                         HiveInvokerInfo info1 = HiveCommon.infoList.get(i);
 
-                        info1.tTime.updateAndGet(x -> 0);
-                        info1.tRequest.updateAndGet(x -> 0);
                         UserLoadBalance.stressInfo = info1;
 
                         UserLoadBalance.send = false;
 
-//                        setToMaxWeight(i);
-                        Thread.sleep(200);
-//                        if (info1.tRequest.get()!=0) {
-//                            info1.rtt = info1.tTime.get() / info1.tRequest.get();
-//                        }
+                        Thread.sleep(HiveCommon.stressTime);
+
                         if (info1.totalRequest != 0) {
                             info1.rtt = info1.totalTime / info1.totalRequest;
                         }
-
-
                         HiveCommon.log("max");
-
                     }
-
                     HiveCommon.infoList = HiveCommon.infoList.stream().sorted(Comparator.comparingInt(x -> x.rtt)).collect(Collectors.toList());
                     UserLoadBalance.send = true;
-//                    int total = 0;
-//                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-//                        total += info.maxConcurrency;
-//                    }
-//                    for (HiveInvokerInfo info : HiveCommon.infoList) {
-//                        info.weight = info.maxConcurrency / (double) total;
-//                    }
+
                     HiveCommon.log("weight");
-
-//                    long currentTime = System.currentTimeMillis();
-//                    if (currentTime >= start + 6000) {
-//                        start = currentTime;
-//                        HiveCommon.clearWeight();
-//                        HiveCommon.setCurrentWeight();
-//                    }
-                    Thread.sleep(5400);
-//
-//                    HiveCommon.lock.writeLock().lock();
-//                    HiveCommon.log("start");
-//                    HiveCommon.weightCalculation();
-//                    HiveCommon.log("end");
-//                    HiveCommon.lock.writeLock().unlock();
-
-
+                    Thread.sleep(6000 - HiveCommon.stressTime * HiveCommon.infoList.size());
                 } else {
                     Thread.sleep(1);
                 }
@@ -97,7 +45,50 @@ public class HiveTask implements Runnable {
             e.printStackTrace();
         }
     }
+}
 
+//    private void setToMaxWeight(int index) {
+//        HiveInvokerInfo maxWeightInfo = HiveCommon.infoList.get(index);
+////        maxWeightInfo.weight = 1;
+//
+//        maxWeightInfo.weight = maxWeightInfo.weightMax;
+//        double remainWeight = 1 - maxWeightInfo.weight;
+//        double totalWeight = 0;
+//        for (int i = 0; i < HiveCommon.infoList.size(); i++) {
+//            if (i != index) {
+//                HiveInvokerInfo info = HiveCommon.infoList.get(i);
+//                totalWeight += info.weightMax;
+//            }
+//        }
+//        for (int i = 0; i < HiveCommon.infoList.size(); i++) {
+//            if (i != index) {
+//                HiveInvokerInfo info = HiveCommon.infoList.get(i);
+//                info.weight = remainWeight * info.weightMax / totalWeight;
+////                info.weight = 0;
+//            }
+//        }
+//    }
+
+//                    int total = 0;
+//                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+//                        total += info.maxConcurrency;
+//                    }
+//                    for (HiveInvokerInfo info : HiveCommon.infoList) {
+//                        info.weight = info.maxConcurrency / (double) total;
+//                    }
+
+//                    long currentTime = System.currentTimeMillis();
+//                    if (currentTime >= start + 6000) {
+//                        start = currentTime;
+//                        HiveCommon.clearWeight();
+//                        HiveCommon.setCurrentWeight();
+//                    }
+
+//                    HiveCommon.lock.writeLock().lock();
+//                    HiveCommon.log("start");
+//                    HiveCommon.weightCalculation();
+//                    HiveCommon.log("end");
+//                    HiveCommon.lock.writeLock().unlock();
 
 //                if (init() && System.currentTimeMillis() > start) {
 //                    UserLoadBalance.selectLock.writeLock().lock();
@@ -169,7 +160,6 @@ public class HiveTask implements Runnable {
 //                    calculateAverage();
 //                    log("result");
 
-
 //
 //    private void calculateAverage() {
 //        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
@@ -211,15 +201,12 @@ public class HiveTask implements Runnable {
 //    }
 
 
-}
-
 //    @Override
 //    public void run() {
 //        try {
 //            Thread.sleep(100);
 //            while (true) {
 //                init();
-//
 //                if (inited) {
 //                    for (HiveInvokerInfo info : infoList) {
 //                        double rttAverageNew = 0;
@@ -270,7 +257,6 @@ public class HiveTask implements Runnable {
 //
 //                            }
 //                        }
-
 //                        info.totalRequest.updateAndGet(x -> 0);
 //                        info.totalTime.updateAndGet(x -> 0);
 //
@@ -290,10 +276,6 @@ public class HiveTask implements Runnable {
 //                    if (expectRttsecond < infoList.get(2).rtt) {
 //                        second.weight *= 2;
 //                    }
-//
-//
-//
-//
 //                    double total = 0;
 //                    for (HiveInvokerInfo info : infoList) {
 //                        total += info.weight;
@@ -301,8 +283,6 @@ public class HiveTask implements Runnable {
 //                    for (HiveInvokerInfo info : infoList) {
 //                        info.weight += info.weight / total;
 //                    }
-
-
 //                Thread.sleep(500);
 //            }
 //        } catch (Exception e) {

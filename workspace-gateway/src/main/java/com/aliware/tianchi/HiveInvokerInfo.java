@@ -11,20 +11,15 @@ public class HiveInvokerInfo {
     volatile int maxPendingRequest = 0;
     AtomicInteger pendingRequest = new AtomicInteger(0);
 
-    volatile int rtt = 0;
-
-    AtomicInteger tTime = new AtomicInteger(0);
-    AtomicInteger tRequest = new AtomicInteger(0);
-
     volatile int totalTime = 0;
     volatile int totalRequest = 0;
+    volatile int rtt = 0;
 
     volatile int maxConcurrency = 0;
 
     volatile double weight = 0;
     volatile double weightInitial = 0;
     volatile double currentWeight = 0;
-    volatile double weightMax = 0;
 
 
     public HiveInvokerInfo(Invoker invoker) {
@@ -62,7 +57,6 @@ public class HiveInvokerInfo {
                 ", totalRequest=" + totalRequest +
                 ", maxConcurrency=" + maxConcurrency +
                 ", weight=" + weight +
-                ", weightMax=" + weightMax +
                 '}';
     }
 }

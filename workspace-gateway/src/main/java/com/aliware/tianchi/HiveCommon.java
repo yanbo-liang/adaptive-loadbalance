@@ -32,6 +32,7 @@ public class HiveCommon {
     private static final AtomicBoolean initedByCallback = new AtomicBoolean(false);
     private static final AtomicBoolean initedByLoadBalance = new AtomicBoolean(false);
 
+    static int stressTime = 200;
 
     static <T> void initLoadBalance(List<Invoker<T>> invokers) {
         if (!initedByLoadBalance.get()) {
@@ -58,68 +59,10 @@ public class HiveCommon {
                     info.weightInitial = ((double) info.maxPendingRequest) / totalPendingRequest;
                     info.weight = info.weightInitial;
                     info.currentWeight = info.weight;
-//                    info.weightMax = ((double) info.maxPendingRequest) / 1024;
                 }
                 infoList = new ArrayList<>(HiveCommon.infoMap.values());
                 inited = true;
             }
-        }
-    }
-
-
-    static double distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight, double weightSum) {
-        List<HiveInvokerInfo> sortedList = infoList.stream().sorted(Comparator.comparing(x -> x.rtt, Comparator.reverseOrder())).collect(Collectors.toList());
-        double remain = 0;
-        for (HiveInvokerInfo info : sortedList) {
-            double weightChange = (info.weight / weightSum) * distributedWeight + remain;
-            if (info.weight >= info.weightMax) {
-                remain += weightChange;
-                continue;
-            }
-            if (info.weight + weightChange < info.weightMax) {
-                info.weight = info.weight + weightChange;
-            } else {
-                remain += (weightChange - (info.weightMax - info.weight));
-                info.weight = info.weightMax;
-            }
-        }
-        return remain;
-    }
-
-    static void distributeWeightDown(List<HiveInvokerInfo> infoList, double distributedWeight, double weightSum) {
-        for (HiveInvokerInfo info : infoList) {
-            info.weight = info.weight - distributedWeight * (info.weight / weightSum);
-        }
-    }
-
-    static void weightNormalize() {
-        double total = 0;
-        for (HiveInvokerInfo info : infoList) {
-            total += info.weight;
-        }
-        for (HiveInvokerInfo info : infoList) {
-            info.weight = info.weight / total;
-        }
-    }
-
-    static void setCurrentWeight() {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        for (HiveInvokerInfo info : infoList) {
-            info.currentWeight = info.weight;
-        }
-    }
-
-    static void clearWeight() {
-        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
-        for (HiveInvokerInfo info : infoList) {
-            info.weight = info.weightInitial;
-        }
-    }
-
-    static void clearWeightAndAverage() {
-        for (HiveInvokerInfo info : HiveCommon.infoList) {
-            info.weight = info.weightInitial;
-            info.rtt = 0;
         }
     }
 
@@ -130,7 +73,65 @@ public class HiveCommon {
         }
         System.out.println();
     }
+}
 
+//    static double distributeWeightUp(List<HiveInvokerInfo> infoList, double distributedWeight, double weightSum) {
+//        List<HiveInvokerInfo> sortedList = infoList.stream().sorted(Comparator.comparing(x -> x.rtt, Comparator.reverseOrder())).collect(Collectors.toList());
+//        double remain = 0;
+//        for (HiveInvokerInfo info : sortedList) {
+//            double weightChange = (info.weight / weightSum) * distributedWeight + remain;
+//            if (info.weight >= info.weightMax) {
+//                remain += weightChange;
+//                continue;
+//            }
+//            if (info.weight + weightChange < info.weightMax) {
+//                info.weight = info.weight + weightChange;
+//            } else {
+//                remain += (weightChange - (info.weightMax - info.weight));
+//                info.weight = info.weightMax;
+//            }
+//        }
+//        return remain;
+//    }
+
+
+//    static void distributeWeightDown(List<HiveInvokerInfo> infoList, double distributedWeight, double weightSum) {
+//        for (HiveInvokerInfo info : infoList) {
+//            info.weight = info.weight - distributedWeight * (info.weight / weightSum);
+//        }
+//    }
+//
+//    static void weightNormalize() {
+//        double total = 0;
+//        for (HiveInvokerInfo info : infoList) {
+//            total += info.weight;
+//        }
+//        for (HiveInvokerInfo info : infoList) {
+//            info.weight = info.weight / total;
+//        }
+//    }
+//
+//    static void setCurrentWeight() {
+//        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+//        for (HiveInvokerInfo info : infoList) {
+//            info.currentWeight = info.weight;
+//        }
+//    }
+//
+//    static void clearWeight() {
+//        List<HiveInvokerInfo> infoList = HiveCommon.infoList;
+//        for (HiveInvokerInfo info : infoList) {
+//            info.weight = info.weightInitial;
+//        }
+//    }
+//
+//    static void clearWeightAndAverage() {
+//        for (HiveInvokerInfo info : HiveCommon.infoList) {
+//            info.weight = info.weightInitial;
+//            info.rtt = 0;
+//        }
+//    }
+//
 //    static int pickByWeight(double[] weightArray) {
 //        double[] section = new double[weightArray.length];
 //        double totalWeight = 0;
@@ -263,4 +264,3 @@ public class HiveCommon {
 //        weightNormalize();
 //        setCurrentWeight();
 //    }
-}
