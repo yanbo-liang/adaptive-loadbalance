@@ -29,7 +29,7 @@ public class HiveCommon {
     private static final AtomicBoolean initedByCallback = new AtomicBoolean(false);
     private static final AtomicBoolean initedByLoadBalance = new AtomicBoolean(false);
 
-    static int stressTime = 150;
+    static int stressTime = 75;
 
     static <T> void initLoadBalance(List<Invoker<T>> invokers) {
         if (!initedByLoadBalance.get()) {
