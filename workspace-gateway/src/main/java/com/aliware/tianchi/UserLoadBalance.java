@@ -15,24 +15,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class UserLoadBalance implements LoadBalance {
 //    static ThreadLocal<HiveSelectInfo> localInfo = new ThreadLocal<>();
-//    static volatile boolean stress = false;
 //    static ReadWriteLock selectLock = new ReentrantReadWriteLock();
 
-    volatile static boolean send = false;
+    static volatile boolean stress = false;
     volatile static HiveInvokerInfo stressInfo;
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException {
         HiveCommon.initLoadBalance(invokers);
         if (HiveCommon.inited) {
-            if (send) {
-                for (HiveInvokerInfo info : HiveCommon.infoList) {
-                    if (info.pendingRequest.get() <= info.maxConcurrency) {
-                        return info.invoker;
-                    }
-                }
-            }
-            if (stressInfo != null) {
+            if (stress && stressInfo != null) {
                 if (stressInfo.pendingRequest.get() < stressInfo.maxPendingRequest * 0.95) {
                     return stressInfo.invoker;
                 } else {
@@ -43,6 +35,12 @@ public class UserLoadBalance implements LoadBalance {
                             }
                         }
                     }
+                }
+            }
+
+            for (HiveInvokerInfo info : HiveCommon.infoList) {
+                if (info.pendingRequest.get() <= info.maxConcurrency) {
+                    return info.invoker;
                 }
             }
         }

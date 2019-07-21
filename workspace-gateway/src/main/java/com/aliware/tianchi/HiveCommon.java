@@ -32,7 +32,7 @@ public class HiveCommon {
     private static final AtomicBoolean initedByCallback = new AtomicBoolean(false);
     private static final AtomicBoolean initedByLoadBalance = new AtomicBoolean(false);
 
-    static int stressTime = 200;
+    static int stressTime = 150;
 
     static <T> void initLoadBalance(List<Invoker<T>> invokers) {
         if (!initedByLoadBalance.get()) {
@@ -69,9 +69,8 @@ public class HiveCommon {
     static void log(String msg) {
         System.out.println(msg);
         for (HiveInvokerInfo info : HiveCommon.infoList) {
-            System.out.println(HiveCommon.format.format(new Date()) + '-' + info);
+            logger.info(HiveCommon.format.format(new Date()) + '-' + info);
         }
-        System.out.println();
     }
 }
 

@@ -9,31 +9,29 @@ public class HiveTask implements Runnable {
 
     @Override
     public void run() {
-//        long start = System.currentTimeMillis();
         try {
             while (true) {
-//                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000 + 50) {
                 if (HiveCommon.inited) {
 
-                    for (int i = 0; i < HiveCommon.infoList.size(); i++) {
-                        HiveCommon.infoList.get(i).maxConcurrency = 0;
-                        HiveCommon.infoList.get(i).totalTime = 0;
-                        HiveCommon.infoList.get(i).totalRequest = 0;
-                        HiveInvokerInfo info1 = HiveCommon.infoList.get(i);
+                    UserLoadBalance.stress = true;
+                    for (HiveInvokerInfo info:HiveCommon.infoList) {
+                        info.maxConcurrency = 0;
+                        info.totalTime = 0;
+                        info.totalRequest = 0;
+                        UserLoadBalance.stressInfo = info;
 
-                        UserLoadBalance.stressInfo = info1;
-
-                        UserLoadBalance.send = false;
 
                         Thread.sleep(HiveCommon.stressTime);
 
-                        if (info1.totalRequest != 0) {
-                            info1.rtt = info1.totalTime / info1.totalRequest;
+
+                        if (info.totalRequest != 0) {
+                            info.rtt = info.totalTime / info.totalRequest;
                         }
                         HiveCommon.log("max");
                     }
+                    UserLoadBalance.stress = false;
+
                     HiveCommon.infoList = HiveCommon.infoList.stream().sorted(Comparator.comparingInt(x -> x.rtt)).collect(Collectors.toList());
-                    UserLoadBalance.send = true;
 
                     HiveCommon.log("weight");
                     Thread.sleep(6000 - HiveCommon.stressTime * HiveCommon.infoList.size());
