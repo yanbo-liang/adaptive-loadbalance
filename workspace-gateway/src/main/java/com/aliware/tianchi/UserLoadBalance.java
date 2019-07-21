@@ -48,7 +48,7 @@ public class UserLoadBalance implements LoadBalance {
 
             if (send) {
                 for (HiveInvokerInfo info : HiveCommon.infoList) {
-                    if (info.pendingRequest.get() < info.maxConcurrency) {
+                    if (info.pendingRequest.get() <=info.maxConcurrency) {
                         return info.invoker;
                     }
                 }
