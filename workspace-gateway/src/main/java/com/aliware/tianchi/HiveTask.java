@@ -9,9 +9,10 @@ public class HiveTask implements Runnable {
     @Override
     public void run() {
         long start = System.currentTimeMillis();
+        long waste = 0;
         try {
             while (true) {
-                if (HiveCommon.inited && System.currentTimeMillis() > start + 30000 + 5) {
+                if (HiveCommon.inited) {
                     long periodStart = System.currentTimeMillis();
                     UserLoadBalance.stress = true;
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
@@ -39,9 +40,11 @@ public class HiveTask implements Runnable {
                     HiveCommon.infoList = HiveCommon.infoList.stream().sorted(Comparator.comparingInt(x -> x.rtt)).collect(Collectors.toList());
 
                     HiveCommon.log("weight");
-                    Thread.sleep(6000 - (System.currentTimeMillis() - periodStart));
+                    Thread.sleep(6000 - (System.currentTimeMillis() - periodStart) - waste);
+                    waste = 0;
                     UserLoadBalance.send = false;
                 } else {
+                    waste += 1;
                     Thread.sleep(1);
 
                 }
