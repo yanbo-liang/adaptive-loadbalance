@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 
 
 public class HiveTask implements Runnable {
-
     @Override
     public void run() {
+        long start = System.currentTimeMillis();
         try {
             while (true) {
                 if (HiveCommon.inited) {
@@ -18,7 +18,7 @@ public class HiveTask implements Runnable {
                         info.maxConcurrency = 0;
                         info.totalTime = 0;
                         info.totalRequest = 0;
-                        info.stressed=false;
+                        info.stressed = false;
                     }
                     for (HiveInvokerInfo info : HiveCommon.infoList) {
                         UserLoadBalance.stressInfo = info;
@@ -27,7 +27,7 @@ public class HiveTask implements Runnable {
                         Thread.sleep(HiveCommon.stressTime);
 
 
-                        info.stressed=true;
+                        info.stressed = true;
                         if (info.totalRequest != 0) {
                             info.rtt = info.totalTime / info.totalRequest;
                         }
@@ -35,14 +35,16 @@ public class HiveTask implements Runnable {
                     }
                     UserLoadBalance.stress = false;
 
-                    UserLoadBalance.send=true;
+                    UserLoadBalance.send = true;
                     HiveCommon.infoList = HiveCommon.infoList.stream().sorted(Comparator.comparingInt(x -> x.rtt)).collect(Collectors.toList());
 
                     HiveCommon.log("weight");
-                    Thread.sleep(6000 - HiveCommon.stressTime * HiveCommon.infoList.size());
-                    UserLoadBalance.send=false;
+                    Thread.sleep(6000 - (System.currentTimeMillis() - start));
+                    start = System.currentTimeMillis();
+                    UserLoadBalance.send = false;
                 } else {
                     Thread.sleep(1);
+
                 }
             }
         } catch (Exception e) {
